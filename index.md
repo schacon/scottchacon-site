@@ -54,13 +54,13 @@ title: "Scott Chacon"
           <div class="mt-12 lg:mt-0 lg:text-right">
             <ul class="text-2xl inline space-x-6 space-y-2 lg:space-y-3 lg:tracking-tight lg:nav-links text-zinc-500">
               <li class="inline lg:block">
-                <a href="/about" class="lg:px-6 py-4">about</a>
+                <a href="/about/" class="lg:px-6 py-4">about</a>
               </li>
               <li class="inline lg:block">
-                <a href="/posts" class="lg:px-6 py-4">writing</a>
+                <a href="/posts/" class="lg:px-6 py-4">writing</a>
               </li>
               <li class="inline lg:block">
-                <a href="/talks" class="lg:px-6 py-4">speaking</a>
+                <a href="/talks/" class="lg:px-6 py-4">speaking</a>
               </li>
             </ul>
           </div>

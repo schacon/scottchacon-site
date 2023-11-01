@@ -1,6 +1,8 @@
 url: ''
 baseurl: ''
-title: 'Jekyllwind'
+title: 'Scott Chacon'
+
+permalink: pretty
 
 plugins:
   - jekyll-postcss
