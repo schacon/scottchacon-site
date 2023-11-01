@@ -1,0 +1,18 @@
+---
+layout: post
+title: My New Blog
+---
+
+My previous blog, which moved from host to host, domain to domain over the years
+has built up a lot of cruft.  I believe I went from a Ruby blog to WordPress to
+a custom blog engine back to WordPress to Jekyll and it's a mess.  Plus, a lot
+of the stuff I used to blog about is not really relevant to me anymore and the
+domain name I did everything under, "jointheconversation.org", was too long and
+not as relevant to what I'm doing as it used to be.
+
+So, I've decided to declare blog bankruptcy - blogruptcy - and start over again
+with a new site design (this time done by me, as you can probably tell) and 
+new content.  I pulled over a few of the last entries of my previous blog but 
+for the most part I'm starting over.
+
+So there.

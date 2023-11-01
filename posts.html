@@ -1,0 +1,93 @@
+---
+layout: default
+title: "Posts"
+---
+
+<div class="flex-auto">
+  <div class="absolute top-0 right-0 p-2">
+    <a class="text-blue-300" href="/">back home</a>
+  </div>
+  <div class="sm:px-8 mt-9">
+    <div class="mx-auto w-full max-w-7xl">
+      <div class="relative px-4 sm:px-8 lg:px-12">
+        <div class="mx-auto max-w-2xl lg:max-w-5xl">
+          <div class="flex flex-col lg:flex-row lg:justify-between lg:mt-12">
+            <div class="max-w-2xl">
+              <h1
+                class="text-4xl font-extrabold tracking-tight bg-gradient-to-r from-blue-700 via-blue-400 to-blue-300 bg-clip-text text-transparent sm:text-5xl pb-1">
+                Scott's Writings
+              </h1>
+              <div class="flex flex-col mt-6 text-base text-zinc-600 dark:text-zinc-400 space-y-2">
+                <div>Here I write about things that are interesting to me.</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 lg:grid-cols-2 mt-8 w-full">
+              <div class="space-y-2">
+                <h1 class="text-lg font-bold mb-4">Stuff I Post Here</h1>
+                {% for post in site.posts %}
+                <div class="grid grid-cols-3 space-x-3">
+                  <div class="text-right text-zinc-500">{{ post.date | date: "%B %e, %Y" }}</div>
+                  <div class="col-span-2"><a class="text-blue-600" href="{{ post.url }}">{{ post.title }}</a></div>
+                </div>
+                {% endfor %}
+              </div>
+              <div class="space-y-2">
+                <h1 class="text-lg font-bold mb-4 mt-8 lg:mt-0">Stuff I Posted On Medium</h1>
+                <div class="grid grid-cols-3 space-x-3">
+                  <div class="text-right text-zinc-500">Mar 20, 2020</div>
+                  <div class="col-span-2"><a class="text-blue-600" href="https://medium.com/@chacon/how-to-move-your-event-online-in-the-age-of-coronavirus-f348371062da">How to Move your Event Online in the Age of Coronavirus</a></div>
+                </div>
+                <div class="grid grid-cols-3 space-x-3">
+                  <div class="text-right text-zinc-500">May 3, 2018</div>
+                  <div class="col-span-2"><a class="text-blue-600" href="https://medium.com/@chacon/mit-scientists-prove-adults-learn-language-to-fluency-nearly-as-well-as-children-1de888d1d45f">MIT Scientists prove adults learn language to fluency nearly as well as children</a></div>
+                </div>
+                <div class="grid grid-cols-3 space-x-3">
+                  <div class="text-right text-zinc-500">Nov 8, 2017</div>
+                  <div class="col-span-2"><a class="text-blue-600" href="https://medium.com/@chacon/tips-from-github-vol-1-customer-service-is-king-e9865823f6ae">Tips from GitHub, Vol 1: Customer Service is King</a></div>
+                </div>
+                <div class="grid grid-cols-3 space-x-3">
+                  <div class="text-right text-zinc-500">Oct 26, 2017</div>
+                  <div class="col-span-2"><a class="text-blue-600" href="https://medium.com/hackernoon/my-love-letter-to-the-chevy-bolt-e970c63963dd">My Love Letter to the Chevy Bolt</a></div>
+                </div>
+                <div class="grid grid-cols-3 space-x-3">
+                  <div class="text-right text-zinc-500">Aug 6, 2016</div>
+                  <div class="col-span-2"><a class="text-blue-600" href="https://medium.com/@chacon/further-adventures-in-language-learning-6e192ccc8b1f">Further Adventures in Language Learning</a></div>
+                </div>
+                <div class="grid grid-cols-3 space-x-3">
+                  <div class="text-right text-zinc-500">Feb 29, 2016</div>
+                  <div class="col-span-2"><a class="text-blue-600" href="https://medium.com/@chacon/an-unlikely-adventure-in-wine-8dac450f6626">An Unlikely Adventure in Wine</a></div>
+                </div>
+                <div class="grid grid-cols-3 space-x-3">
+                  <div class="text-right text-zinc-500">Jan 5, 2016</div>
+                  <div class="col-span-2"><a class="text-blue-600" href="https://medium.com/@chacon/how-to-really-learn-a-language-maybe-c1b07223278c">How to Really Learn a Language (Maybe)</a></div>
+                </div>
+                <div class="grid grid-cols-3 space-x-3">
+                  <div class="text-right text-zinc-500">Jul 6, 2015</div>
+                  <div class="col-span-2"><a class="text-blue-600" href="https://medium.com/an-american-developer-in-paris/a-year-in-paris-a235519a486b">A Year in Paris</a></div>
+                </div>
+                <div class="grid grid-cols-3 space-x-3">
+                  <div class="text-right text-zinc-500">Oct 27, 2014</div>
+                  <div class="col-span-2"><a class="text-blue-600" href="https://medium.com/@chacon/living-the-future-of-technical-writing-2f368bd0a272">Living the Future of Technical Writing</a></div>
+                </div>
+                <div class="grid grid-cols-3 space-x-3">
+                  <div class="text-right text-zinc-500">Oct 5, 2014</div>
+                  <div class="col-span-2"><a class="text-blue-600" href="https://medium.com/an-american-developer-in-paris/moving-to-paris-boots-on-the-ground-69c91186f683">Moving to Paris : Boots on the Ground</a></div>
+                </div>
+                <div class="grid grid-cols-3 space-x-3">
+                  <div class="text-right text-zinc-500">Oct 2, 2014</div>
+                  <div class="col-span-2"><a class="text-blue-600" href="https://medium.com/an-american-developer-in-paris/how-to-move-to-paris-part-one-33194c8902fe">How to Move to Paris : The Homefront</a></div>
+                </div>
+                <div class="grid grid-cols-3 space-x-3">
+                  <div class="text-right text-zinc-500">Sep 29, 2014</div>
+                  <div class="col-span-2"><a class="text-blue-600" href="https://medium.com/an-american-developer-in-paris/moving-to-paris-6b42fa7e19dd">Moving to Paris</a></div>
+                </div>
+              </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

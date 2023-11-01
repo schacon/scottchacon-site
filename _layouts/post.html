@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="{{ site.lang | default: " en-US" }}">
+
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="utf-8">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;900&family=Roboto+Mono:wght@300;400&family=Roboto:wght@100;300;400;500;700&family=Source+Serif+4:opsz,wght@8..60,300;8..60,400&display=swap"
+    rel="stylesheet">
+  <title>{{ page.title }} - {{ site.title }}</title>
+  <link rel="stylesheet" href="{{ " /assets/css/main.css" }}">
+  <style>
+    a { color: #5555ff; }
+    blockquote { 
+      background: #eee; 
+      color: #666;
+      border-left: 2px solid #888;
+      padding: 12px;
+      line-height: 1.8em;
+      font-style: italic;
+    }
+    h2 { font-size: 2em; margin-top: 30px !important; font-weight: bold; }
+    h3 { font-size: 1.8em; margin-top: 30px !important; font-weight: bold; }
+    h4 { font-size: 1.4em; margin-top: 30px !important; font-weight: bold; }
+    code { 
+      font-size: 0.8em;
+      background-color: #eee; 
+      padding: 4px; 
+      line-height: 0.8em;
+    }
+    pre { 
+      line-height: 1.4em;
+      width: 100%; 
+      background-color: #eee; 
+      padding: 4px; 
+    }
+    ul { 
+      list-style: circle;
+      margin-left: 30px;
+    }
+    ul li { 
+      margin-bottom: 10px;
+    }
+    p { 
+      font-size: 1.1em;
+      letter-spacing: -0.003em;
+      line-height: 32px;
+      font-weight: 300;
+    }
+  </style>
+</head>
+
+<body>
+<div class="flex-auto pb-20">
+  <div class="absolute top-0 right-0 p-2">
+    <a class="text-blue-300" href="/posts">all posts</a>
+  </div>
+  <div class="sm:px-8 mt-9">
+    <div class="mx-auto w-full max-w-7xl lg:px-8">
+      <div class="relative px-4 sm:px-8 lg:px-12">
+        <div class="mx-auto max-w-2xl lg:max-w-5xl">
+          <div class="flex flex-col lg:flex-row lg:justify-between lg:mt-24">
+            <div class="max-w-2xl">
+              <h1
+                class="text-4xl font-extrabold tracking-tight bg-gradient-to-r from-blue-700 via-blue-400 to-blue-300 bg-clip-text text-transparent sm:text-5xl">
+                {{ page.title }}
+              </h1>
+              <div class="font-blog font-lg leading-7 flex flex-col mt-6 space-y-4">
+                  {{ content }}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+
+</html>
