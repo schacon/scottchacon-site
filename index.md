@@ -19,7 +19,7 @@ title: "Scott Chacon"
               I'm currently working on  <a class="text-blue-600" href="https://gitbutler.com">GitButler</a>, a next generation version control tool.
               Previously I cofounded the language learning startup <a class="text-blue-600" href="https://chatterbug.com">Chatterbug</a>
               and the version control hosting platform <a class="text-blue-600" href="https://github.com">GitHub</a>. 
-              My wife and I run a <a href="text-blue-600">dog and cat rescue</a> outside of Berlin.
+              My wife and I run a <a class="text-blue-600" href="https://www.teddyfarms.com/">dog and cat rescue</a> outside of Berlin.
               I love karaoke.
             </p>
             <div class="mt-6 flex gap-6"><a class="group -m-1 p-1" aria-label="Follow on Twitter"
