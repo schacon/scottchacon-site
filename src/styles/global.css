@@ -1,0 +1,72 @@
+@import "tailwindcss";
+
+/* Font family tokens (ported from the old tailwind.config.js `fontFamily`).
+   In Tailwind v4 these generate `font-sans`, `font-serif`, `font-mono`,
+   `font-blog`, `font-head` utilities, and `--font-sans` sets the default body font. */
+@theme {
+  --font-sans: "Inter", sans-serif;
+  --font-serif: Georgia, Cambria, "Times New Roman", Times, serif;
+  --font-mono: "Roboto Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+    "Liberation Mono", "Courier New", monospace;
+  --font-blog: "Inter", sans-serif;
+  --font-head: "But Head", "Inter", sans-serif;
+}
+
+@font-face {
+  font-family: "But Head";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/assets/fonts/But-Head-Regular.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "But Head";
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/assets/fonts/But-Head-Italic.woff2") format("woff2");
+}
+
+/* Tailwind v4 defaults unspecified border/divide colors to `currentColor`;
+   Tailwind v3 defaulted to gray-200. Restore the v3 behaviour so any bare
+   `border`/`divide` utilities keep looking the same. */
+@layer base {
+  *,
+  ::before,
+  ::after {
+    border-color: var(--color-zinc-200);
+  }
+}
+
+@layer components {
+  /* Display headings — But Head, no gradient, dark and crisp */
+  .font-head {
+    font-family: "But Head", "Inter", sans-serif;
+    letter-spacing: -0.01em;
+  }
+
+  /* Crisp, understated navigation links */
+  .nav-link {
+    @apply relative text-base font-medium uppercase tracking-widest text-zinc-500 transition-colors duration-200;
+  }
+  .nav-link:hover {
+    @apply text-zinc-900 dark:text-zinc-100;
+  }
+
+  /* "back to" / utility links */
+  .back-link {
+    @apply inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-widest text-zinc-400 transition-colors duration-200;
+  }
+  .back-link:hover {
+    @apply text-zinc-700 dark:text-zinc-200;
+  }
+
+  /* Site wordmark shown at the top of article pages */
+  .site-mark {
+    @apply text-xs font-semibold uppercase tracking-widest text-zinc-400 transition-colors duration-200;
+  }
+  .site-mark:hover {
+    @apply text-zinc-700 dark:text-zinc-200;
+  }
+}

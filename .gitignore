@@ -1,2 +1,13 @@
+# astro build output
+dist/
+.astro/
+
+# legacy jekyll (removed during migration)
 _site
+.jekyll-cache
+
+# deps
 node_modules
+
+# macOS
+.DS_Store

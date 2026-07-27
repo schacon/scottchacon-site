@@ -10,7 +10,7 @@ an <img>-referenced SVG.
 import math, os
 
 W, H = 1200, 800
-OUT = "/Users/schacon/projects/scottchacon-site/assets/images/covers"
+OUT = "/Users/schacon/projects/scottchacon-site/public/assets/images/covers"
 
 PAL = {
     "git": dict(bg=("#fff3ec", "#ffdcc7"), ink="#7c2d12",

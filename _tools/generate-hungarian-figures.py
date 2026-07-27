@@ -14,7 +14,7 @@ SVG. Run:  python3 _tools/generate-hungarian-figures.py
 """
 import math, os
 
-OUT = "/Users/schacon/projects/scottchacon-site/assets/images"
+OUT = "/Users/schacon/projects/scottchacon-site/public/assets/images"
 
 BG0, BG1, INK = "#eef2ff", "#dbe4ff", "#1e1b4b"
 A, B, C, D, E, F = "#4f46e5", "#2563eb", "#0ea5e9", "#7c3aed", "#06b6d4", "#818cf8"

@@ -1,0 +1,240 @@
+---
+import { render } from 'astro:content';
+import '../styles/global.css';
+import SiteHeader from '../components/SiteHeader.astro';
+import PromoBanner from '../components/PromoBanner.astro';
+import { formatDate, relativeTime, shareImage, type Post } from '../lib/posts';
+
+interface Props {
+  post: Post;
+}
+const { post } = Astro.props;
+const { entry, category, date, url, isHtml } = post;
+const { title, image, excerpt } = entry.data;
+
+const siteTitle = 'Scott Chacon';
+const shareImg = shareImage(image);
+const shareDesc = (excerpt ?? '').replace(/\s+/g, ' ').trim().slice(0, 200);
+const showBanner = category === 'git' || category === 'tech';
+const isoDate = date.toISOString();
+const prettyDate = formatDate(date);
+const rel = relativeTime(date);
+
+// Markdown/MDX render through Astro's pipeline; raw-HTML posts inject verbatim.
+let Content: Awaited<ReturnType<typeof render>>['Content'] | undefined;
+if (!isHtml) {
+  ({ Content } = await render(entry));
+}
+---
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="author" content="Scott Chacon" />
+  <meta name="description" content={shareDesc} />
+
+  <meta property="og:type" content="article" />
+  <meta property="og:site_name" content={siteTitle} />
+  <meta property="og:title" content={title} />
+  <meta property="og:description" content={shareDesc} />
+  <meta property="og:image" content={`https://scottchacon.com${shareImg}`} />
+  <meta property="og:url" content={`https://scottchacon.com${url}`} />
+  <meta property="article:published_time" content={isoDate} />
+
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:site" content="@chacon" />
+  <meta name="twitter:creator" content="@chacon" />
+  <meta name="twitter:title" content={title} />
+  <meta name="twitter:description" content={shareDesc} />
+  <meta name="twitter:image" content={`https://scottchacon.com${shareImg}`} />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;900&family=Roboto+Mono:wght@300;400&family=Roboto:wght@100;300;400;500;700&family=Source+Serif+4:opsz,wght@8..60,300;8..60,400&display=swap"
+    rel="stylesheet"
+  />
+  <title>{title} - {siteTitle}</title>
+  <style is:global>
+    /* Article prose. Scoped to .prose-body (a class, matching the specificity of
+       an HTML post's own component styles) so it never leaks into the site chrome
+       and so raw-HTML posts (e.g. the wire post's `.wire pre`) still win by source
+       order. Class-scoping matters under Tailwind v4's cascade layers. */
+    .prose-body a { color: #5555ff; }
+    .prose-body blockquote {
+      background: #eee;
+      color: #666;
+      border-left: 2px solid #888;
+      padding: 12px;
+      line-height: 1.8em;
+      font-style: italic;
+    }
+    .prose-body h2 { font-size: 2em; margin-top: 30px !important; font-weight: bold; }
+    .prose-body h3 { font-size: 1.8em; margin-top: 30px !important; font-weight: bold; }
+    .prose-body h4 { font-size: 1.4em; margin-top: 30px !important; font-weight: bold; }
+    .prose-body code {
+      font-size: 0.8em;
+      background-color: #eee;
+      padding: 4px;
+      line-height: 0.8em;
+    }
+    .prose-body pre {
+      line-height: 1.4em;
+      width: 100%;
+      background-color: #eee;
+      padding: 4px;
+    }
+    .prose-body ul {
+      list-style: circle;
+      margin-left: 30px;
+    }
+    .prose-body ul li {
+      margin-bottom: 10px;
+    }
+    .prose-body p {
+      font-size: 1.1em;
+      letter-spacing: -0.003em;
+      line-height: 32px;
+      font-weight: 400;
+    }
+    .prose-body img { max-width: 100%; height: auto; }
+    .prose-body figure { margin: 32px 0; }
+    .prose-body figure img { width: 100%; border-radius: 12px; display: block; }
+    .prose-body figcaption {
+      text-align: center;
+      font-size: 0.9em;
+      color: #888;
+      margin-top: 10px;
+      font-style: italic;
+    }
+    .toc { border-left: 1px solid #e4e4e7; }
+    .toc a {
+      display: block;
+      padding: 5px 0 5px 16px;
+      margin-left: -1px;
+      border-left: 2px solid transparent;
+      color: #71717a;
+      font-size: 0.9em;
+      line-height: 1.4;
+      text-decoration: none;
+      transition: color .15s, border-color .15s;
+    }
+    .toc a.lvl-3 { padding-left: 32px; font-size: 0.85em; }
+    .toc a:hover { color: #3f3f46; }
+    .toc a.active {
+      color: #5555ff;
+      border-left-color: #5555ff;
+      font-weight: 500;
+    }
+    @media (prefers-color-scheme: dark) {
+      .toc { border-left-color: #27272a; }
+      .toc a { color: #a1a1aa; }
+      .toc a:hover { color: #e4e4e7; }
+      .toc a.active { color: #a5b4fc; border-left-color: #a5b4fc; }
+    }
+  </style>
+</head>
+
+<body>
+<div class="flex-auto pb-20">
+  <SiteHeader backUrl="/posts" backText="all posts" />
+  {showBanner && <PromoBanner />}
+  <div class="sm:px-8 mt-9">
+    <div class="mx-auto w-full max-w-7xl lg:px-8">
+      <div class="relative px-4 sm:px-8 lg:px-12">
+        <div class="mx-auto max-w-5xl lg:flex lg:justify-between lg:gap-12 lg:mt-16">
+          <article class="w-full lg:max-w-2xl min-w-0">
+            <h1 class="font-head text-4xl sm:text-5xl tracking-tight text-zinc-900 dark:text-zinc-100">
+              {title}
+            </h1>
+            <div class="mt-4 flex items-center gap-2 text-sm tracking-tight text-zinc-400">
+              <time datetime={isoDate}>{prettyDate}</time>
+              <span aria-hidden="true">·</span>
+              <span>{rel}</span>
+            </div>
+            <div id="post-content" class="prose-body font-blog font-lg leading-7 flex flex-col mt-6 space-y-4">
+              {isHtml ? <Fragment set:html={entry.body} /> : Content && <Content />}
+            </div>
+          </article>
+          <aside id="toc-wrap" class="hidden lg:block flex-none w-60">
+            <div class="sticky top-12">
+              {image && (
+                <img src={image} alt="" class="w-full rounded-xl mb-6 ring-1 ring-zinc-900/5 dark:ring-white/10" />
+              )}
+              <nav id="toc-nav">
+                <div class="text-xs font-semibold uppercase tracking-widest text-zinc-400 mb-3">On this page</div>
+                <div class="toc" id="toc"></div>
+              </nav>
+            </div>
+          </aside>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script is:inline>
+(function () {
+  var content = document.getElementById('post-content');
+  var toc = document.getElementById('toc');
+  var wrap = document.getElementById('toc-wrap');
+  if (!content || !toc) { return; }
+  var hs = Array.prototype.slice.call(content.querySelectorAll('h2, h3'));
+  if (hs.length < 2) {
+    var nav = document.getElementById('toc-nav');
+    if (nav) { nav.style.display = 'none'; }
+    if (wrap && !wrap.querySelector('img')) { wrap.style.display = 'none'; }
+    return;
+  }
+
+  var links = {};
+  hs.forEach(function (h) {
+    if (!h.id) {
+      h.id = h.textContent.trim().toLowerCase()
+        .replace(/[^\w]+/g, '-').replace(/^-+|-+$/g, '');
+    }
+    var a = document.createElement('a');
+    a.href = '#' + h.id;
+    a.textContent = h.textContent;
+    a.className = h.tagName === 'H3' ? 'lvl-3' : 'lvl-2';
+    toc.appendChild(a);
+    links[h.id] = a;
+  });
+
+  var current = null;
+  function setActive(id) {
+    if (current === id || !links[id]) { return; }
+    if (current && links[current]) { links[current].classList.remove('active'); }
+    current = id;
+    links[id].classList.add('active');
+  }
+
+  var visible = {};
+  var obs = new IntersectionObserver(function (entries) {
+    entries.forEach(function (e) {
+      if (e.isIntersecting) { visible[e.target.id] = true; }
+      else { delete visible[e.target.id]; }
+    });
+    var best = null, bestTop = Infinity;
+    hs.forEach(function (h) {
+      if (visible[h.id]) {
+        var t = h.getBoundingClientRect().top;
+        if (t < bestTop) { bestTop = t; best = h.id; }
+      }
+    });
+    if (best) { setActive(best); }
+    else {
+      var above = null;
+      hs.forEach(function (h) {
+        if (h.getBoundingClientRect().top < 120) { above = h.id; }
+      });
+      if (above) { setActive(above); }
+    }
+  }, { rootMargin: '-80px 0px -65% 0px', threshold: 0 });
+
+  hs.forEach(function (h) { obs.observe(h); });
+  setActive(hs[0].id);
+})();
+</script>
+</body>
+</html>

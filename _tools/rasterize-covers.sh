@@ -3,7 +3,7 @@
 # render SVG). Output is the same basename with a .png extension, 1200px wide
 # (covers are 1200x800, so height stays 800). Re-run after regenerating covers.
 set -euo pipefail
-cd "$(dirname "$0")/../assets/images/covers"
+cd "$(dirname "$0")/../public/assets/images/covers"
 shopt -s nullglob
 for svg in *.svg; do
   png="${svg%.svg}.png"

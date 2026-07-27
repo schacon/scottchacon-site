@@ -1,0 +1,26 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import SiteHeader from '../components/SiteHeader.astro';
+---
+<BaseLayout title="Not Found">
+  <div class="flex-auto">
+    <SiteHeader />
+    <div class="sm:px-8 mt-9">
+      <div class="mx-auto w-full max-w-7xl lg:px-8">
+        <div class="relative px-4 sm:px-8 lg:px-12">
+          <div class="mx-auto max-w-2xl lg:max-w-5xl">
+            <h1 class="font-head text-5xl sm:text-6xl tracking-tight text-zinc-900 dark:text-zinc-100">
+              Not Found
+            </h1>
+            <p class="mt-6 text-lg text-zinc-600 dark:text-zinc-400">
+              Sorry! Couldn't find that page. Bummer.
+            </p>
+            <p class="mt-8">
+              <a class="back-link" href="/"><span aria-hidden="true">←</span> back home</a>
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</BaseLayout>

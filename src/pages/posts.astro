@@ -1,0 +1,70 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import SiteHeader from '../components/SiteHeader.astro';
+import PostCard from '../components/PostCard.astro';
+import { getAllPosts } from '../lib/posts';
+
+const posts = await getAllPosts();
+const hero = posts[0];
+const rest = posts.slice(1);
+
+const medium = [
+  { title: 'How to Move your Event Online in the Age of Coronavirus', url: 'https://medium.com/@chacon/how-to-move-your-event-online-in-the-age-of-coronavirus-f348371062da', date: 'Mar 20, 2020' },
+  { title: 'My Love Letter to the Chevy Bolt', url: 'https://medium.com/hackernoon/my-love-letter-to-the-chevy-bolt-e970c63963dd', date: 'Oct 26, 2017' },
+  { title: 'Further Adventures in Language Learning', url: 'https://medium.com/@chacon/further-adventures-in-language-learning-6e192ccc8b1f', date: 'Aug 6, 2016' },
+  { title: 'An Unlikely Adventure in Wine', url: 'https://medium.com/@chacon/an-unlikely-adventure-in-wine-8dac450f6626', date: 'Feb 29, 2016' },
+  { title: 'How to Really Learn a Language (Maybe)', url: 'https://medium.com/@chacon/how-to-really-learn-a-language-maybe-c1b07223278c', date: 'Jan 5, 2016' },
+  { title: 'A Year in Paris', url: 'https://medium.com/an-american-developer-in-paris/a-year-in-paris-a235519a486b', date: 'Jul 6, 2015' },
+  { title: 'Living the Future of Technical Writing', url: 'https://medium.com/@chacon/living-the-future-of-technical-writing-2f368bd0a272', date: 'Oct 27, 2014' },
+  { title: 'Moving to Paris : Boots on the Ground', url: 'https://medium.com/an-american-developer-in-paris/moving-to-paris-boots-on-the-ground-69c91186f683', date: 'Oct 5, 2014' },
+  { title: 'How to Move to Paris : The Homefront', url: 'https://medium.com/an-american-developer-in-paris/how-to-move-to-paris-part-one-33194c8902fe', date: 'Oct 2, 2014' },
+  { title: 'Moving to Paris', url: 'https://medium.com/an-american-developer-in-paris/moving-to-paris-6b42fa7e19dd', date: 'Sep 29, 2014' },
+];
+---
+<BaseLayout title="Writing">
+  <div class="flex-auto pb-24">
+    <SiteHeader />
+    <div class="sm:px-8 mt-9">
+      <div class="mx-auto w-full max-w-7xl lg:px-8">
+        <div class="relative px-4 sm:px-8 lg:px-12">
+          <div class="mx-auto max-w-2xl lg:max-w-5xl">
+            <div class="max-w-2xl">
+              <h1 class="font-head text-5xl sm:text-6xl tracking-tight text-zinc-900 dark:text-zinc-100 pb-1">
+                Writing
+              </h1>
+              <div class="flex flex-col mt-6 text-lg text-zinc-600 dark:text-zinc-400 space-y-2">
+                <div>
+                  Here I write about things that are interesting to me &mdash; Git, languages,
+                  technology, life. I promise that every word is hand crafted by a very human me and
+                  zero AI (though I may use it for images, tables, diagrams, etc).
+                </div>
+              </div>
+            </div>
+
+            <div class="mt-14 pb-10 border-b border-zinc-200 dark:border-zinc-800">
+              <PostCard post={hero} variant="hero" />
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-x-12 gap-y-8 mt-10 items-start">
+              {rest.map((post) => <PostCard post={post} variant="compact" />)}
+            </div>
+
+            <div class="mt-24 max-w-3xl">
+              <h2 class="font-head text-2xl text-zinc-900 dark:text-zinc-100 pb-4 mb-2 border-b border-zinc-200 dark:border-zinc-800">
+                Also on Medium
+              </h2>
+              <div class="flex flex-col divide-y divide-zinc-100 dark:divide-zinc-800">
+                {medium.map((m) => (
+                  <a href={m.url} class="group flex items-baseline gap-4 py-3">
+                    <time class="w-28 flex-none text-sm tracking-tight text-zinc-400">{m.date}</time>
+                    <span class="text-zinc-700 dark:text-zinc-300 transition-colors group-hover:text-blue-600">{m.title}</span>
+                  </a>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</BaseLayout>

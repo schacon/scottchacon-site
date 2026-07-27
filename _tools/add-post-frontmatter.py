@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import os
 
-ROOT = "/Users/schacon/projects/scottchacon-site/_posts"
+ROOT = "/Users/schacon/projects/scottchacon-site/src/posts"
 
 # basename -> (image path, excerpt)
 META = {

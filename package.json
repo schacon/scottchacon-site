@@ -1,13 +1,37 @@
 {
+  "name": "scottchacon-site",
+  "type": "module",
+  "version": "2.0.0",
+  "private": true,
+  "packageManager": "pnpm@10.20.0",
   "scripts": {
-    "setup": "yarn install && bundle install",
-    "dev": "bundle exec jekyll serve",
-    "build": "JEKYLL_ENV=production bundle exec jekyll build"
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "astro": "astro"
+  },
+  "dependencies": {
+    "@astrojs/mdx": "^4.3.14",
+    "@astrojs/react": "^4.4.2",
+    "@astrojs/rss": "^4",
+    "@astrojs/sitemap": "^3",
+    "@tailwindcss/vite": "^4.3.3",
+    "astro": "^5.18.2",
+    "gray-matter": "^4.0.3",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
+    "rehype-slug": "^6.0.0",
+    "tailwindcss": "^4.3.3",
+    "tinyglobby": "^0.2.17"
   },
   "devDependencies": {
-    "autoprefixer": "^10.4.7",
-    "cssnano": "^5.1.8",
-    "postcss": "^8.4.13",
-    "tailwindcss": "^3.0.24"
+    "@types/react": "^19.2.17",
+    "@types/react-dom": "^19.2.3"
+  },
+  "pnpm": {
+    "overrides": {
+      "vite": "^6"
+    },
+    "onlyBuiltDependencies": ["esbuild", "sharp"]
   }
 }
