@@ -113,6 +113,23 @@
               class="font-head text-4xl sm:text-5xl tracking-tight text-zinc-900 dark:text-zinc-100">
               {{ page.title }}
             </h1>
+            {%- assign _now = site.time | date: '%s' | plus: 0 -%}
+            {%- assign _then = page.date | date: '%s' | plus: 0 -%}
+            {%- assign _d = _now | minus: _then -%}
+            {%- assign _yr = _d | divided_by: 31557600 -%}
+            {%- assign _mo = _d | divided_by: 2629800 -%}
+            {%- assign _da = _d | divided_by: 86400 -%}
+            {%- capture _rel -%}
+            {%- if _yr >= 1 -%}{%- if _yr == 1 -%}a year ago{%- else -%}{{ _yr }} years ago{%- endif -%}
+            {%- elsif _mo >= 1 -%}{%- if _mo == 1 -%}a month ago{%- else -%}{{ _mo }} months ago{%- endif -%}
+            {%- elsif _da >= 1 -%}{%- if _da == 1 -%}yesterday{%- else -%}{{ _da }} days ago{%- endif -%}
+            {%- else -%}today{%- endif -%}
+            {%- endcapture -%}
+            <div class="mt-4 flex items-center gap-2 text-sm tracking-tight text-zinc-400">
+              <time datetime="{{ page.date | date_to_xmlschema }}">{{ page.date | date: "%B %-d, %Y" }}</time>
+              <span aria-hidden="true">·</span>
+              <span>{{ _rel | strip }}</span>
+            </div>
             <div id="post-content" class="font-blog font-lg leading-7 flex flex-col mt-6 space-y-4">
               {{ content }}
             </div>
