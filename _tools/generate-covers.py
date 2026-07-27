@@ -218,29 +218,49 @@ def flags():
     save("flags", c.render("A row of stylized national flags on poles representing languages"))
 
 
+def _flow_icon(c, x, y, kind):
+    w = "#ffffff"
+    if kind == "fork":
+        c.line(x - 20, y - 24, x - 20, y + 24, w, sw=7)
+        c.line(x - 20, y, x + 20, y - 24, w, sw=7)
+        c.circle(x - 20, y + 24, 9, w); c.circle(x - 20, y - 24, 9, w)
+        c.circle(x + 20, y - 24, 9, w)
+    elif kind == "dot":
+        c.circle(x, y, 20, w)
+    elif kind == "chat":
+        c.rrect(x - 30, y - 26, 60, 42, 12, w)
+        c.path(f"M{x-8} {y+16} l0 20 l20 -20 Z", fill=w)
+        for i in range(3):
+            c.circle(x - 16 + i * 16, y - 5, 5, c.p["d"])
+    else:  # up arrow (deploy)
+        c.line(x, y + 22, x, y - 20, w, sw=8)
+        c.path(f"M{x-18} {y-4} L{x} {y-26} L{x+18} {y-4} Z", fill=w)
+
+
 def github_flow():
-    """GitHub Flow — master line, a feature branch merging back, deploy."""
+    """GitHub Flow — the flow as a labelled pipeline of steps."""
     c = Cover("tech"); p = c.p
-    y = 440
-    main = c.grad(p["a"], p["b"], 0)
-    c.line(140, y, 1060, y, main, sw=10)
-    # main commits
-    for x in [140, 300, 780, 940, 1060]:
-        c.circle(x, y, 18, main)
-    # feature branch up
-    br = c.grad(p["c"], p["d"], 0)
-    c.path(f"M300 {y} C 360 {y}, 380 300, 460 300 L 640 300 "
-           f"C 720 300, 740 {y}, 780 {y}", stroke=br, sw=10)
-    for x in [460, 560, 640]:
-        c.circle(x, 300, 16, br)
-    # deploy rocket / arrow + check near merge
-    c.circle(940, y - 150, 54, c.grad(p["d"], p["a"]))
-    c.path(f"M916 {y-150} l16 16 l34 -40", stroke="#ffffff", sw=10)
-    c.line(940, y - 96, 940, y - 40, p["ink"], sw=6, dash="2 12")
-    # small "deploy" arrow going up-right
-    c.text(600, 210, "ship it", 40, p["ink"], family="Georgia, serif",
-           weight="700", style="italic")
-    save("github-flow", c.render("A git branch flow with a feature branch merging into master and a deploy"))
+    steps = [("BRANCH", "fork"), ("COMMIT", "dot"),
+             ("REVIEW", "chat"), ("DEPLOY", "up")]
+    grads = [c.grad(p["a"], p["f"]), c.grad(p["b"], p["c"]),
+             c.grad(p["d"], "#c4b5fd"), c.grad("#22c55e", "#16a34a")]
+    y = 380
+    xs = [225, 470, 715, 960]
+    r = 74
+    for i in range(3):
+        c.line(xs[i] + r + 6, y, xs[i + 1] - r - 24, y, p["ink"], sw=6)
+        c.arrowhead(xs[i + 1] - r - 12, y, 0, 24, p["ink"])
+    for i, (lbl, icon) in enumerate(steps):
+        x = xs[i]
+        c.shadow(x, y + r + 22, r * 0.8, 16, 0.09)
+        c.circle(x, y, r, grads[i])
+        _flow_icon(c, x, y, icon)
+        c.text(x, y + r + 52, lbl, 24, p["ink"],
+               family="'Courier New', monospace", weight="700", spacing="1")
+    c.text(600, 150, "the github flow", 40, p["ink"],
+           family="Georgia, serif", weight="700", style="italic")
+    save("github-flow",
+         c.render("The GitHub flow as a pipeline: branch, commit, review, deploy"))
 
 
 def reset():
