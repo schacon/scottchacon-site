@@ -107,13 +107,13 @@ title: "Scott Chacon"
     </div>
   </div>
 
-  <div class="mt-24 sm:mt-32">
+  <div class="mt-24 sm:mt-32 pb-24 sm:pb-32">
     <div class="sm:px-8">
       <div class="mx-auto w-full max-w-7xl lg:px-8">
         <div class="relative px-4 sm:px-8 lg:px-12">
           <div class="mx-auto max-w-2xl lg:max-w-5xl">
             <div class="flex items-baseline justify-between border-b border-zinc-200 dark:border-zinc-800 pb-4">
-              <h2 class="font-head text-2xl sm:text-3xl text-zinc-900 dark:text-zinc-100">Latest Writing</h2>
+              <h2 class="font-head text-2xl sm:text-3xl text-zinc-900 dark:text-zinc-100">Latest Posts</h2>
               <a href="/posts/" class="back-link">All writing <span aria-hidden="true">→</span></a>
             </div>
             <div class="mt-4 flex flex-col divide-y divide-zinc-100 dark:divide-zinc-800">
