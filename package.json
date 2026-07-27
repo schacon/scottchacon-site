@@ -1,4 +1,9 @@
 {
+  "scripts": {
+    "setup": "yarn install && bundle install",
+    "dev": "bundle exec jekyll serve",
+    "build": "JEKYLL_ENV=production bundle exec jekyll build"
+  },
   "devDependencies": {
     "autoprefixer": "^10.4.7",
     "cssnano": "^5.1.8",
