@@ -11,7 +11,7 @@ title: "Scott Chacon"
           <div class="flex flex-col lg:flex-row lg:justify-between lg:mt-24">
 
           <div class="max-w-2xl">
-            <h1 class="text-4xl font-extrabold tracking-tight bg-gradient-to-r from-blue-700 via-blue-400 to-blue-300 bg-clip-text text-transparent sm:text-5xl">
+            <h1 class="font-head text-5xl sm:text-6xl tracking-tight text-zinc-900 dark:text-zinc-100">
               Scott Chacon
               </h1>
             <p class="mt-6 text-base text-zinc-600 dark:text-zinc-400">
@@ -52,16 +52,16 @@ title: "Scott Chacon"
                 </svg></a></div>
           </div>
 
-          <div class="mt-12 lg:mt-0 lg:text-right">
-            <ul class="text-2xl inline space-x-6 space-y-2 lg:space-y-3 lg:tracking-tight lg:nav-links text-zinc-500">
-              <li class="inline lg:block">
-                <a href="/about/" class="lg:px-6 py-4">about</a>
+          <div class="mt-12 lg:mt-2">
+            <ul class="flex flex-wrap gap-x-8 gap-y-3 lg:flex-col lg:items-end lg:gap-4">
+              <li>
+                <a href="/about/" class="nav-link">about</a>
               </li>
-              <li class="inline lg:block">
-                <a href="/posts/" class="lg:px-6 py-4">writing</a>
+              <li>
+                <a href="/posts/" class="nav-link">writing</a>
               </li>
-              <li class="inline lg:block">
-                <a href="/talks/" class="lg:px-6 py-4">speaking</a>
+              <li>
+                <a href="/talks/" class="nav-link">speaking</a>
               </li>
             </ul>
           </div>
@@ -104,6 +104,31 @@ title: "Scott Chacon"
           class="absolute inset-0 h-full w-full object-cover" style="color:transparent"
           sizes="(min-width: 640px) 18rem, 11rem"
           src="{{ "/assets/images/karaoke2.png" | relative_url }}"></div>
+    </div>
+  </div>
+
+  <div class="mt-24 sm:mt-32">
+    <div class="sm:px-8">
+      <div class="mx-auto w-full max-w-7xl lg:px-8">
+        <div class="relative px-4 sm:px-8 lg:px-12">
+          <div class="mx-auto max-w-2xl lg:max-w-5xl">
+            <div class="flex items-baseline justify-between border-b border-zinc-200 dark:border-zinc-800 pb-4">
+              <h2 class="font-head text-2xl sm:text-3xl text-zinc-900 dark:text-zinc-100">Latest Writing</h2>
+              <a href="/posts/" class="back-link">All writing <span aria-hidden="true">→</span></a>
+            </div>
+            <div class="mt-4 flex flex-col divide-y divide-zinc-100 dark:divide-zinc-800">
+              {% for post in site.posts limit:5 %}
+              <a href="{{ post.url }}"
+                class="group flex flex-col gap-1 py-5 sm:flex-row sm:items-baseline sm:gap-6">
+                <time class="w-36 flex-none text-sm tracking-tight text-zinc-400">{{ post.date | date: "%B %e, %Y" }}</time>
+                <span
+                  class="text-lg text-zinc-700 dark:text-zinc-300 transition-colors group-hover:text-blue-600">{{ post.title }}</span>
+              </a>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 

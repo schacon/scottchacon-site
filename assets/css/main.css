@@ -1,6 +1,54 @@
 ---
 ---
 
+@font-face {
+  font-family: "But Head";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/assets/fonts/But-Head-Regular.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "But Head";
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/assets/fonts/But-Head-Italic.woff2") format("woff2");
+}
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer components {
+  /* Display headings — But Head, no gradient, dark and crisp */
+  .font-head {
+    font-family: "But Head", "Inter", sans-serif;
+    letter-spacing: -0.01em;
+  }
+
+  /* Crisp, understated navigation links */
+  .nav-link {
+    @apply relative text-base font-medium uppercase tracking-widest text-zinc-500 transition-colors duration-200;
+  }
+  .nav-link:hover {
+    @apply text-zinc-900 dark:text-zinc-100;
+  }
+
+  /* "back to" / utility links */
+  .back-link {
+    @apply inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-widest text-zinc-400 transition-colors duration-200;
+  }
+  .back-link:hover {
+    @apply text-zinc-700 dark:text-zinc-200;
+  }
+
+  /* Site wordmark shown at the top of article pages */
+  .site-mark {
+    @apply text-xs font-semibold uppercase tracking-widest text-zinc-400 transition-colors duration-200;
+  }
+  .site-mark:hover {
+    @apply text-zinc-700 dark:text-zinc-200;
+  }
+}

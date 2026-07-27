@@ -13,6 +13,7 @@ module.exports = {
       'serif': ['Georgia', 'Cambria', "Times New Roman", 'Times', 'serif'],
       'mono': ['Roboto mono', 'ui-monospace', 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', "Liberation Mono", "Courier New", 'monospace'],
       'blog': ['Inter'],
+      'head': ['"But Head"', 'Inter', 'sans-serif'],
     },
     theme: {
       extend: {},

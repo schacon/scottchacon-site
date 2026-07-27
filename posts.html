@@ -4,90 +4,56 @@ title: "Posts"
 ---
 
 <div class="flex-auto">
-  <div class="absolute top-0 right-0 p-2">
-    <a class="text-blue-300" href="/">back home</a>
+  <div class="absolute top-0 right-0 p-4">
+    <a class="back-link" href="/"><span aria-hidden="true">←</span> back home</a>
   </div>
-  <div class="sm:px-8 mt-9">
+  <div class="sm:px-8 mt-16">
     <div class="mx-auto w-full max-w-7xl">
       <div class="relative px-4 sm:px-8 lg:px-12">
         <div class="mx-auto max-w-2xl lg:max-w-5xl">
-          <div class="flex flex-col lg:flex-row lg:justify-between lg:mt-12">
-            <div class="max-w-2xl">
-              <h1
-                class="text-4xl font-extrabold tracking-tight bg-gradient-to-r from-blue-700 via-blue-400 to-blue-300 bg-clip-text text-transparent sm:text-5xl pb-1">
-                Scott's Writings
-              </h1>
-              <div class="flex flex-col mt-6 text-base text-zinc-600 dark:text-zinc-400 space-y-2">
-                <div>Here I write about things that are interesting to me.</div>
-              </div>
+          <div class="max-w-2xl">
+            <h1 class="font-head text-5xl sm:text-6xl tracking-tight text-zinc-900 dark:text-zinc-100 pb-1">
+              Writing
+            </h1>
+            <div class="flex flex-col mt-6 text-lg text-zinc-600 dark:text-zinc-400 space-y-2">
+              <div>Here I write about things that are interesting to me &mdash; Git, technology, and life.</div>
             </div>
           </div>
 
-          <div class="grid grid-cols-1 lg:grid-cols-2 mt-8 w-full">
-              <div class="space-y-2">
-                <h1 class="text-lg font-bold mb-4">Stuff I Post Here</h1>
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-x-16 gap-y-12 mt-16 w-full">
+
+            <div>
+              <h2 class="font-head text-xl text-zinc-900 dark:text-zinc-100 pb-4 mb-2 border-b border-zinc-200 dark:border-zinc-800">
+                On This Site
+              </h2>
+              <div class="flex flex-col divide-y divide-zinc-100 dark:divide-zinc-800">
                 {% for post in site.posts %}
-                <div class="grid grid-cols-3 space-x-3">
-                  <div class="text-right text-zinc-500">{{ post.date | date: "%B %e, %Y" }}</div>
-                  <div class="col-span-2"><a class="text-blue-600" href="{{ post.url }}">{{ post.title }}</a></div>
-                </div>
+                <a href="{{ post.url }}"
+                  class="group flex items-baseline gap-4 py-3">
+                  <time class="w-28 flex-none text-sm tracking-tight text-zinc-400">{{ post.date | date: "%b %e, %Y" }}</time>
+                  <span class="text-zinc-700 dark:text-zinc-300 transition-colors group-hover:text-blue-600">{{ post.title }}</span>
+                </a>
                 {% endfor %}
               </div>
-              <div class="space-y-2">
-                <h1 class="text-lg font-bold mb-4 mt-8 lg:mt-0">Stuff I Posted On Medium</h1>
-                <div class="grid grid-cols-3 space-x-3">
-                  <div class="text-right text-zinc-500">Jun 27, 2025</div>
-                  <div class="col-span-2"><a class="text-blue-600" href="https://medium.com/@chacon/on-using-flags-to-represent-languages-c5d2943484ec">On Using Flags to Represent Language</a></div>
-                </div>
-                <div class="grid grid-cols-3 space-x-3">
-                  <div class="text-right text-zinc-500">Mar 20, 2020</div>
-                  <div class="col-span-2"><a class="text-blue-600" href="https://medium.com/@chacon/how-to-move-your-event-online-in-the-age-of-coronavirus-f348371062da">How to Move your Event Online in the Age of Coronavirus</a></div>
-                </div>
-                <div class="grid grid-cols-3 space-x-3">
-                  <div class="text-right text-zinc-500">May 3, 2018</div>
-                  <div class="col-span-2"><a class="text-blue-600" href="https://medium.com/@chacon/mit-scientists-prove-adults-learn-language-to-fluency-nearly-as-well-as-children-1de888d1d45f">MIT Scientists prove adults learn language to fluency nearly as well as children</a></div>
-                </div>
-                <div class="grid grid-cols-3 space-x-3">
-                  <div class="text-right text-zinc-500">Nov 8, 2017</div>
-                  <div class="col-span-2"><a class="text-blue-600" href="https://medium.com/@chacon/tips-from-github-vol-1-customer-service-is-king-e9865823f6ae">Tips from GitHub, Vol 1: Customer Service is King</a></div>
-                </div>
-                <div class="grid grid-cols-3 space-x-3">
-                  <div class="text-right text-zinc-500">Oct 26, 2017</div>
-                  <div class="col-span-2"><a class="text-blue-600" href="https://medium.com/hackernoon/my-love-letter-to-the-chevy-bolt-e970c63963dd">My Love Letter to the Chevy Bolt</a></div>
-                </div>
-                <div class="grid grid-cols-3 space-x-3">
-                  <div class="text-right text-zinc-500">Aug 6, 2016</div>
-                  <div class="col-span-2"><a class="text-blue-600" href="https://medium.com/@chacon/further-adventures-in-language-learning-6e192ccc8b1f">Further Adventures in Language Learning</a></div>
-                </div>
-                <div class="grid grid-cols-3 space-x-3">
-                  <div class="text-right text-zinc-500">Feb 29, 2016</div>
-                  <div class="col-span-2"><a class="text-blue-600" href="https://medium.com/@chacon/an-unlikely-adventure-in-wine-8dac450f6626">An Unlikely Adventure in Wine</a></div>
-                </div>
-                <div class="grid grid-cols-3 space-x-3">
-                  <div class="text-right text-zinc-500">Jan 5, 2016</div>
-                  <div class="col-span-2"><a class="text-blue-600" href="https://medium.com/@chacon/how-to-really-learn-a-language-maybe-c1b07223278c">How to Really Learn a Language (Maybe)</a></div>
-                </div>
-                <div class="grid grid-cols-3 space-x-3">
-                  <div class="text-right text-zinc-500">Jul 6, 2015</div>
-                  <div class="col-span-2"><a class="text-blue-600" href="https://medium.com/an-american-developer-in-paris/a-year-in-paris-a235519a486b">A Year in Paris</a></div>
-                </div>
-                <div class="grid grid-cols-3 space-x-3">
-                  <div class="text-right text-zinc-500">Oct 27, 2014</div>
-                  <div class="col-span-2"><a class="text-blue-600" href="https://medium.com/@chacon/living-the-future-of-technical-writing-2f368bd0a272">Living the Future of Technical Writing</a></div>
-                </div>
-                <div class="grid grid-cols-3 space-x-3">
-                  <div class="text-right text-zinc-500">Oct 5, 2014</div>
-                  <div class="col-span-2"><a class="text-blue-600" href="https://medium.com/an-american-developer-in-paris/moving-to-paris-boots-on-the-ground-69c91186f683">Moving to Paris : Boots on the Ground</a></div>
-                </div>
-                <div class="grid grid-cols-3 space-x-3">
-                  <div class="text-right text-zinc-500">Oct 2, 2014</div>
-                  <div class="col-span-2"><a class="text-blue-600" href="https://medium.com/an-american-developer-in-paris/how-to-move-to-paris-part-one-33194c8902fe">How to Move to Paris : The Homefront</a></div>
-                </div>
-                <div class="grid grid-cols-3 space-x-3">
-                  <div class="text-right text-zinc-500">Sep 29, 2014</div>
-                  <div class="col-span-2"><a class="text-blue-600" href="https://medium.com/an-american-developer-in-paris/moving-to-paris-6b42fa7e19dd">Moving to Paris</a></div>
-                </div>
+            </div>
+
+            <div>
+              <h2 class="font-head text-xl text-zinc-900 dark:text-zinc-100 pb-4 mb-2 border-b border-zinc-200 dark:border-zinc-800">
+                On Medium
+              </h2>
+              <div class="flex flex-col divide-y divide-zinc-100 dark:divide-zinc-800">
+                {% assign medium = "On Using Flags to Represent Language|https://medium.com/@chacon/on-using-flags-to-represent-languages-c5d2943484ec|Jun 27, 2025;;How to Move your Event Online in the Age of Coronavirus|https://medium.com/@chacon/how-to-move-your-event-online-in-the-age-of-coronavirus-f348371062da|Mar 20, 2020;;MIT Scientists prove adults learn language to fluency nearly as well as children|https://medium.com/@chacon/mit-scientists-prove-adults-learn-language-to-fluency-nearly-as-well-as-children-1de888d1d45f|May 3, 2018;;Tips from GitHub, Vol 1: Customer Service is King|https://medium.com/@chacon/tips-from-github-vol-1-customer-service-is-king-e9865823f6ae|Nov 8, 2017;;My Love Letter to the Chevy Bolt|https://medium.com/hackernoon/my-love-letter-to-the-chevy-bolt-e970c63963dd|Oct 26, 2017;;Further Adventures in Language Learning|https://medium.com/@chacon/further-adventures-in-language-learning-6e192ccc8b1f|Aug 6, 2016;;An Unlikely Adventure in Wine|https://medium.com/@chacon/an-unlikely-adventure-in-wine-8dac450f6626|Feb 29, 2016;;How to Really Learn a Language (Maybe)|https://medium.com/@chacon/how-to-really-learn-a-language-maybe-c1b07223278c|Jan 5, 2016;;A Year in Paris|https://medium.com/an-american-developer-in-paris/a-year-in-paris-a235519a486b|Jul 6, 2015;;Living the Future of Technical Writing|https://medium.com/@chacon/living-the-future-of-technical-writing-2f368bd0a272|Oct 27, 2014;;Moving to Paris : Boots on the Ground|https://medium.com/an-american-developer-in-paris/moving-to-paris-boots-on-the-ground-69c91186f683|Oct 5, 2014;;How to Move to Paris : The Homefront|https://medium.com/an-american-developer-in-paris/how-to-move-to-paris-part-one-33194c8902fe|Oct 2, 2014;;Moving to Paris|https://medium.com/an-american-developer-in-paris/moving-to-paris-6b42fa7e19dd|Sep 29, 2014" | split: ";;" %}
+                {% for item in medium %}
+                {% assign parts = item | split: "|" %}
+                <a href="{{ parts[1] }}"
+                  class="group flex items-baseline gap-4 py-3">
+                  <time class="w-28 flex-none text-sm tracking-tight text-zinc-400">{{ parts[2] }}</time>
+                  <span class="text-zinc-700 dark:text-zinc-300 transition-colors group-hover:text-blue-600">{{ parts[0] }}</span>
+                </a>
+                {% endfor %}
               </div>
+            </div>
+
           </div>
 
         </div>
