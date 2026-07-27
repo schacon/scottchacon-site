@@ -4,17 +4,27 @@
 <head>
 
   <meta name="author" content="Scott Chacon" />
-  <meta name="description" content="Writing, talks, random photos and other things from Scott Chacon." />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-  <meta property="og:title" content="My homepage" />
-  <meta property="og:image" content="//scottchacon.com/assets/images/title.png" />
+  {%- comment -%} Social share metadata. Covers are SVG, but social cards need
+     a raster image, so we point at the rasterized .png (see _tools/rasterize-covers.sh). {%- endcomment -%}
+  {%- if page.image -%}{%- assign share_img = page.image | replace: '.svg', '.png' -%}{%- else -%}{%- assign share_img = '/assets/images/title.png' -%}{%- endif -%}
+  {%- assign share_desc = page.excerpt | strip_html | strip_newlines | truncate: 200 -%}
+  <meta name="description" content="{{ share_desc | escape }}" />
 
-  <meta name="twitter:card" content="summary" />
+  <meta property="og:type" content="article" />
+  <meta property="og:site_name" content="{{ site.title }}" />
+  <meta property="og:title" content="{{ page.title | escape }}" />
+  <meta property="og:description" content="{{ share_desc | escape }}" />
+  <meta property="og:image" content="https://scottchacon.com{{ share_img }}" />
+  <meta property="og:url" content="https://scottchacon.com{{ page.url }}" />
+  <meta property="article:published_time" content="{{ page.date | date_to_xmlschema }}" />
+
+  <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:site" content="@chacon" />
-  <meta name="twitter:title" content="Scott Chacon's homepage" />
-  <meta name="twitter:description" content="Writing, talks, randomness from Scott on the internet." />
-  <meta name="twitter:image" content="//scottchacon.com/assets/images/title.png" />
+  <meta name="twitter:creator" content="@chacon" />
+  <meta name="twitter:title" content="{{ page.title | escape }}" />
+  <meta name="twitter:description" content="{{ share_desc | escape }}" />
+  <meta name="twitter:image" content="https://scottchacon.com{{ share_img }}" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta charset="utf-8">
