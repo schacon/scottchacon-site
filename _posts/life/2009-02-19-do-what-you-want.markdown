@@ -1,6 +1,8 @@
 ---
 layout: post
 title: Do What You Want
+image: /assets/images/covers/do-what-you-want.svg
+excerpt: "Reflections sparked by Chris Wanstrath's StartupRiot keynote on building a company by doing what you love."
 ---
 
 My friend Chris Wanstrath gave the [keynote talk](http://gist.github.com/67060) yesterday at StartupRiot on his lessons learned in building a successful startup company.  A comment on the [Hacker News](http://news.ycombinator.com/item?id=487686) post about it summed the keynote up thusly:

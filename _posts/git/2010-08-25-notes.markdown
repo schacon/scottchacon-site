@@ -1,6 +1,8 @@
 ---
 layout: post
 title: Note to Self
+image: /assets/images/covers/notes.svg
+excerpt: "Attaching extra data to a commit without changing its SHA, using the little-known git notes command."
 ---
 
 One of the cool things about Git is that it has strong cryptographic 

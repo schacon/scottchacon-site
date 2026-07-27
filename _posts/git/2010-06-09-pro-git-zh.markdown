@@ -1,6 +1,8 @@
 ---
 layout: post
 title: Pro Git 简体中文版
+image: /assets/images/covers/pro-git-zh.svg
+excerpt: "Pro Git is now available in a simplified Chinese translation, thanks to the tireless work of Chunzi."
 ---
 
 The amazing <a href="http://chunzi.me/">Chunzi</a>, in addition to translating 

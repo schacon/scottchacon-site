@@ -1,6 +1,8 @@
 ---
 layout: post
 title: Pro Git Kindle Version Available
+image: /assets/images/covers/pro-git-on-kindle.svg
+excerpt: "Pro Git is now available as a proper Kindle edition, downloadable straight from the Amazon store."
 ---
 
 When Pro Git was first released, I asked about being able to get it on my Kindle.  In fact, one of the very first people to read the book was <a href="http://twitter.com/adelcambre">@adelcambre</a> with a mobi file I generated myself.  It was horrible looking, because I didn't do it very well, but it did work. My editor at Apress wanted to get a professional Kindle version produced, but wasn't sure if it was going to get done anytime soon. 

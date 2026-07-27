@@ -1,6 +1,8 @@
 ---
 layout: post
 title: Rerere Your Boat...
+image: /assets/images/covers/rerere.svg
+excerpt: "Teaching Git to remember how you resolved a conflict so it can replay that resolution next time — git rerere."
 ---
 
 One of the things I didn't touch on at all in the book is the `git rerere`

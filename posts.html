@@ -1,14 +1,15 @@
 ---
 layout: default
-title: "Posts"
+title: "Writing"
 ---
 
-<div class="flex-auto">
+<div class="flex-auto pb-24">
   {% include site-header.html %}
   <div class="sm:px-8 mt-9">
     <div class="mx-auto w-full max-w-7xl lg:px-8">
       <div class="relative px-4 sm:px-8 lg:px-12">
         <div class="mx-auto max-w-2xl lg:max-w-5xl">
+
           <div class="max-w-2xl">
             <h1 class="font-head text-5xl sm:text-6xl tracking-tight text-zinc-900 dark:text-zinc-100 pb-1">
               Writing
@@ -18,40 +19,31 @@ title: "Posts"
             </div>
           </div>
 
-          <div class="grid grid-cols-1 lg:grid-cols-2 gap-x-16 gap-y-12 mt-16 w-full">
+          <div class="mt-14 pb-10 border-b border-zinc-200 dark:border-zinc-800">
+            {% include post-card.html post=site.posts.first variant="hero" %}
+          </div>
 
-            <div>
-              <h2 class="font-head text-xl text-zinc-900 dark:text-zinc-100 pb-4 mb-2 border-b border-zinc-200 dark:border-zinc-800">
-                On This Site
-              </h2>
-              <div class="flex flex-col divide-y divide-zinc-100 dark:divide-zinc-800">
-                {% for post in site.posts %}
-                <a href="{{ post.url }}"
-                  class="group flex items-baseline gap-4 py-3">
-                  <time class="w-28 flex-none text-sm tracking-tight text-zinc-400">{{ post.date | date: "%b %e, %Y" }}</time>
-                  <span class="text-zinc-700 dark:text-zinc-300 transition-colors group-hover:text-blue-600">{{ post.title }}</span>
-                </a>
-                {% endfor %}
-              </div>
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-x-12 gap-y-8 mt-10 items-start">
+            {% for post in site.posts offset:1 %}
+              {% include post-card.html post=post variant="compact" %}
+            {% endfor %}
+          </div>
+
+          <div class="mt-24 max-w-3xl">
+            <h2 class="font-head text-2xl text-zinc-900 dark:text-zinc-100 pb-4 mb-2 border-b border-zinc-200 dark:border-zinc-800">
+              Also on Medium
+            </h2>
+            <div class="flex flex-col divide-y divide-zinc-100 dark:divide-zinc-800">
+              {% assign medium = "How to Move your Event Online in the Age of Coronavirus|https://medium.com/@chacon/how-to-move-your-event-online-in-the-age-of-coronavirus-f348371062da|Mar 20, 2020;;MIT Scientists prove adults learn language to fluency nearly as well as children|https://medium.com/@chacon/mit-scientists-prove-adults-learn-language-to-fluency-nearly-as-well-as-children-1de888d1d45f|May 3, 2018;;Tips from GitHub, Vol 1: Customer Service is King|https://medium.com/@chacon/tips-from-github-vol-1-customer-service-is-king-e9865823f6ae|Nov 8, 2017;;My Love Letter to the Chevy Bolt|https://medium.com/hackernoon/my-love-letter-to-the-chevy-bolt-e970c63963dd|Oct 26, 2017;;Further Adventures in Language Learning|https://medium.com/@chacon/further-adventures-in-language-learning-6e192ccc8b1f|Aug 6, 2016;;An Unlikely Adventure in Wine|https://medium.com/@chacon/an-unlikely-adventure-in-wine-8dac450f6626|Feb 29, 2016;;How to Really Learn a Language (Maybe)|https://medium.com/@chacon/how-to-really-learn-a-language-maybe-c1b07223278c|Jan 5, 2016;;A Year in Paris|https://medium.com/an-american-developer-in-paris/a-year-in-paris-a235519a486b|Jul 6, 2015;;Living the Future of Technical Writing|https://medium.com/@chacon/living-the-future-of-technical-writing-2f368bd0a272|Oct 27, 2014;;Moving to Paris : Boots on the Ground|https://medium.com/an-american-developer-in-paris/moving-to-paris-boots-on-the-ground-69c91186f683|Oct 5, 2014;;How to Move to Paris : The Homefront|https://medium.com/an-american-developer-in-paris/how-to-move-to-paris-part-one-33194c8902fe|Oct 2, 2014;;Moving to Paris|https://medium.com/an-american-developer-in-paris/moving-to-paris-6b42fa7e19dd|Sep 29, 2014" | split: ";;" %}
+              {% for item in medium %}
+              {% assign parts = item | split: "|" %}
+              <a href="{{ parts[1] }}"
+                class="group flex items-baseline gap-4 py-3">
+                <time class="w-28 flex-none text-sm tracking-tight text-zinc-400">{{ parts[2] }}</time>
+                <span class="text-zinc-700 dark:text-zinc-300 transition-colors group-hover:text-blue-600">{{ parts[0] }}</span>
+              </a>
+              {% endfor %}
             </div>
-
-            <div>
-              <h2 class="font-head text-xl text-zinc-900 dark:text-zinc-100 pb-4 mb-2 border-b border-zinc-200 dark:border-zinc-800">
-                On Medium
-              </h2>
-              <div class="flex flex-col divide-y divide-zinc-100 dark:divide-zinc-800">
-                {% assign medium = "On Using Flags to Represent Language|https://medium.com/@chacon/on-using-flags-to-represent-languages-c5d2943484ec|Jun 27, 2025;;How to Move your Event Online in the Age of Coronavirus|https://medium.com/@chacon/how-to-move-your-event-online-in-the-age-of-coronavirus-f348371062da|Mar 20, 2020;;MIT Scientists prove adults learn language to fluency nearly as well as children|https://medium.com/@chacon/mit-scientists-prove-adults-learn-language-to-fluency-nearly-as-well-as-children-1de888d1d45f|May 3, 2018;;Tips from GitHub, Vol 1: Customer Service is King|https://medium.com/@chacon/tips-from-github-vol-1-customer-service-is-king-e9865823f6ae|Nov 8, 2017;;My Love Letter to the Chevy Bolt|https://medium.com/hackernoon/my-love-letter-to-the-chevy-bolt-e970c63963dd|Oct 26, 2017;;Further Adventures in Language Learning|https://medium.com/@chacon/further-adventures-in-language-learning-6e192ccc8b1f|Aug 6, 2016;;An Unlikely Adventure in Wine|https://medium.com/@chacon/an-unlikely-adventure-in-wine-8dac450f6626|Feb 29, 2016;;How to Really Learn a Language (Maybe)|https://medium.com/@chacon/how-to-really-learn-a-language-maybe-c1b07223278c|Jan 5, 2016;;A Year in Paris|https://medium.com/an-american-developer-in-paris/a-year-in-paris-a235519a486b|Jul 6, 2015;;Living the Future of Technical Writing|https://medium.com/@chacon/living-the-future-of-technical-writing-2f368bd0a272|Oct 27, 2014;;Moving to Paris : Boots on the Ground|https://medium.com/an-american-developer-in-paris/moving-to-paris-boots-on-the-ground-69c91186f683|Oct 5, 2014;;How to Move to Paris : The Homefront|https://medium.com/an-american-developer-in-paris/how-to-move-to-paris-part-one-33194c8902fe|Oct 2, 2014;;Moving to Paris|https://medium.com/an-american-developer-in-paris/moving-to-paris-6b42fa7e19dd|Sep 29, 2014" | split: ";;" %}
-                {% for item in medium %}
-                {% assign parts = item | split: "|" %}
-                <a href="{{ parts[1] }}"
-                  class="group flex items-baseline gap-4 py-3">
-                  <time class="w-28 flex-none text-sm tracking-tight text-zinc-400">{{ parts[2] }}</time>
-                  <span class="text-zinc-700 dark:text-zinc-300 transition-colors group-hover:text-blue-600">{{ parts[0] }}</span>
-                </a>
-                {% endfor %}
-              </div>
-            </div>
-
           </div>
 
         </div>

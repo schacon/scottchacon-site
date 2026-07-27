@@ -1,6 +1,8 @@
 ---
 layout: post
 title: My New Blog
+image: /assets/images/covers/blog-over.svg
+excerpt: "Retiring my old blog that hopped from host to host and domain to domain over the years, for something new."
 ---
 
 My previous blog, which moved from host to host, domain to domain over the years

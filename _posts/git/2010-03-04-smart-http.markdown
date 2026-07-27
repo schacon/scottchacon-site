@@ -1,6 +1,8 @@
 ---
 layout: post
 title: Smart HTTP Transport
+image: /assets/images/covers/smart-http.svg
+excerpt: "The new Smart HTTP transport in Git, and how it makes cloning and fetching over plain HTTP fast."
 ---
 
 When I was done writing Pro Git, the only transfer protocols that existed were

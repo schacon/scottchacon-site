@@ -1,0 +1,682 @@
+#!/usr/bin/env python3
+"""Bespoke per-article SVG cover illustrations for scottchacon.com.
+
+One hand-composed scene per post, each reflecting the article's actual topic,
+all sharing a single visual system (soft category-tinted background + faint
+grid + soft blobs, flat gradient vector illustration) so they read as a set.
+No external resources; text uses generic system fonts so it renders inside
+an <img>-referenced SVG.
+"""
+import math, os
+
+W, H = 1200, 800
+OUT = "/Users/schacon/projects/scottchacon-site/assets/images/covers"
+
+PAL = {
+    "git": dict(bg=("#fff3ec", "#ffdcc7"), ink="#7c2d12",
+                a="#f97316", b="#ea580c", c="#e11d48", d="#f59e0b",
+                e="#6366f1", f="#fb923c"),
+    "tech": dict(bg=("#eef2ff", "#dbe4ff"), ink="#1e1b4b",
+                 a="#4f46e5", b="#2563eb", c="#0ea5e9", d="#7c3aed",
+                 e="#06b6d4", f="#818cf8"),
+    "life": dict(bg=("#ecfdf5", "#cdf4e2"), ink="#064e3b",
+                 a="#0d9488", b="#059669", c="#10b981", d="#f59e0b",
+                 e="#ec4899", f="#0ea5e9"),
+}
+
+
+class Cover:
+    def __init__(self, cat):
+        self.p = PAL[cat]
+        self.defs = []
+        self.body = []
+        self._gid = 0
+        self._bg()
+
+    # ---- gradient registration ----
+    def grad(self, c0, c1, angle=90):
+        self._gid += 1
+        n = f"g{self._gid}"
+        a = math.radians(angle)
+        x1, y1 = 0.5 - 0.5 * math.cos(a), 0.5 - 0.5 * math.sin(a)
+        x2, y2 = 0.5 + 0.5 * math.cos(a), 0.5 + 0.5 * math.sin(a)
+        self.defs.append(
+            f'<linearGradient id="{n}" x1="{x1:.3f}" y1="{y1:.3f}" '
+            f'x2="{x2:.3f}" y2="{y2:.3f}">'
+            f'<stop offset="0" stop-color="{c0}"/>'
+            f'<stop offset="1" stop-color="{c1}"/></linearGradient>')
+        return f"url(#{n})"
+
+    def rgrad(self, c0, c1):
+        self._gid += 1
+        n = f"g{self._gid}"
+        self.defs.append(
+            f'<radialGradient id="{n}"><stop offset="0" stop-color="{c0}"/>'
+            f'<stop offset="1" stop-color="{c1}"/></radialGradient>')
+        return f"url(#{n})"
+
+    # ---- background shared across all covers ----
+    def _bg(self):
+        p = self.p
+        self.body.append(
+            f'<rect width="{W}" height="{H}" fill="{self.grad(*p["bg"], 120)}"/>')
+        g = []
+        for x in range(100, W, 100):
+            g.append(f'<line x1="{x}" y1="0" x2="{x}" y2="{H}"/>')
+        for y in range(100, H, 100):
+            g.append(f'<line x1="0" y1="{y}" x2="{W}" y2="{y}"/>')
+        self.body.append(
+            f'<g stroke="{p["ink"]}" stroke-width="1" opacity="0.05">'
+            + "".join(g) + "</g>")
+        # soft blobs
+        self.body.append(
+            f'<circle cx="250" cy="170" r="300" fill="{self.rgrad(p["a"], p["bg"][1])}" opacity="0.12"/>')
+        self.body.append(
+            f'<circle cx="1000" cy="640" r="340" fill="{self.rgrad(p["d"], p["bg"][1])}" opacity="0.10"/>')
+
+    # ---- primitives ----
+    def add(self, s):
+        self.body.append(s)
+
+    def pill(self, x, y, w, h, fill, **kw):
+        extra = "".join(f' {k}="{v}"' for k, v in kw.items())
+        self.add(f'<rect x="{x:.1f}" y="{y:.1f}" width="{w:.1f}" '
+                 f'height="{h:.1f}" rx="{h/2:.1f}" fill="{fill}"{extra}/>')
+
+    def rrect(self, x, y, w, h, r, fill, **kw):
+        extra = "".join(f' {k}="{v}"' for k, v in kw.items())
+        self.add(f'<rect x="{x:.1f}" y="{y:.1f}" width="{w:.1f}" '
+                 f'height="{h:.1f}" rx="{r:.1f}" fill="{fill}"{extra}/>')
+
+    def rect_raw(self, x, y, w, h, fill, **kw):
+        extra = "".join(f' {k}="{v}"' for k, v in kw.items())
+        self.add(f'<rect x="{x:.1f}" y="{y:.1f}" width="{w:.1f}" '
+                 f'height="{h:.1f}" fill="{fill}"{extra}/>')
+
+    def circle(self, cx, cy, r, fill, **kw):
+        extra = "".join(f' {k}="{v}"' for k, v in kw.items())
+        self.add(f'<circle cx="{cx:.1f}" cy="{cy:.1f}" r="{r:.1f}" '
+                 f'fill="{fill}"{extra}/>')
+
+    def ring(self, cx, cy, r, stroke, sw=10, **kw):
+        extra = "".join(f' {k}="{v}"' for k, v in kw.items())
+        self.add(f'<circle cx="{cx:.1f}" cy="{cy:.1f}" r="{r:.1f}" fill="none" '
+                 f'stroke="{stroke}" stroke-width="{sw}"{extra}/>')
+
+    def line(self, x1, y1, x2, y2, stroke, sw=6, dash=None, cap="round"):
+        d = f' stroke-dasharray="{dash}"' if dash else ""
+        self.add(f'<line x1="{x1:.1f}" y1="{y1:.1f}" x2="{x2:.1f}" y2="{y2:.1f}" '
+                 f'stroke="{stroke}" stroke-width="{sw}" stroke-linecap="{cap}"{d}/>')
+
+    def path(self, d, stroke=None, fill="none", sw=6, **kw):
+        s = f' stroke="{stroke}" stroke-width="{sw}" stroke-linecap="round" stroke-linejoin="round"' if stroke else ""
+        extra = "".join(f' {k}="{v}"' for k, v in kw.items())
+        self.add(f'<path d="{d}" fill="{fill}"{s}{extra}/>')
+
+    def text(self, x, y, s, size, fill, family="Georgia, 'Times New Roman', serif",
+             weight="700", anchor="middle", spacing=None, style=""):
+        sp = f' letter-spacing="{spacing}"' if spacing else ""
+        st = f' font-style="{style}"' if style else ""
+        self.add(f'<text x="{x:.1f}" y="{y:.1f}" font-family="{family}" '
+                 f'font-size="{size}" font-weight="{weight}" fill="{fill}" '
+                 f'text-anchor="{anchor}"{sp}{st}>{s}</text>')
+
+    def arrowhead(self, x, y, ang, size, fill):
+        a = math.radians(ang)
+        p1 = (x, y)
+        p2 = (x - size * math.cos(a - 0.5), y - size * math.sin(a - 0.5))
+        p3 = (x - size * math.cos(a + 0.5), y - size * math.sin(a + 0.5))
+        self.path(f'M{p1[0]:.1f} {p1[1]:.1f} L{p2[0]:.1f} {p2[1]:.1f} '
+                  f'L{p3[0]:.1f} {p3[1]:.1f} Z', fill=fill)
+
+    def shadow(self, cx, cy, rx, ry=None, op=0.10):
+        ry = ry or rx * 0.28
+        self.add(f'<ellipse cx="{cx:.1f}" cy="{cy:.1f}" rx="{rx:.1f}" '
+                 f'ry="{ry:.1f}" fill="{self.p["ink"]}" opacity="{op}"/>')
+
+    def clip(self, x, y, w, h, r):
+        self._gid += 1
+        n = f"c{self._gid}"
+        self.defs.append(
+            f'<clipPath id="{n}"><rect x="{x:.1f}" y="{y:.1f}" width="{w:.1f}" '
+            f'height="{h:.1f}" rx="{r:.1f}"/></clipPath>')
+        return n
+
+    def render(self, label):
+        return (f'<svg xmlns="http://www.w3.org/2000/svg" width="{W}" height="{H}" '
+                f'viewBox="0 0 {W} {H}" role="img" aria-label="{label}">'
+                f'<defs>{"".join(self.defs)}</defs>{"".join(self.body)}</svg>')
+
+
+def save(slug, svg):
+    os.makedirs(OUT, exist_ok=True)
+    with open(os.path.join(OUT, slug + ".svg"), "w") as fh:
+        fh.write(svg)
+    print(f"wrote {slug}.svg ({len(svg)} bytes)")
+
+
+# =====================================================================
+# SCENES  (one per article)
+# =====================================================================
+
+def commit_line(c, y, xs, fill, node_r=16, sw=8):
+    c.line(xs[0], y, xs[-1], y, fill, sw=sw)
+    for x in xs:
+        c.circle(x, y, node_r, fill)
+
+
+def flags():
+    """On Using Flags to Represent Languages — a row of stylized flags."""
+    c = Cover("tech"); p = c.p
+    fw, fh, top = 210, 138, 280
+    xs = [175, 430, 685, 940]
+    basey = 620
+    for x in xs:
+        c.line(x + 8, top, x + 8, basey, p["ink"], sw=7)
+        c.circle(x + 8, top - 6, 12, p["ink"])
+        c.shadow(x + 8, basey + 6, 46, 12, 0.10)
+
+    def wave(x):  # a gentle flag bottom wave, as a clipped rounded rect
+        cid = c.clip(x, top, fw, fh, 14)
+        return cid
+
+    # 1: vertical tricolor
+    x = xs[0]; cid = wave(x)
+    c.add(f'<g clip-path="url(#{cid})">')
+    c.rect_raw(x, top, fw/3, fh, c.grad("#4f46e5", "#6366f1"))
+    c.rect_raw(x + fw/3, top, fw/3, fh, "#ffffff")
+    c.rect_raw(x + 2*fw/3, top, fw/3, fh, c.grad("#e11d48", "#fb7185"))
+    c.add("</g>")
+    # 2: rising sun
+    x = xs[1]; cid = wave(x)
+    c.add(f'<g clip-path="url(#{cid})">')
+    c.rect_raw(x, top, fw, fh, "#ffffff")
+    c.circle(x + fw/2, top + fh/2, 42, c.grad("#ef4444", "#f97316"))
+    c.add("</g>")
+    # 3: horizontal bands
+    x = xs[2]; cid = wave(x)
+    c.add(f'<g clip-path="url(#{cid})">')
+    c.rect_raw(x, top, fw, fh/3, c.grad("#0ea5e9", "#38bdf8"))
+    c.rect_raw(x, top + fh/3, fw, fh/3, "#ffffff")
+    c.rect_raw(x, top + 2*fh/3, fw, fh/3, c.grad("#059669", "#34d399"))
+    c.add("</g>")
+    # 4: diagonal cross
+    x = xs[3]; cid = wave(x)
+    c.add(f'<g clip-path="url(#{cid})">')
+    c.rect_raw(x, top, fw, fh, c.grad("#7c3aed", "#a78bfa"))
+    c.line(x, top, x + fw, top + fh, "#ffffff", sw=18, cap="butt")
+    c.line(x + fw, top, x, top + fh, "#fde68a", sw=18, cap="butt")
+    c.add("</g>")
+
+    c.text(600, 210, "one icon, every language", 40, p["ink"],
+           family="Georgia, serif", weight="700", style="italic")
+    c.text(600, 690, "hello · bonjour · こんにちは · hola", 30,
+           p["ink"], family="Georgia, serif", weight="500")
+    save("flags", c.render("A row of stylized national flags on poles representing languages"))
+
+
+def github_flow():
+    """GitHub Flow — master line, a feature branch merging back, deploy."""
+    c = Cover("tech"); p = c.p
+    y = 440
+    main = c.grad(p["a"], p["b"], 0)
+    c.line(140, y, 1060, y, main, sw=10)
+    # main commits
+    for x in [140, 300, 780, 940, 1060]:
+        c.circle(x, y, 18, main)
+    # feature branch up
+    br = c.grad(p["c"], p["d"], 0)
+    c.path(f"M300 {y} C 360 {y}, 380 300, 460 300 L 640 300 "
+           f"C 720 300, 740 {y}, 780 {y}", stroke=br, sw=10)
+    for x in [460, 560, 640]:
+        c.circle(x, 300, 16, br)
+    # deploy rocket / arrow + check near merge
+    c.circle(940, y - 150, 54, c.grad(p["d"], p["a"]))
+    c.path(f"M916 {y-150} l16 16 l34 -40", stroke="#ffffff", sw=10)
+    c.line(940, y - 96, 940, y - 40, p["ink"], sw=6, dash="2 12")
+    # small "deploy" arrow going up-right
+    c.text(600, 210, "ship it", 40, p["ink"], family="Georgia, serif",
+           weight="700", style="italic")
+    save("github-flow", c.render("A git branch flow with a feature branch merging into master and a deploy"))
+
+
+def reset():
+    """Reset Demystified — Git's three trees: HEAD, Index, Working."""
+    c = Cover("git"); p = c.p
+    labels = ["HEAD", "INDEX", "WORKING"]
+    cols = [c.grad(p["e"], "#a5b4fc"), c.grad(p["a"], p["f"]),
+            c.grad(p["c"], "#fb7185")]
+    xs = [170, 500, 830]
+    pw, ph, top = 200, 320, 240
+    for i, x in enumerate(xs):
+        c.shadow(x + pw/2, top + ph + 18, 120, 20, 0.10)
+        c.rrect(x, top, pw, ph, 22, "#ffffff", opacity="0.95")
+        c.rrect(x, top, pw, 56, 22, cols[i])
+        c.rrect(x, top + 34, pw, 22, 0, cols[i])
+        c.text(x + pw/2, top + 38, labels[i], 26, "#ffffff",
+               family="'Courier New', monospace", weight="700", spacing="1")
+        # little commit stack
+        for j in range(3):
+            cy = top + 130 + j * 60
+            c.circle(x + pw/2, cy, 18, cols[i])
+            if j < 2:
+                c.line(x + pw/2, cy + 18, x + pw/2, cy + 42, cols[i], sw=6)
+    # arrows between panels (reset moves the trees)
+    ay = top + ph/2
+    for x0, x1 in [(xs[0] + pw, xs[1]), (xs[1] + pw, xs[2])]:
+        c.line(x0 + 14, ay, x1 - 26, ay, p["ink"], sw=7)
+        c.arrowhead(x1 - 14, ay, 0, 26, p["ink"])
+    c.text(600, 160, "the three trees", 42, p["ink"], family="Georgia, serif",
+           weight="700", style="italic")
+    save("reset", c.render("Git's three trees: HEAD, index and working directory with reset arrows"))
+
+
+def notes():
+    """Note to Self — a commit with a sticky note attached."""
+    c = Cover("git"); p = c.p
+    y = 430
+    fill = c.grad(p["a"], p["f"], 0)
+    c.line(180, y, 1020, y, fill, sw=10)
+    for x in [180, 400, 820, 1020]:
+        c.circle(x, y, 20, fill)
+    # highlight middle node
+    c.circle(600, y, 30, c.grad(p["c"], "#fb7185"))
+    c.circle(600, y, 30, "none", stroke="#ffffff", **{"stroke-width": "6"})
+    # sticky note attached
+    nx, ny, nw, nh = 470, 150, 260, 210
+    c.line(600, y - 30, nx + nw/2, ny + nh, p["ink"], sw=5, dash="2 10")
+    g = f'<g transform="rotate(-6 {nx+nw/2} {ny+nh/2})">'
+    c.add(g)
+    c.shadow(nx + nw/2 + 10, ny + nh + 6, 120, 18, 0.10)
+    c.rrect(nx, ny, nw, nh, 14, c.grad("#fde68a", "#fcd34d"))
+    c.rrect(nx, ny, nw, 40, 14, c.grad("#fbbf24", "#f59e0b"))
+    for i in range(3):
+        c.line(nx + 26, ny + 90 + i * 38, nx + nw - 26, ny + 90 + i * 38,
+               p["ink"], sw=6)
+    c.add("</g>")
+    c.text(600, 640, "git notes", 40, p["ink"],
+           family="'Courier New', monospace", weight="700")
+    save("notes", c.render("A commit node on a graph with a yellow sticky note attached"))
+
+
+def pro_git_zh():
+    """Pro Git 简体中文版 — a book with a branch motif and Chinese title."""
+    c = Cover("git"); p = c.p
+    bx, by, bw, bh = 430, 210, 340, 420
+    c.shadow(bx + bw/2, by + bh + 20, 200, 26, 0.12)
+    # book cover
+    c.rrect(bx, by, bw, bh, 18, c.grad(p["b"], p["a"], 120))
+    c.rrect(bx, by, 26, bh, 8, p["ink"], opacity="0.25")  # spine
+    # branch motif on cover
+    gy = by + 150
+    c.line(bx + 80, gy, bx + 80, gy + 150, "#ffffff", sw=8)
+    c.circle(bx + 80, gy, 16, "#ffffff")
+    c.path(f"M{bx+80} {gy+70} C {bx+80} {gy+110}, {bx+220} {gy+70}, {bx+220} {gy+110}",
+           stroke="#ffffff", sw=8)
+    c.circle(bx + 220, gy + 116, 16, "#fde68a")
+    c.circle(bx + 80, gy + 150, 16, "#ffffff")
+    # titles
+    c.text(bx + bw/2 + 12, by + 90, "Pro Git", 46, "#ffffff",
+           family="Georgia, serif", weight="700")
+    c.text(bx + bw/2 + 12, by + bh - 40, "简体中文版", 44, "#fde68a",
+           family="'PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif",
+           weight="700")
+    save("pro-git-zh", c.render("The Pro Git book cover with a branch motif and a Simplified Chinese title"))
+
+
+def pro_git_kindle():
+    """Pro Git on Kindle — an e-reader showing the book."""
+    c = Cover("git"); p = c.p
+    dx, dy, dw, dh = 420, 180, 360, 480
+    c.shadow(dx + dw/2, dy + dh + 18, 210, 26, 0.12)
+    c.rrect(dx, dy, dw, dh, 30, c.grad("#3f3f46", "#18181b"))  # device
+    sx, sy, sw2, sh = dx + 30, dy + 40, dw - 60, dh - 110
+    c.rrect(sx, sy, sw2, sh, 8, "#f8fafc")  # screen (e-ink)
+    # book content on screen
+    c.text(sx + sw2/2, sy + 80, "Pro Git", 40, p["ink"],
+           family="Georgia, serif", weight="700")
+    # branch motif
+    gy = sy + 150
+    c.line(sx + sw2/2, gy, sx + sw2/2, gy + 120, p["a"], sw=7)
+    c.circle(sx + sw2/2, gy, 13, p["a"])
+    c.path(f"M{sx+sw2/2} {gy+50} C {sx+sw2/2} {gy+90}, {sx+sw2/2+90} {gy+50}, {sx+sw2/2+90} {gy+90}",
+           stroke=p["c"], sw=7)
+    c.circle(sx + sw2/2 + 90, gy + 96, 13, p["c"])
+    c.circle(sx + sw2/2, gy + 120, 13, p["a"])
+    for i in range(3):
+        c.line(sx + 40, sy + sh - 90 + i*26, sx + sw2 - 40, sy + sh - 90 + i*26,
+               p["ink"], sw=5, dash="2 10")
+    # home button
+    c.circle(dx + dw/2, dy + dh - 34, 20, "none", stroke="#a1a1aa",
+             **{"stroke-width": "5"})
+    save("pro-git-on-kindle", c.render("An e-reader device showing the Pro Git book on its screen"))
+
+
+def blog_over():
+    """My New Blog — a fresh page with a sunrise and a sparkle."""
+    c = Cover("life"); p = c.p
+    # sunrise arc
+    c.circle(600, 470, 210, c.rgrad("#fef3c7", p["bg"][1]), opacity="0.6")
+    for i, r in enumerate([150, 200, 250]):
+        c.path(f"M{600-r} 470 A {r} {r} 0 0 1 {600+r} 470",
+               stroke=p["d"], sw=6, opacity=str(0.5 - i*0.12))
+    # old faded page behind
+    c.rrect(430, 250, 300, 380, 16, "#ffffff", opacity="0.45",
+            transform="rotate(-8 580 440)")
+    # new page front
+    px, py, pw, ph = 470, 220, 300, 400
+    c.shadow(px + pw/2, py + ph + 14, 150, 20, 0.10)
+    c.rrect(px, py, pw, ph, 16, "#ffffff")
+    c.rrect(px, py, pw, 60, 16, c.grad(p["a"], p["c"]))
+    c.rrect(px, py + 40, pw, 20, 0, c.grad(p["a"], p["c"]))
+    for i in range(5):
+        w = pw - 60 if i % 2 == 0 else pw - 130
+        c.line(px + 30, py + 130 + i*52, px + 30 + w, py + 130 + i*52,
+               p["ink"], sw=7, dash="2 12")
+    # sparkle / new badge
+    c.text(770, 250, "✦", 60, p["d"], family="sans-serif")
+    save("blog-over", c.render("A fresh blank page with a sunrise, marking a new blog"))
+
+
+def environment():
+    """Git Loves the Environment — a terminal sprouting a plant (env pun)."""
+    c = Cover("git"); p = c.p
+    tx, ty, tw, th = 300, 320, 600, 320
+    c.shadow(tx + tw/2, ty + th + 16, 300, 26, 0.12)
+    c.rrect(tx, ty, tw, th, 20, c.grad("#27272a", "#18181b"))
+    c.rrect(tx, ty, tw, 48, 20, "#3f3f46")
+    c.rrect(tx, ty + 26, tw, 22, 0, "#3f3f46")
+    for i, col in enumerate(["#ef4444", "#f59e0b", "#22c55e"]):
+        c.circle(tx + 34 + i*34, ty + 24, 10, col)
+    # env var lines
+    envs = ["$ export GIT_AUTHOR_NAME", "$ export GIT_DIR=.git",
+            "$ export GIT_EDITOR=vim"]
+    for i, s in enumerate(envs):
+        c.text(tx + 34, ty + 120 + i*58, s, 26,
+               "#86efac" if i == 0 else "#e4e4e7",
+               family="'Courier New', monospace", weight="400", anchor="start")
+    # plant growing out of the top
+    stem_x = tx + tw - 150
+    c.path(f"M{stem_x} {ty} C {stem_x} {ty-90}, {stem_x-30} {ty-120}, {stem_x} {ty-180}",
+           stroke=p["b"], sw=10)
+    leaf = c.grad("#22c55e", "#16a34a")
+    c.path(f"M{stem_x} {ty-70} C {stem_x-70} {ty-90}, {stem_x-80} {ty-150}, {stem_x-20} {ty-140} "
+           f"C {stem_x-30} {ty-100}, {stem_x} {ty-80}, {stem_x} {ty-70} Z", fill=leaf)
+    c.path(f"M{stem_x} {ty-110} C {stem_x+70} {ty-130}, {stem_x+80} {ty-190}, {stem_x+20} {ty-180} "
+           f"C {stem_x+30} {ty-140}, {stem_x} {ty-120}, {stem_x} {ty-110} Z", fill=leaf)
+    c.circle(stem_x, ty - 180, 22, c.grad(p["d"], p["a"]))
+    save("environment", c.render("A terminal window showing Git environment variables with a plant growing out"))
+
+
+def replace():
+    """Replace Kicker — swapping one commit object for another."""
+    c = Cover("git"); p = c.p
+    y = 400
+    base = c.grad(p["a"], p["f"], 0)
+    c.line(180, y, 1020, y, base, sw=9)
+    for x in [180, 360, 840, 1020]:
+        c.circle(x, y, 18, base)
+    # old node (dashed, faded) up top; new node solid below, swap arrows
+    old_c = 600
+    c.ring(old_c, y - 150, 46, p["c"], sw=8, **{"stroke-dasharray": "6 12", "opacity": "0.7"})
+    c.text(old_c, y - 138, "old", 26, p["c"], family="Georgia, serif",
+           weight="700", style="italic")
+    c.circle(old_c, y, 46, c.grad(p["e"], "#a5b4fc"))
+    c.text(old_c, y + 10, "new", 26, "#ffffff", family="Georgia, serif", weight="700")
+    # swap arrows (curved)
+    c.path(f"M{old_c-70} {y-120} C {old_c-140} {y-70}, {old_c-140} {y-30}, {old_c-70} {y-10}",
+           stroke=p["ink"], sw=6)
+    c.arrowhead(old_c - 70, y - 10, 20, 24, p["ink"])
+    c.path(f"M{old_c+70} {y-10} C {old_c+140} {y-30}, {old_c+140} {y-70}, {old_c+70} {y-120}",
+           stroke=p["ink"], sw=6)
+    c.arrowhead(old_c + 70, y - 120, 200, 24, p["ink"])
+    c.text(600, 650, "git replace", 40, p["ink"],
+           family="'Courier New', monospace", weight="700")
+    save("replace", c.render("Swapping one commit object for another with git replace"))
+
+
+def bundles():
+    """Git's Little Bundle of Joy — a wrapped parcel holding a git graph."""
+    c = Cover("git"); p = c.p
+    bx, by, bw, bh = 400, 250, 400, 320
+    c.shadow(bx + bw/2, by + bh + 16, 230, 26, 0.12)
+    c.rrect(bx, by, bw, bh, 22, c.grad(p["f"], p["a"], 120))
+    # ribbon
+    c.rrect(bx + bw/2 - 26, by, 52, bh, 0, c.grad(p["c"], "#fb7185"))
+    c.rrect(bx, by + bh/2 - 26, bw, 52, 0, c.grad(p["c"], "#fb7185"))
+    # bow
+    c.circle(bx + bw/2, by + bh/2, 30, c.grad(p["c"], "#fb7185"))
+    c.path(f"M{bx+bw/2} {by+bh/2} l-70 -34 l0 68 Z", fill=c.grad(p["c"], "#fb7185"))
+    c.path(f"M{bx+bw/2} {by+bh/2} l70 -34 l0 68 Z", fill=c.grad(p["c"], "#fb7185"))
+    # tiny git graph "shipping label" on parcel
+    lx, ly = bx + 40, by + 54
+    c.rrect(lx, ly, 120, 90, 10, "#ffffff", opacity="0.92")
+    c.line(lx + 24, ly + 45, lx + 96, ly + 45, p["a"], sw=6)
+    for gx in [lx + 24, lx + 60, lx + 96]:
+        c.circle(gx, ly + 45, 10, p["a"])
+    # motion / sneakernet dashes
+    for i in range(3):
+        c.line(bx - 40 - i*44, by + bh/2 - 20 + i*20, bx - 90 - i*44,
+               by + bh/2 - 20 + i*20, p["ink"], sw=7, dash="2 14")
+    c.text(600, 660, "git bundle", 40, p["ink"],
+           family="'Courier New', monospace", weight="700")
+    save("bundles", c.render("A wrapped parcel containing a git graph, moved by sneakernet"))
+
+
+def rerere():
+    """Rerere — record & replay a conflict resolution."""
+    c = Cover("git"); p = c.p
+    cx, cy = 560, 400
+    # two branches colliding into a conflict burst
+    left = c.grad(p["e"], "#a5b4fc", 0)
+    right = c.grad(p["c"], "#fb7185", 180)
+    c.path(f"M200 250 C 360 250, 400 {cy}, {cx-60} {cy}", stroke=left, sw=10)
+    c.path(f"M200 {cy+150} C 360 {cy+150}, 400 {cy}, {cx-60} {cy}", stroke=right, sw=10)
+    c.circle(200, 250, 18, left); c.circle(200, cy + 150, 18, right)
+    # conflict burst (star)
+    pts = []
+    for i in range(10):
+        ang = math.pi / 5 * i - math.pi / 2
+        r = 66 if i % 2 == 0 else 30
+        pts.append(f"{cx + r*math.cos(ang):.1f} {cy + r*math.sin(ang):.1f}")
+    c.path("M" + " L".join(pts) + " Z", fill=c.grad(p["d"], p["a"]))
+    c.text(cx, cy + 12, "!", 44, "#ffffff", family="Georgia, serif", weight="800")
+    # circular replay arrow around it
+    rr = 120
+    c.path(f"M{cx+rr} {cy} A {rr} {rr} 0 1 1 {cx} {cy-rr}",
+           stroke=p["ink"], sw=7)
+    c.arrowhead(cx, cy - rr, 180, 26, p["ink"])
+    # "memory" chip to the right (remembered resolution)
+    mx, my = 900, 340
+    c.rrect(mx, my, 120, 120, 18, c.grad(p["b"], p["a"]))
+    for i in range(3):
+        c.line(mx - 16, my + 28 + i*32, mx, my + 28 + i*32, p["ink"], sw=6)
+        c.line(mx + 120, my + 28 + i*32, mx + 136, my + 28 + i*32, p["ink"], sw=6)
+    c.text(mx + 60, my + 74, "↻", 56, "#ffffff", family="sans-serif")
+    c.line(cx + rr + 10, cy, mx - 24, my + 60, p["ink"], sw=6, dash="2 12")
+    save("rerere", c.render("Recording and replaying a git conflict resolution"))
+
+
+def smart_http():
+    """Smart HTTP Transport — fast data over http between two nodes."""
+    c = Cover("git"); p = c.p
+    y = 400
+    # two endpoints
+    for x, lbl in [(210, ""), (990, "")]:
+        c.shadow(x, y + 120, 90, 22, 0.10)
+    # server (left) and client (right) as rounded devices
+    c.rrect(140, y - 90, 150, 180, 20, c.grad(p["b"], p["a"], 120))
+    c.rrect(910, y - 70, 160, 140, 20, c.grad(p["e"], "#a5b4fc", 120))
+    # git repo mark on server
+    c.circle(215, y - 20, 14, "#ffffff")
+    c.line(215, y - 20, 215, y + 40, "#ffffff", sw=7)
+    c.circle(215, y + 46, 14, "#ffffff")
+    c.path(f"M215 {y+6} C215 {y+26}, 255 {y+6}, 255 {y+30}", stroke="#ffffff", sw=7)
+    c.circle(255, y + 34, 12, "#fde68a")
+    # wire
+    c.line(300, y, 900, y, p["ink"], sw=6)
+    # http pill + lightning + speed dashes
+    c.pill(520, y - 34, 160, 68, c.grad(p["d"], p["a"]))
+    c.text(600, y + 12, "http://", 30, "#ffffff",
+           family="'Courier New', monospace", weight="700")
+    c.path(f"M470 {y-70} l-30 46 l24 0 l-16 40 l44 -56 l-26 0 Z",
+           fill=c.grad("#fde68a", p["d"]))
+    for i in range(4):
+        xx = 720 + i*40
+        c.line(xx, y - 6 - i*2, xx + 26, y - 6 - i*2, p["c"], sw=6)
+    save("smart-http", c.render("Fast git data transfer over HTTP between a server and client"))
+
+
+def undoing_merges():
+    """Undoing Merges — a merge point being reversed with an undo arc."""
+    c = Cover("git"); p = c.p
+    y = 430
+    main = c.grad(p["a"], p["f"], 0)
+    feat = c.grad(p["e"], "#a5b4fc", 0)
+    c.line(180, y, 1020, y, main, sw=10)
+    for x in [180, 360, 820, 1020]:
+        c.circle(x, y, 18, main)
+    # feature branch merging in at x=600
+    c.path(f"M360 {y} C 460 {y}, 470 280, 560 280 L 620 280 "
+           f"C 700 280, 520 {y}, 600 {y}", stroke=feat, sw=10)
+    for x in [560, 620]:
+        c.circle(x, 280, 16, feat)
+    # merge node highlighted
+    c.circle(600, y, 26, c.grad(p["c"], "#fb7185"))
+    # big counter-clockwise undo arc over the merge
+    cx, cy, r = 600, y, 150
+    c.path(f"M{cx+r} {cy-6} A {r} {r} 0 1 0 {cx-r*0.2:.0f} {cy-r+20:.0f}",
+           stroke=p["ink"], sw=8)
+    c.arrowhead(cx - r*0.2, cy - r + 20, 250, 30, p["ink"])
+    c.text(600, 690, "git reset --hard HEAD^", 34, p["ink"],
+           family="'Courier New', monospace", weight="700")
+    save("undoing-merges", c.render("A git merge point being reversed with an undo arc"))
+
+
+def this_year():
+    """This Year — a 2009 calendar, quiet year-end reflection."""
+    c = Cover("life"); p = c.p
+    cx, cy, cw, ch = 420, 250, 360, 360
+    c.shadow(cx + cw/2, cy + ch + 16, 200, 24, 0.10)
+    c.rrect(cx, cy, cw, ch, 22, "#ffffff")
+    c.rrect(cx, cy, cw, 90, 22, c.grad(p["a"], p["c"]))
+    c.rrect(cx, cy + 60, cw, 30, 0, c.grad(p["a"], p["c"]))
+    # binder rings
+    for rx in [cx + 90, cx + cw - 90]:
+        c.line(rx, cy - 24, rx, cy + 26, p["ink"], sw=10)
+        c.circle(rx, cy - 24, 10, p["ink"])
+    c.text(cx + cw/2, cy + 58, "2009", 46, "#ffffff",
+           family="Georgia, serif", weight="800", spacing="4")
+    # sparse marked days grid
+    for r in range(3):
+        for col in range(5):
+            gx = cx + 60 + col*60
+            gy = cy + 150 + r*70
+            marked = (r*5 + col) in (2, 9, 13)
+            c.circle(gx, gy, 20, c.grad(p["c"], p["b"]) if marked else "#e2e8f0")
+    # crescent moon / star for reflective year-end
+    c.circle(940, 210, 60, c.grad("#fcd34d", p["d"]))
+    c.circle(968, 194, 52, p["bg"][0])
+    c.text(300, 200, "★", 40, p["d"], family="sans-serif")
+    save("this-year", c.render("A 2009 calendar with a crescent moon for a quiet year-end reflection"))
+
+
+def translate_this():
+    """Translate This — one speech bubble forking into many languages."""
+    c = Cover("git"); p = c.p
+    # source bubble
+    sx, sy = 240, 400
+    c.circle(sx, sy, 6, p["ink"])
+    src = c.grad(p["a"], p["f"])
+    c.rrect(sx - 30, sy - 70, 200, 140, 26, src)
+    c.path(f"M{sx+40} {sy+60} l0 60 l50 -50 Z", fill=src)
+    c.text(sx + 70, sy + 12, "git", 40, "#ffffff",
+           family="Georgia, serif", weight="700")
+    # fork lines to translated bubbles
+    targets = [
+        (760, 210, "あ", c.grad(p["c"], "#fb7185")),
+        (860, 400, "Я", c.grad(p["e"], "#a5b4fc")),
+        (760, 590, "文", c.grad(p["b"], p["a"])),
+    ]
+    for tx, ty, glyph, g in targets:
+        c.path(f"M{sx+180} {sy} C {sx+300} {sy}, {tx-160} {ty}, {tx-30} {ty}",
+               stroke=p["ink"], sw=6)
+        c.rrect(tx - 30, ty - 60, 170, 120, 24, g)
+        c.path(f"M{tx-10} {ty+50} l0 50 l44 -42 Z", fill=g)
+        c.text(tx + 55, ty + 16, glyph, 46, "#ffffff",
+               family="sans-serif", weight="700")
+    save("translate-this", c.render("One speech bubble forking into bubbles of different languages"))
+
+
+def gory_details():
+    """The Gory Details — a launch-day traffic spike with a book."""
+    c = Cover("git"); p = c.p
+    ax, ay, aw, ah = 200, 620, 820, 380
+    # axes
+    c.line(ax, ay, ax + aw, ay, p["ink"], sw=6)
+    c.line(ax, ay, ax, ay - ah + 40, p["ink"], sw=6)
+    # spiking area chart
+    pts = [(ax, ay), (ax + 120, ay - 60), (ax + 260, ay - 90),
+           (ax + 420, ay - 150), (ax + 560, ay - 120), (ax + 700, ay - 300),
+           (ax + aw, ay - 250)]
+    d = f"M{pts[0][0]} {pts[0][1]} " + " ".join(f"L{x} {y}" for x, y in pts[1:])
+    area = c.grad(p["a"], p["f"], 90)
+    c.path(d + f" L{ax+aw} {ay} L{ax} {ay} Z", fill=area, opacity="0.35")
+    c.path(d, stroke=c.grad(p["c"], p["a"], 0), sw=8)
+    for x, y in pts:
+        c.circle(x, y, 9, p["a"])
+    # 10k marker at the peak
+    px, py = ax + 700, ay - 300
+    c.pill(px - 60, py - 78, 150, 56, c.grad(p["c"], "#fb7185"))
+    c.text(px + 15, py - 40, "10,000", 30, "#ffffff",
+           family="Georgia, serif", weight="800")
+    c.line(px, py - 22, px, py - 10, p["ink"], sw=5)
+    # book at origin
+    c.rrect(ax - 70, ay - 90, 90, 120, 8, c.grad(p["b"], p["a"], 120))
+    c.line(ax - 25, ay - 90, ax - 25, ay + 30, "#ffffff", sw=4, dash="2 8")
+    save("the-gory-details", c.render("A launch-day traffic spike chart peaking at ten thousand visitors"))
+
+
+def do_what_you_want():
+    """Do What You Want — a signpost of diverging paths, one sparked."""
+    c = Cover("life"); p = c.p
+    # ground + post
+    px = 600
+    c.shadow(px, 640, 150, 24, 0.10)
+    c.rrect(px - 12, 240, 24, 400, 10, c.grad("#a16207", "#ca8a04"))
+    # direction signs
+    signs = [
+        (250, c.grad(p["a"], p["c"]), False, 1),
+        (330, c.grad(p["f"], p["b"]), True, -1),
+        (410, c.grad(p["d"], "#fcd34d"), False, 1),
+        (490, c.grad(p["e"], "#f9a8d4"), True, -1),
+    ]
+    for y, g, left, dirn in signs:
+        w = 240
+        if left:
+            x = px - 12 - w
+            c.path(f"M{x} {y} L{x+w} {y} L{x+w} {y+56} L{x} {y+56} "
+                   f"L{x-40} {y+28} Z", fill=g)
+        else:
+            x = px + 12
+            c.path(f"M{x} {y} L{x+w} {y} L{x+w+40} {y+28} L{x+w} {y+56} "
+                   f"L{x} {y+56} Z", fill=g)
+        # dashed line on sign
+        cxs = x + 30 if not left else x + 20
+        c.line(cxs, y + 28, cxs + w - 60, y + 28, "#ffffff", sw=7, dash="2 14")
+    # a spark / heart on the chosen (top) sign
+    c.text(px + 300, 232, "✦", 58, p["d"], family="sans-serif")
+    # sun
+    c.circle(230, 210, 66, c.grad("#fcd34d", p["d"]))
+    save("do-what-you-want", c.render("A signpost with diverging paths, one marked with a spark"))
+
+
+SCENES = [flags, github_flow, reset, notes, pro_git_zh, pro_git_kindle,
+          blog_over, environment, replace, bundles, rerere, smart_http,
+          undoing_merges, this_year, translate_this, gory_details,
+          do_what_you_want]
+
+if __name__ == "__main__":
+    for s in SCENES:
+        s()
+    print("done:", len(SCENES), "covers")

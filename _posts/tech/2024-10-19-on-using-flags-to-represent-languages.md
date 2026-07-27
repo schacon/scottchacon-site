@@ -1,6 +1,8 @@
 ---
 layout: post
 title: "On Using Flags to Represent Languages 🇯🇵 🇬🇧 🇫🇷"
+image: /assets/images/covers/flags.svg
+excerpt: "Why national flags remain the most universally recognizable way to represent languages in an interface — and where they fall short."
 ---
 
 <figure>

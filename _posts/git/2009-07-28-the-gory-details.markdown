@@ -1,6 +1,8 @@
 ---
 layout: post
 title: The Gory Details
+image: /assets/images/covers/the-gory-details.svg
+excerpt: "Overwhelmed by the response to Pro Git's launch — 10,000 visitors on day one — plus notes on what comes next."
 ---
 First of all, thanks to everyone for spreading the word about this book and this site - I got _way_ more attention on the first day live than I expected I might.  More than 10,000 individuals visited the site in the first 24 hours of it being online for over 38k pageviews.  We got on Hacker News, Reddit and Delicious Popular aggregators, not to mention the Twitterverse.
 

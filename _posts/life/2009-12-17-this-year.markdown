@@ -1,6 +1,8 @@
 ---
 layout: post
 title: This Year
+image: /assets/images/covers/this-year.svg
+excerpt: "A year-end reflection, after mostly stepping away from blogging through 2009."
 ---
 
 So I basically stopped blogging this year, more or less since I started

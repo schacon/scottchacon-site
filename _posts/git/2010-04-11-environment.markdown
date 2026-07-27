@@ -1,6 +1,8 @@
 ---
 layout: post
 title: Git Loves the Environment
+image: /assets/images/covers/environment.svg
+excerpt: "A tour of the environment variables Git respects, and how they can quietly shape your workflow."
 ---
 
 One of the things that people that come from the Subversion world tend

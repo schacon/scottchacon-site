@@ -1,6 +1,8 @@
 ---
 layout: post
 title: Undoing Merges
+image: /assets/images/covers/undoing-merges.svg
+excerpt: "Kicking off a series of Git tips with the tricky business of undoing a merge that's already been committed."
 ---
 
 I would like to start writing more here about general Git tips, tricks and

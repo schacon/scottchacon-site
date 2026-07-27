@@ -1,6 +1,8 @@
 ---
 layout: post
 title: GitHub Flow
+image: /assets/images/covers/github-flow.svg
+excerpt: "Why we don't use git-flow at GitHub, and the simpler branch-and-deploy workflow we use instead."
 ---
 
 ## Issues with git-flow ##

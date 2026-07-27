@@ -1,6 +1,8 @@
 ---
 layout: post
 title: Replace Kicker
+image: /assets/images/covers/replace.svg
+excerpt: "Another hidden Git feature: using git replace to transparently swap one object in for another."
 ---
 
 In another of my series of "seemingly hidden Git features", I would like to

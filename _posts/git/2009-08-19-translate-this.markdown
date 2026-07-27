@@ -1,6 +1,8 @@
 ---
 layout: post
 title: Translate This
+image: /assets/images/covers/translate-this.svg
+excerpt: "Git makes forking and contributing easy — a call to help translate the Pro Git book into more languages."
 ---
 
 One of the things I love about Git is how easy it is to fork and contribute.

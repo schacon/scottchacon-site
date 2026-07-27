@@ -1,6 +1,8 @@
 ---
 layout: post
 title: Git's Little Bundle of Joy
+image: /assets/images/covers/bundles.svg
+excerpt: "Moving commits between repositories with no network at all, by packaging a push into a git bundle file."
 ---
 
 The scenario is thus: you need to sneakernet a `git push`.  Maybe your network
