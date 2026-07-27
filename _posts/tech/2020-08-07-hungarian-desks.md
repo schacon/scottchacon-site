@@ -7,7 +7,7 @@ excerpt: "How we replaced our office desk lottery with a weighted-bet form and t
 
 In nearly any company, but especially tech companies, how does one handle seating arrangements? Often this is done by department, but for smaller companies without so much space — and especially now with more flexible work-from-home and partial remote policies — a more fluid use of desk space is often preferable.
 
-I wrote a little tool to solve this properly, which I've put up on GitHub as [schacon/hungarian-desks](https://github.com/schacon/hungarian-desks). Here's the thinking behind it.
+A while ago, I wrote a little tool to solve this in an interesting way, which I've put up on GitHub as [schacon/hungarian-desks](https://github.com/schacon/hungarian-desks). Here's the thinking behind it.
 
 ## The Problem with Seating
 
@@ -44,38 +44,10 @@ Now we essentially have the data to do a cost matrix that we can treat as a clas
   <figcaption>Treating people and desks as a weighted bipartite graph, the Hungarian algorithm picks exactly one desk per person to maximize <em>total</em> happiness — here Ada gives up her own top pick (desk A, worth 0.90 to her) so Cleo can take it, because that trade makes the whole team happier.</figcaption>
 </figure>
 
-## The Airtable Solution
+## The Data and Code
 
-Now we just need everyone in the company to fill out a form telling us their top choices and bets, so we can calculate the optimal assignments. We decided to try the easiest route, which is to have everyone fill out an Airtable form, which gives us a nice simple database of all the users and their choices that is easily API accessible. Then we wrote a script to pull those choices down, do the math, make the assignments and upload the assignments (as well as the calculated "happiness" score for each user).
+Now we just need everyone in the company to fill out a form telling us their top choices and bets, so we can calculate the optimal assignments.
 
-## Run it Yourself
-
-To run this, you will need an Airtable base with two tables.
-
-The first is a table named "Desks" with one mandatory field named "Name" that has the names of the assignable desks.
-
-The second is a table named "Choices" that has the following fields:
-
-* Email
-* First Choice
-* First Choice Weight
-* Second Choice
-* Second Choice Weight
-* Third Choice
-* Third Choice Weight
-* Fourth Choice
-* Fourth Choice Weight
-* Result Desk
-* Result Score
-
-The "[Cardinal] Choice" fields should be a link field to the Desks table, as should the "Result Desk" field.
-
-Then you can create a form view, share it with the company and when you have all your results, you can run:
-
-```
-$ AIRTABLE_BASE_KEY=[base-key] AIRTABLE_KEY=[api-key] ruby seating.rb
-```
-
-This will pull down all your choices, calculate the "costs" for each choice, determine the assignments and upload the desk assignment result to the "Result Desk" field, and the final score for that user into "Result Score". If you average the score field, you should get a good idea of how happy your team will be as a whole, on a scale from 0 to 1, `1.0` meaning everyone got their top choice.
+We decided to try the easiest route, which is to have everyone fill out an Airtable form, which gives us a nice simple database of all the users and their choices that is easily API accessible. Then we wrote a script to pull those choices down, do the math, make the assignments and upload the assignments (as well as the calculated "happiness" score for each user).
 
 The code is on GitHub at [schacon/hungarian-desks](https://github.com/schacon/hungarian-desks) if you'd like to try it or adapt it for your own office.
