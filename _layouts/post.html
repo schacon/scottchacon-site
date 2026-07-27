@@ -118,10 +118,15 @@
             </div>
           </article>
           <aside id="toc-wrap" class="hidden lg:block flex-none w-60">
-            <nav class="sticky top-12">
-              <div class="text-xs font-semibold uppercase tracking-widest text-zinc-400 mb-3">On this page</div>
-              <div class="toc" id="toc"></div>
-            </nav>
+            <div class="sticky top-12">
+              {% if page.image %}
+              <img src="{{ page.image | relative_url }}" alt="" class="w-full rounded-xl mb-6 ring-1 ring-zinc-900/5 dark:ring-white/10">
+              {% endif %}
+              <nav id="toc-nav">
+                <div class="text-xs font-semibold uppercase tracking-widest text-zinc-400 mb-3">On this page</div>
+                <div class="toc" id="toc"></div>
+              </nav>
+            </div>
           </aside>
         </div>
       </div>
@@ -135,7 +140,13 @@
   var wrap = document.getElementById('toc-wrap');
   if (!content || !toc) { return; }
   var hs = Array.prototype.slice.call(content.querySelectorAll('h2, h3'));
-  if (hs.length < 2) { if (wrap) { wrap.style.display = 'none'; } return; }
+  if (hs.length < 2) {
+    var nav = document.getElementById('toc-nav');
+    if (nav) { nav.style.display = 'none'; }
+    // No TOC and no cover image → drop the whole sidebar rail.
+    if (wrap && !wrap.querySelector('img')) { wrap.style.display = 'none'; }
+    return;
+  }
 
   var links = {};
   hs.forEach(function (h) {
