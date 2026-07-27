@@ -170,7 +170,7 @@ def commit_line(c, y, xs, fill, node_r=16, sw=8):
 
 def flags():
     """On Using Flags to Represent Languages — a row of stylized flags."""
-    c = Cover("tech"); p = c.p
+    c = Cover("lang"); p = c.p
     fw, fh, top = 210, 138, 280
     xs = [175, 430, 685, 940]
     basey = 620
