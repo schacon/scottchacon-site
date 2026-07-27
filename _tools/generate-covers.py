@@ -22,6 +22,9 @@ PAL = {
     "life": dict(bg=("#ecfdf5", "#cdf4e2"), ink="#064e3b",
                  a="#0d9488", b="#059669", c="#10b981", d="#f59e0b",
                  e="#ec4899", f="#0ea5e9"),
+    "lang": dict(bg=("#fdf2f8", "#fbe2f0"), ink="#831843",
+                 a="#ec4899", b="#db2777", c="#a855f7", d="#f59e0b",
+                 e="#8b5cf6", f="#f472b6"),
 }
 
 
@@ -671,10 +674,143 @@ def do_what_you_want():
     save("do-what-you-want", c.render("A signpost with diverging paths, one marked with a spark"))
 
 
+def mit_language():
+    """MIT adults learn language — accuracy curves rising to a native line."""
+    c = Cover("lang"); p = c.p
+    ax, ay, aw, ah = 190, 630, 840, 420
+    # axes
+    c.line(ax, ay, ax + aw, ay, p["ink"], sw=6)
+    c.line(ax, ay, ax, ay - ah + 30, p["ink"], sw=6)
+    # "native" threshold line (dashed) near the top
+    ny = ay - ah + 90
+    c.line(ax, ny, ax + aw, ny, p["b"], sw=4, dash="2 12")
+    c.text(ax + aw - 6, ny - 16, "native", 26, p["b"], anchor="end",
+           family="Georgia, serif", weight="700", style="italic")
+    # three learning curves (start ages) rising toward the line
+    curves = [
+        (c.grad("#ef4444", "#f97316"), 0),      # started young
+        (c.grad(p["d"], "#fcd34d"), 34),
+        (c.grad(p["a"], p["c"], 0), 74),        # started as adult (20+)
+    ]
+    for g, off in curves:
+        x0, y0 = ax, ay - 40 - off * 0.2
+        d = (f"M{x0} {y0} "
+             f"C {ax+220} {ny+70+off}, {ax+380} {ny+30+off}, {ax+540} {ny+18+off} "
+             f"S {ax+760} {ny+8+off}, {ax+aw} {ny+6+off}")
+        c.path(d, stroke=g, sw=9)
+        c.circle(ax + aw, ny + 6 + off, 12, g)
+    # a couple of scatter dots in native range for the adult curve
+    for dx in [520, 640, 760]:
+        c.circle(ax + dx, ny - 8, 9, c.grad(p["a"], p["c"], 0))
+    c.text(600, 150, "adults get there too", 40, p["ink"],
+           family="Georgia, serif", weight="700", style="italic")
+    save("mit-adults-learn-language",
+         c.render("Language-accuracy curves for different starting ages rising toward a native line"))
+
+
+def github_cs():
+    """Tips from GitHub: Customer Service — a chat bubble with a heart + star."""
+    c = Cover("tech"); p = c.p
+    # main support chat bubble
+    bx, by, bw, bh = 300, 250, 460, 300
+    c.shadow(bx + bw/2, by + bh + 40, 220, 26, 0.12)
+    c.rrect(bx, by, bw, bh, 40, c.grad(p["a"], p["f"], 120))
+    c.path(f"M{bx+120} {by+bh} l0 90 l90 -90 Z", fill=c.grad(p["a"], p["f"], 120))
+    # heart inside
+    hx, hy, s = bx + bw/2, by + bh/2 + 6, 46
+    c.path(f"M{hx} {hy+s*0.7} C {hx-s} {hy-s*0.3}, {hx-s*0.5} {hy-s}, {hx} {hy-s*0.35} "
+           f"C {hx+s*0.5} {hy-s}, {hx+s} {hy-s*0.3}, {hx} {hy+s*0.7} Z",
+           fill="#ffffff")
+    # smaller reply bubble
+    c.rrect(720, 400, 220, 150, 32, c.grad(p["c"], "#7dd3fc", 120))
+    c.path(f"M{860} {550} l0 60 l50 -60 Z", fill=c.grad(p["c"], "#7dd3fc", 120))
+    for i in range(3):
+        c.circle(760 + i * 40, 475, 12, "#ffffff")
+    # superfan star
+    cx, cy = 880, 230
+    pts = []
+    for i in range(10):
+        ang = math.pi / 5 * i - math.pi / 2
+        r = 54 if i % 2 == 0 else 24
+        pts.append(f"{cx + r*math.cos(ang):.1f} {cy + r*math.sin(ang):.1f}")
+    c.path("M" + " L".join(pts) + " Z", fill=c.grad(p["d"], "#c4b5fd"))
+    c.text(600, 160, "create a superfan", 40, p["ink"],
+           family="Georgia, serif", weight="700", style="italic")
+    save("tips-from-github-customer-service",
+         c.render("A customer-support chat bubble with a heart and a superfan star"))
+
+
+def hungarian_desks():
+    """Hungarian Desks — bipartite matching of people to desks."""
+    c = Cover("tech"); p = c.p
+    lx, rx = 340, 860
+    ys = [270, 400, 530]
+    people = c.grad(p["a"], p["f"], 120)
+    desk = c.grad(p["c"], "#7dd3fc", 120)
+    # faint candidate edges (all-to-all)
+    matching = {0: 1, 1: 2, 2: 0}
+    for i, ly in enumerate(ys):
+        for j, ry in enumerate(ys):
+            if matching[i] == j:
+                continue
+            c.line(lx + 34, ly, rx - 40, ry, p["ink"], sw=3,
+                   dash="2 12")
+    # optimal matching edges (bold, colored)
+    for i, ly in enumerate(ys):
+        j = matching[i]
+        c.line(lx + 34, ly, rx - 40, ys[j], c.grad(p["a"], p["c"], 0), sw=8)
+    # people nodes (left) — circles with a head/person mark
+    for ly in ys:
+        c.circle(lx, ly, 34, people)
+        c.circle(lx, ly - 8, 11, "#ffffff")
+        c.path(f"M{lx-16} {ly+18} C {lx-16} {ly+2}, {lx+16} {ly+2}, {lx+16} {ly+18} Z",
+               fill="#ffffff")
+    # desk nodes (right) — little desk glyphs
+    for ry in ys:
+        c.rrect(rx - 40, ry - 30, 80, 60, 12, desk)
+        c.rect_raw(rx - 24, ry - 6, 48, 8, "#ffffff")
+        c.rect_raw(rx - 22, ry + 2, 6, 20, "#ffffff")
+        c.rect_raw(rx + 16, ry + 2, 6, 20, "#ffffff")
+    c.text(600, 155, "everyone's happiest seat", 38, p["ink"],
+           family="Georgia, serif", weight="700", style="italic")
+    save("hungarian-desks",
+         c.render("A bipartite matching of people to desks, one optimal assignment highlighted"))
+
+
+def cefr_levels():
+    """How to Talk about Language Learning — the six CEFR levels as a rising staircase."""
+    c = Cover("lang"); p = c.p
+    labels = ["A1", "A2", "B1", "B2", "C1", "C2"]
+    pairs = [(p["f"], p["a"]), (p["a"], p["b"]), (p["b"], p["e"]),
+             (p["e"], p["c"]), (p["c"], "#7c3aed"), ("#7c3aed", "#6d28d9")]
+    base = 650
+    bw, gap, x0 = 118, 22, 190
+    for i, lbl in enumerate(labels):
+        h = 90 + i * 62
+        x = x0 + i * (bw + gap)
+        y = base - h
+        c.shadow(x + bw/2, base + 12, bw * 0.6, 12, 0.08)
+        c.rrect(x, y, bw, h, 18, c.grad(pairs[i][0], pairs[i][1], 90))
+        c.text(x + bw/2, y + 46, lbl, 34, "#ffffff",
+               family="'Courier New', monospace", weight="700", spacing="1")
+    # a little flag planted on the top (C2) step
+    tx = x0 + 5 * (bw + gap) + bw/2
+    ty = base - (90 + 5 * 62)
+    c.line(tx, ty - 76, tx, ty, p["ink"], sw=7)
+    c.path(f"M{tx} {ty-76} L{tx+58} {ty-60} L{tx} {ty-44} Z",
+           fill=c.grad(p["d"], "#fcd34d"))
+    c.circle(tx, ty - 78, 9, p["ink"])
+    c.text(600, 155, "from first word to fluent", 40, p["ink"],
+           family="Georgia, serif", weight="700", style="italic")
+    save("cefr-language-levels",
+         c.render("The six CEFR language levels rising as a staircase from A1 to C2"))
+
+
 SCENES = [flags, github_flow, reset, notes, pro_git_zh, pro_git_kindle,
           blog_over, environment, replace, bundles, rerere, smart_http,
           undoing_merges, this_year, translate_this, gory_details,
-          do_what_you_want]
+          do_what_you_want, mit_language, github_cs, hungarian_desks,
+          cefr_levels]
 
 if __name__ == "__main__":
     for s in SCENES:
