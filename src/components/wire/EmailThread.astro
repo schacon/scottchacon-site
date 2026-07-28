@@ -1,0 +1,89 @@
+---
+import './wire.css';
+import crypto from 'node:crypto';
+// Embeds a mailing-list email or patch series (e.g. lore.kernel.org). Like
+// <Commit>, but for email: an author header with avatar + date, an extract from
+// the first message, and one or more messages each linking to lore — with an
+// optional associated commit (linked to GitHub).
+interface Email {
+  subject: string;
+  url: string;
+  sha?: string; // optional associated commit
+}
+interface Props {
+  author: string;
+  handle?: string; // GitHub username → avatar
+  email?: string; // used for a Gravatar fallback when no handle is given
+  date?: string;
+  title?: string; // optional thread / series title
+  extract?: string; // HTML excerpt from the first message
+  url?: string; // lore URL for the first message / thread
+  repo?: string; // default repo for associated commit links
+  emails: Email[];
+}
+const { author, handle, email, date, title, extract, url, repo = 'git/git', emails } = Astro.props;
+
+let avatar: string | null = null;
+if (handle) {
+  avatar = `https://github.com/${handle}.png?size=64`;
+} else if (email) {
+  const hash = crypto.createHash('md5').update(email.trim().toLowerCase()).digest('hex');
+  avatar = `https://www.gravatar.com/avatar/${hash}?s=64&d=identicon`;
+}
+const initials = author
+  .split(/\s+/)
+  .filter(Boolean)
+  .map((w) => w[0])
+  .join('')
+  .slice(0, 2)
+  .toUpperCase();
+---
+<div class="mailthread">
+  <div class="mailthread__head">
+    {avatar ? (
+      <img class="mailthread__avatar" src={avatar} alt={author} width="40" height="40" loading="lazy" decoding="async" />
+    ) : (
+      <span class="mailthread__avatar mailthread__avatar--mono" aria-hidden="true">{initials}</span>
+    )}
+    <div class="mailthread__meta">
+      <div class="mailthread__who">
+        <span class="mailthread__author">{author}</span>
+        {date && <span class="mailthread__dot">·</span>}
+        {date && <span class="mailthread__date">{date}</span>}
+      </div>
+      <span class="mailthread__src">lore.kernel.org{emails.length > 1 ? ` · ${emails.length} messages` : ''}</span>
+    </div>
+  </div>
+  {title &&
+    (url ? (
+      <a class="mailthread__title" href={url} target="_blank" rel="noopener noreferrer">{title}</a>
+    ) : (
+      <span class="mailthread__title">{title}</span>
+    ))}
+  {extract && (
+    <blockquote class="mailthread__extract">
+      <p set:html={extract} />
+      {url && (
+        <a class="mailthread__more" href={url} target="_blank" rel="noopener noreferrer">Read the first message →</a>
+      )}
+    </blockquote>
+  )}
+  <ul class="mailthread__list">
+    {emails.map((e) => {
+      const shortSha = e.sha ? e.sha.slice(0, 10) : '';
+      const commitUrl = e.sha ? `https://github.com/${repo}/commit/${e.sha}` : '';
+      return (
+        <li class="mailthread__item">
+          <a class="mailthread__subject" href={e.url} target="_blank" rel="noopener noreferrer">
+            <span class="mailthread__env" aria-hidden="true">✉</span>{e.subject}
+          </a>
+          {e.sha && (
+            <a class="mailthread__commit" href={commitUrl} target="_blank" rel="noopener noreferrer" title={`commit ${shortSha}`}>
+              <code>{shortSha}</code>
+            </a>
+          )}
+        </li>
+      );
+    })}
+  </ul>
+</div>

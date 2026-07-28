@@ -1,0 +1,16 @@
+---
+import './wire.css';
+// Header chip for one HTTP round trip in a protocol dive: a badge (e.g.
+// "RT 1 · GET") next to the endpoint it hits. `variant` tints the badge:
+// 'v2' (default, teal) or 'v0' (amber).
+interface Props {
+  badge: string;
+  ep: string;
+  variant?: 'v0' | 'v2';
+}
+const { badge, ep, variant = 'v2' } = Astro.props;
+---
+<div class={`rt rt--${variant}`}>
+  <span class="rt__badge">{badge}</span>
+  <span class="rt__ep" set:html={ep} />
+</div>

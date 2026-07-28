@@ -1,0 +1,18 @@
+---
+import './wire.css';
+interface Row {
+  pl: string;
+  pp?: string;
+  cm: string;
+}
+interface Props {
+  label?: string;
+  rows: Row[];
+}
+const { label, rows } = Astro.props;
+const width = Math.max(...rows.map((r) => (r.pl + (r.pp ?? '')).length)) + 3;
+---
+<div class="pktex" aria-label={label}>{rows.map((r) => {
+  const pad = ' '.repeat(Math.max(2, width - (r.pl + (r.pp ?? '')).length));
+  return <div class="row"><span class="pl">{r.pl}</span>{r.pp ? <span class="pp">{r.pp}</span> : null}{pad}<span class="arrow">→</span>{'  '}<span class="cm">{r.cm}</span></div>;
+})}</div>

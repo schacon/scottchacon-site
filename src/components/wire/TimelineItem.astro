@@ -1,0 +1,8 @@
+---
+import './wire.css';
+interface Props {
+  hot?: boolean;
+}
+const { hot } = Astro.props;
+---
+<div class={hot ? 'tl hot' : 'tl'}><slot /></div>

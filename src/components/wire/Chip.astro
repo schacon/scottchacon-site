@@ -1,0 +1,8 @@
+---
+import './wire.css';
+interface Props {
+  variant: 'core' | 'gated' | 'new' | 'hot';
+}
+const { variant } = Astro.props;
+---
+<span class={`chip chip--${variant}`}><slot /></span>

@@ -826,11 +826,39 @@ def cefr_levels():
          c.render("The six CEFR language levels rising as a staircase from A1 to C2"))
 
 
+def git_wire_v2():
+    """Git Wire Protocol v2 — a terminal showing a v2 capability advertisement."""
+    c = Cover("git"); p = c.p
+    tx, ty, tw, th = 250, 240, 700, 360
+    mono = "'Courier New', monospace"
+    c.shadow(tx + tw/2, ty + th + 16, 340, 26, 0.12)
+    c.rrect(tx, ty, tw, th, 20, c.grad("#0f2320", "#0a1413"))
+    c.rrect(tx, ty, tw, 48, 20, "#173330")
+    c.rrect(tx, ty + 26, tw, 22, 0, "#173330")
+    for i, col in enumerate(["#e06c4a", "#d9a24a", "#4aa06a"]):
+        c.circle(tx + 34 + i * 32, ty + 24, 9, col)
+    rows = [
+        ("$ git ls-remote origin", "#5F7A76"),
+        ("version 2", "#57C6BD"),
+        ("ls-refs  fetch  filter", "#E7ECEA"),
+        ("object-format=sha1", "#E9915F"),
+        ("0000", "#5F7A76"),
+    ]
+    for i, (s, col) in enumerate(rows):
+        c.text(tx + 34, ty + 112 + i * 48, s, 25, col, family=mono,
+               weight="400", anchor="start")
+    c.rect_raw(tx + 34 + 74, ty + 112 + 4 * 48 - 21, 14, 27, "#57C6BD")  # cursor
+    c.text(600, 160, "the protocol you're speaking", 38, p["ink"],
+           family="Georgia, serif", weight="700", style="italic")
+    save("git-wire-v2",
+         c.render("A terminal showing a Git protocol v2 capability advertisement"))
+
+
 SCENES = [flags, github_flow, reset, notes, pro_git_zh, pro_git_kindle,
           blog_over, environment, replace, bundles, rerere, smart_http,
           undoing_merges, this_year, translate_this, gory_details,
           do_what_you_want, mit_language, github_cs, hungarian_desks,
-          cefr_levels]
+          cefr_levels, git_wire_v2]
 
 if __name__ == "__main__":
     for s in SCENES:

@@ -1,0 +1,22 @@
+---
+import './wire.css';
+// Annotated key/description grid that sits under a protocol trace and explains
+// each piece of the wire. Both `k` (the wire token) and `d` (the description)
+// are HTML strings, so they may contain <code>, <b>, <em>, <br>.
+interface Item {
+  k: string;
+  d: string;
+}
+interface Props {
+  items: Item[];
+}
+const { items } = Astro.props;
+---
+<ul class="explain">
+  {items.map((it) => (
+    <li>
+      <span class="k" set:html={it.k} />
+      <span class="d" set:html={it.d} />
+    </li>
+  ))}
+</ul>

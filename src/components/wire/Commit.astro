@@ -1,0 +1,32 @@
+---
+import './wire.css';
+interface Props {
+  repo: string;
+  sha: string;
+  author: string;
+  subject: string;
+  date?: string;
+  comment?: string;
+}
+const { repo, sha, author, subject, date, comment } = Astro.props;
+const url = `https://github.com/${repo}/commit/${sha}`;
+const avatar = `https://github.com/${author}.png?size=48`;
+const shortSha = sha.slice(0, 8);
+const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+function formatDate(d?: string) {
+  if (!d) return '';
+  const m = d.match(/^(\d{1,2})-(\d{1,2})-(\d{4})$/); // MM-DD-YYYY
+  if (m) return `${months[Number(m[1]) - 1]} ${Number(m[2])}, ${m[3]}`;
+  return d;
+}
+const when = formatDate(date);
+---
+<div class="commitref">
+  <a class="commitref__main" href={url} target="_blank" rel="noopener noreferrer" title={`${repo}@${shortSha} — ${subject}`}>
+    <img class="commitref__avatar" src={avatar} alt={`@${author}`} width="24" height="24" loading="lazy" decoding="async" />
+    <code class="commitref__sha">{shortSha}</code>
+    <span class="commitref__subject">{subject}</span>
+    <span class="commitref__meta">@{author}{when && ` · ${when}`}</span>
+  </a>
+  {comment && <p class="commitref__comment">{comment}</p>}
+</div>

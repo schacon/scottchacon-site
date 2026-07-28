@@ -1,0 +1,191 @@
+---
+import './wire.css';
+import crypto from 'node:crypto';
+interface Config {
+  key: string;
+  value: string;
+  side?: 'server' | 'client' | 'both';
+}
+interface Row {
+  cap: string;
+  ver: string;
+  yr: string;
+  does: string;
+  enabled?: boolean; // advertised by default (green row) vs needs config (grey row)
+  purpose: string; // Purpose tag text (e.g. "Core", "Large repo")
+  tone?: 'core' | 'on' | 'gated' | 'new' | 'hot'; // Purpose tag colour
+  author?: string;
+  sha?: string;
+  subject?: string;
+  date?: string;
+  repo?: string;
+  desc?: string; // HTML: what it's for + how commonly it's used (left column)
+  config?: Config[]; // config values to enable it (right column)
+  doc?: string; // link to the git-scm.com documentation section
+  thread?: string; // lore.kernel.org URL of the introducing email thread
+  handle?: string; // GitHub username → author avatar for the thread link
+  email?: string; // author email → Gravatar fallback when no handle
+}
+interface Props {
+  rows: Row[];
+  repo?: string;
+}
+const { rows, repo: defaultRepo = 'git/git' } = Astro.props;
+
+const sideLabel = (s?: string) =>
+  s === 'both' ? 'Server + client' : s === 'client' ? 'Client' : s === 'server' ? 'Server' : 'Config';
+function groupConfig(cfg: Config[]): [string, Config[]][] {
+  const order: string[] = [];
+  const map = new Map<string, Config[]>();
+  for (const c of cfg) {
+    const k = c.side ?? '';
+    if (!map.has(k)) { map.set(k, []); order.push(k); }
+    map.get(k)!.push(c);
+  }
+  return order.map((k) => [k, map.get(k)!]);
+}
+function avatarFor(handle?: string, email?: string): string | null {
+  if (handle) return `https://github.com/${handle}.png?size=48`;
+  if (email) {
+    const hash = crypto.createHash('md5').update(email.trim().toLowerCase()).digest('hex');
+    return `https://www.gravatar.com/avatar/${hash}?s=48&d=identicon`;
+  }
+  return null;
+}
+const initialsFor = (name?: string) =>
+  (name ?? '').split(/\s+/).filter(Boolean).map((w) => w[0]).join('').slice(0, 2).toUpperCase();
+---
+<div class="tablewrap captable">
+  <table>
+    <thead>
+      <tr>
+        <th class="cap-caret" aria-hidden="true"></th>
+        <th>Capability</th>
+        <th>Since</th>
+        <th>Does</th>
+        <th>Purpose</th>
+      </tr>
+    </thead>
+    <tbody>
+      {rows.map((r, i) => {
+        const tone = r.tone ?? 'gated';
+        const repoName = r.repo ?? defaultRepo;
+        const shortSha = r.sha ? r.sha.slice(0, 10) : '';
+        const url = r.sha ? `https://github.com/${repoName}/commit/${r.sha}` : '';
+        const hasConfig = Boolean(r.config?.length);
+        const cfgGroups = hasConfig ? groupConfig(r.config!) : [];
+        const avatar = avatarFor(r.handle, r.email);
+        const initials = initialsFor(r.author);
+        const hasDetail = Boolean(r.author || r.sha || r.subject || r.date || r.desc || hasConfig || r.doc || r.thread);
+        const rowCls = [
+          'cap-row',
+          hasDetail ? 'cap-row--toggle' : '',
+          r.enabled ? 'cap-row--default' : 'cap-row--gated',
+        ].filter(Boolean).join(' ');
+        return (
+          <Fragment>
+            <tr
+              class={rowCls}
+              aria-expanded={hasDetail ? 'false' : undefined}
+              aria-controls={hasDetail ? `cap-detail-${i}` : undefined}
+              tabindex={hasDetail ? 0 : undefined}
+              role={hasDetail ? 'button' : undefined}
+            >
+              <td class="cap-caret">{hasDetail && <span class="caret" aria-hidden="true" />}</td>
+              <td>{r.cap}</td>
+              <td><span class="ver">{r.ver}</span> <span class="yr">{r.yr}</span></td>
+              <td title={r.does}>{r.does}</td>
+              <td><span class={`cap-status cap-status--${tone}`}>{r.purpose}</span></td>
+            </tr>
+            {hasDetail && (
+              <tr class="cap-detail" id={`cap-detail-${i}`} hidden>
+                <td colspan="5">
+                  <div class="cap-detail__inner">
+                    {(r.author || r.sha || r.date) && (
+                      <div class="cap-detail__commit">
+                        {r.author && <span class="cap-detail__author">{r.author}</span>}
+                        {r.author && r.sha && <span class="cap-detail__sep">·</span>}
+                        {r.sha && (
+                          <a class="cap-detail__sha" href={url} target="_blank" rel="noopener noreferrer" title={r.subject}>
+                            <code>{shortSha}</code>
+                          </a>
+                        )}
+                        {r.date && (r.author || r.sha) && <span class="cap-detail__sep">·</span>}
+                        {r.date && <span class="cap-detail__date">{r.date}</span>}
+                      </div>
+                    )}
+                    <div class={hasConfig ? 'cap-detail__cols cap-detail__cols--split' : 'cap-detail__cols'}>
+                      {r.desc && (
+                        <div class="cap-detail__usage">
+                          {hasConfig && <span class="cap-detail__collabel">Usage</span>}
+                          <p class="cap-detail__desc" set:html={r.desc} />
+                        </div>
+                      )}
+                      {hasConfig && (
+                        <div class="cap-detail__config">
+                          <span class="cap-detail__cfgtitle">Config value</span>
+                          {cfgGroups.map(([side, entries]) => (
+                            <div class="cap-detail__cfggroup">
+                              <span class="cap-detail__cfghead">{sideLabel(side)}</span>
+                              {entries.map((c) => (
+                                <div class="cap-detail__cfgrow">
+                                  <code class="cap-detail__cfgkey">{c.key}</code>
+                                </div>
+                              ))}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                    {(r.doc || r.thread) && (
+                      <div class="cap-detail__links">
+                        {r.doc && (
+                          <a class="cap-detail__doc" href={r.doc} target="_blank" rel="noopener noreferrer">
+                            <span class="cap-detail__linktag">Docs</span>
+                            <span class="cap-detail__linktext">gitprotocol-v2 spec</span>
+                          </a>
+                        )}
+                        {r.thread && (
+                          <a class="cap-detail__thread" href={r.thread} target="_blank" rel="noopener noreferrer">
+                            {avatar ? (
+                              <img class="cap-detail__avatar" src={avatar} alt={r.author} width="20" height="20" loading="lazy" decoding="async" />
+                            ) : (
+                              <span class="cap-detail__avatar cap-detail__avatar--mono" aria-hidden="true">{initials}</span>
+                            )}
+                            <span class="cap-detail__linktag">Thread</span>
+                            <span class="cap-detail__threadsubj">{r.subject}</span>
+                          </a>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </td>
+              </tr>
+            )}
+          </Fragment>
+        );
+      })}
+    </tbody>
+  </table>
+</div>
+<script>
+  // Expand/collapse capability rows on click or keyboard activation.
+  document.querySelectorAll<HTMLElement>('.captable .cap-row--toggle').forEach((row) => {
+    const toggle = () => {
+      const id = row.getAttribute('aria-controls');
+      const detail = id ? document.getElementById(id) : null;
+      if (!detail) return;
+      const open = row.getAttribute('aria-expanded') === 'true';
+      row.setAttribute('aria-expanded', String(!open));
+      row.classList.toggle('is-open', !open);
+      (detail as HTMLElement).hidden = open;
+    };
+    row.addEventListener('click', toggle);
+    row.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        toggle();
+      }
+    });
+  });
+</script>

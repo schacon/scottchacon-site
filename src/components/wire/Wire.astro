@@ -1,0 +1,14 @@
+---
+import './wire.css';
+// A terminal / protocol-trace block. `lines` is an array of lines; each line is
+// an array of segments. A segment is a plain string, or a [class, text] tuple
+// for coloured spans: 'srv' | 'cli' | 'len' | 'cmd' | 'cmt' (and 'cur' for the
+// blinking cursor, written as ['cur', '']).
+type Seg = string | [string, string];
+interface Props {
+  label?: string;
+  lines: Seg[][];
+}
+const { label, lines } = Astro.props;
+---
+<div class="wire" role="img" aria-label={label}><div class="bar" aria-hidden="true"><i></i><i></i><i></i></div><pre>{lines.map((segs, i) => [segs.map((s) => (typeof s === 'string' ? s : s[0] === 'cur' ? <span class="cur" aria-hidden="true"></span> : <span class={s[0]}>{s[1]}</span>)), i < lines.length - 1 ? '\n' : ''])}</pre></div>

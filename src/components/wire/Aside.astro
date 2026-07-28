@@ -1,0 +1,21 @@
+---
+import './wire.css';
+// A distinct "related information" callout — a neutral card with an accent icon
+// disc, a small label, an optional title, and slotted body content. Visually
+// separate from <Sidebar> (the tinted .aside box) and <Note> (the left-bar
+// callout), so it reads as a side-note rather than a warning or a heading block.
+interface Props {
+  label?: string;
+  title?: string;
+  icon?: string;
+}
+const { label = 'Related', title, icon = '※' } = Astro.props;
+---
+<aside class="relaside">
+  <div class="relaside__icon" aria-hidden="true">{icon}</div>
+  <div class="relaside__body">
+    {label && <span class="relaside__label">{label}</span>}
+    {title && <p class="relaside__title">{title}</p>}
+    <div class="relaside__content"><slot /></div>
+  </div>
+</aside>

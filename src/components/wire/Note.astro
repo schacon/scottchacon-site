@@ -1,0 +1,12 @@
+---
+import './wire.css';
+interface Props {
+  label: string;
+  caution?: boolean;
+}
+const { label, caution } = Astro.props;
+---
+<div class={caution ? 'note caution' : 'note'}>
+  <span class="lbl">{label}</span>
+  <slot />
+</div>

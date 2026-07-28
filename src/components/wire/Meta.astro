@@ -1,0 +1,12 @@
+---
+import './wire.css';
+interface Item {
+  label: string;
+  value: string;
+}
+interface Props {
+  items: Item[];
+}
+const { items } = Astro.props;
+---
+<div class="meta">{items.map((m) => (<span><b>{m.label}</b> {m.value}</span>))}</div>

@@ -1,0 +1,11 @@
+---
+import './wire.css';
+interface Props {
+  title: string;
+}
+const { title } = Astro.props;
+---
+<div class="card">
+  <h3>{title}</h3>
+  <slot />
+</div>
