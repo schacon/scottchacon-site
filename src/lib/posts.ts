@@ -105,6 +105,27 @@ export function relativeTime(date: Date, now: Date = new Date()): string {
   return 'today';
 }
 
+/** Rough reading time in whole minutes from a raw entry body (markdown, MDX, or
+ *  HTML). Strips MDX import/export lines, fenced code, JSX/MDX `{…}` expression
+ *  blocks (so component data arrays aren't counted as prose), and tags, then
+ *  counts words at `wpm`. Always at least 1. */
+export function readingMinutes(body: string, wpm = 200): number {
+  let text = body ?? '';
+  text = text.replace(/^\s*(import|export)\b.*$/gm, '');
+  text = text.replace(/```[\s\S]*?```/g, ' ');
+  // Remove `{…}` expression containers by brace depth (handles nested arrays).
+  let out = '';
+  let depth = 0;
+  for (const ch of text) {
+    if (ch === '{') depth++;
+    else if (ch === '}') { if (depth > 0) depth--; }
+    else if (depth === 0) out += ch;
+  }
+  out = out.replace(/<[^>]+>/g, ' ');
+  const words = out.match(/[\p{L}\p{N}'’-]+/gu)?.length ?? 0;
+  return Math.max(1, Math.round(words / wpm));
+}
+
 /** Social share image: covers are authored as .svg, but cards need the .png twin. */
 export function shareImage(image: string | undefined): string {
   const img = image ?? '/assets/images/title.png';

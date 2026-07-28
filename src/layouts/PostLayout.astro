@@ -3,7 +3,7 @@ import { render } from 'astro:content';
 import '../styles/global.css';
 import SiteHeader from '../components/SiteHeader.astro';
 import PromoBanner from '../components/PromoBanner.astro';
-import { formatDate, relativeTime, shareImage, type Post } from '../lib/posts';
+import { formatDate, relativeTime, readingMinutes, shareImage, type Post } from '../lib/posts';
 
 interface Props {
   post: Post;
@@ -19,6 +19,7 @@ const showBanner = category === 'git' || category === 'tech';
 const isoDate = date.toISOString();
 const prettyDate = formatDate(date);
 const rel = relativeTime(date);
+const readMins = readingMinutes(entry.body ?? '');
 
 // Markdown/MDX render through Astro's pipeline; raw-HTML posts inject verbatim.
 let Content: Awaited<ReturnType<typeof render>>['Content'] | undefined;
@@ -159,6 +160,8 @@ if (!isHtml) {
               <time datetime={isoDate}>{prettyDate}</time>
               <span aria-hidden="true">·</span>
               <span>{rel}</span>
+              <span aria-hidden="true">·</span>
+              <span>{readMins} min read</span>
             </div>
             <div id="post-content" class="prose-body font-blog font-lg leading-7 flex flex-col mt-6 space-y-4">
               {isHtml ? <Fragment set:html={entry.body} /> : Content && <Content />}
