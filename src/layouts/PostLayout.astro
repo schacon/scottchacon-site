@@ -94,6 +94,10 @@ if (!isHtml) {
       padding: 12px;
       overflow-x: auto;
     }
+    /* ```small — plain-text blocks set a size down, so wide terminal traces
+       fit the column without wrapping or horizontal scrolling. */
+    .prose-body pre[data-language="small"] { font-size: 0.7em; line-height: 1.5; }
+    .prose-body pre[data-language="small"] code { font-size: 1em; }
     /* Inside a block, the <pre> already carries the chip treatment. */
     .prose-body pre code {
       color: inherit;

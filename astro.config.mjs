@@ -17,6 +17,11 @@ export default defineConfig({
   },
   markdown: {
     rehypePlugins: [rehypeSlug],
-    shikiConfig: { theme: 'github-light' },
+    shikiConfig: {
+      theme: 'github-light',
+      // ```small — plain text, rendered at a smaller size (see PostLayout's
+      // `pre[data-language="small"]` rule). Useful for wide terminal traces.
+      langAlias: { small: 'text' },
+    },
   },
 });
