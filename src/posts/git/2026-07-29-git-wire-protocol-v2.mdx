@@ -24,7 +24,7 @@ import Commit from "../../components/wire/Commit.astro";
 
 Recently, I've been messing about with Git server stuff for some experimental work for [GitButler](https://gitbutler.com). In doing that, one of the things that I've been digging into is the [bundle-uri](https://blog.gitbutler.com/going-down-the-rabbit-hole-of-gits-new-bundle-uri) and [packfile-uri](https://git-scm.com/docs/packfile-uri) capabilities.
 
-Looking more into it made me realize that I'm not as familiar with how Git's server works these days as I thought I was. Specifically, I had never really learned about Git's new "v2" server protocol, which is what those capabilities are built on. So I did a bit of a deep dive.
+Looking more into it made me realize that I'm not as familiar with how Git's server works these days as I thought I was. Specifically, I had never really learned about Git's new (8 years old) "v2" server protocol, which is what those capabilities are built on. So I did a bit of a deep dive.
 
 ## Smart HTTP, First Edition
 
@@ -851,7 +851,7 @@ Here is a full list of the current potential capabilities of a v2 Git server _(g
   ]}
 />
 
-Now, there is a lot to potentially dig into here, but what's really interesting is how _old_ some of these capabilities are and how very, very rarely used they are.
+Now, there is a lot to potentially dig into here (perhaps a future blog post), but what's really interesting is how _old_ some of these capabilities are and how very, very rarely used they are.
 
 Nearly all of them landed over 5 years ago and nearly none of them are available on any major code host. GitHub and GitLab, for example, only enable `fetch.filter` so you can do blobless clones. None of the rest of these capabilities are enabled _(well, GitLab can do bundle-uris on self-hosted instances, I think, but not by default)_.
 
