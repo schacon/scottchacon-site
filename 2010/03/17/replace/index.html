@@ -1,0 +1,209 @@
+<!DOCTYPE html><html lang="en-US"> <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="author" content="Scott Chacon"><meta name="description" content="Another hidden Git feature: using git replace to transparently swap one object in for another."><meta property="og:type" content="article"><meta property="og:site_name" content="Scott Chacon"><meta property="og:title" content="Replace Kicker"><meta property="og:description" content="Another hidden Git feature: using git replace to transparently swap one object in for another."><meta property="og:image" content="https://scottchacon.com/assets/images/covers/replace.png"><meta property="og:url" content="https://scottchacon.com/2010/03/17/replace/"><meta property="article:published_time" content="2010-03-17T00:00:00.000Z"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:site" content="@chacon"><meta name="twitter:creator" content="@chacon"><meta name="twitter:title" content="Replace Kicker"><meta name="twitter:description" content="Another hidden Git feature: using git replace to transparently swap one object in for another."><meta name="twitter:image" content="https://scottchacon.com/assets/images/covers/replace.png"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;900&family=Roboto+Mono:wght@300;400&family=Roboto:wght@100;300;400;500;700&family=Source+Serif+4:opsz,wght@8..60,300;8..60,400&display=swap" rel="stylesheet"><title>Replace Kicker - Scott Chacon</title><!-- Privacy-friendly analytics by Plausible --><script async src="https://plausible.io/js/pa-L3isa8WSnas7pGAEYbsHg.js"></script><script>
+    window.plausible=window.plausible||function(){(plausible.q=plausible.q||[]).push(arguments)},plausible.init=plausible.init||function(i){plausible.o=i||{}};
+    plausible.init()
+  </script><link rel="stylesheet" href="/_astro/about.ByQc9HF7.css">
+<style>.prose-body a{color:#55f}.prose-body blockquote{background:#eee;color:#666;border-left:2px solid #888;padding:12px;line-height:1.8em;font-style:italic}.prose-body h2{font-size:2em;margin-top:30px!important;font-weight:700}.prose-body h3{font-size:1.8em;margin-top:30px!important;font-weight:700}.prose-body h4{font-size:1.4em;margin-top:30px!important;font-weight:700}.prose-body code{font-family:var(--font-mono);font-size:.85em;color:#be123c;background-color:#f4f4f5;border:1px solid #e4e4e7;border-radius:4px;padding:.1em .35em;line-height:inherit}.prose-body pre{line-height:1.4em;width:100%;background-color:#f4f4f5;border:1px solid #e4e4e7;border-radius:6px;padding:12px;overflow-x:auto}.prose-body pre[data-language=small]{font-size:.7em;line-height:1.5}.prose-body pre[data-language=small] code{font-size:1em}.prose-body pre code{color:inherit;background:none;border:0;border-radius:0;padding:0;font-size:.9em}.prose-body ul{list-style:circle;margin-left:30px}.prose-body ul li{margin-bottom:10px}.prose-body p{font-size:1.1em;letter-spacing:-.003em;line-height:32px;font-weight:400}.prose-body img{max-width:100%;height:auto}.prose-body figure{margin:32px 0}.prose-body figure img{width:100%;border-radius:12px;display:block}.prose-body figcaption{text-align:center;font-size:.9em;color:#888;margin-top:10px;font-style:italic}.toc{border-left:1px solid #e4e4e7}.toc a{display:block;padding:5px 0 5px 16px;margin-left:-1px;border-left:2px solid transparent;color:#71717a;font-size:.9em;line-height:1.4;text-decoration:none;transition:color .15s,border-color .15s}.toc a.lvl-3{padding-left:32px;font-size:.85em}.toc a:hover{color:#3f3f46}.toc a.active{color:#55f;border-left-color:#55f;font-weight:500}@media(prefers-color-scheme:dark){.prose-body code{color:#fda4af;background-color:#27272a;border-color:#3f3f46}.prose-body pre{background-color:#18181b;border-color:#27272a}.prose-body pre code{color:inherit;background:none}.toc{border-left-color:#27272a}.toc a{color:#a1a1aa}.toc a:hover{color:#e4e4e7}.toc a.active{color:#a5b4fc;border-left-color:#a5b4fc}}
+</style></head> <body> <div class="flex-auto pb-20"> <div class="border-b border-zinc-200 dark:border-zinc-800"> <div class="mx-auto w-full max-w-7xl lg:px-8"> <div class="relative px-4 sm:px-8 lg:px-12"> <div class="mx-auto max-w-2xl lg:max-w-5xl flex items-center justify-between py-4"> <a class="site-mark" href="/">scottchacon.com</a> <a class="back-link" href="/posts"><span aria-hidden="true">←</span> all posts</a> </div> </div> </div> </div> <div class="bg-zinc-100 dark:bg-zinc-800/60 border-b border-zinc-200 dark:border-zinc-800"> <div class="mx-auto w-full max-w-7xl lg:px-8"> <div class="relative px-4 sm:px-8 lg:px-12"> <div class="mx-auto max-w-5xl flex flex-wrap items-center gap-x-1.5 gap-y-1 py-2 text-xs text-zinc-400 dark:text-zinc-500"> <span aria-hidden="true" class="leading-none text-zinc-300 dark:text-zinc-600">&#x29D3;</span> <a href="https://gitbutler.com" class="font-medium text-zinc-500 dark:text-zinc-400 transition-colors hover:text-blue-600">gitbutler.com</a> <span>&mdash; What I'm building now: a better version control system</span> </div> </div> </div> </div> <div class="sm:px-8 mt-9"> <div class="mx-auto w-full max-w-7xl lg:px-8"> <div class="relative px-4 sm:px-8 lg:px-12"> <div class="mx-auto max-w-5xl lg:flex lg:justify-between lg:gap-12 lg:mt-16"> <article class="w-full lg:max-w-2xl min-w-0"> <h1 class="font-head text-4xl sm:text-5xl tracking-tight text-zinc-900 dark:text-zinc-100"> Replace Kicker </h1> <div class="mt-4 flex items-center gap-2 text-sm tracking-tight text-zinc-400"> <time datetime="2010-03-17T00:00:00.000Z">March 17, 2010</time> <span aria-hidden="true">·</span> <span>16 years ago</span> <span aria-hidden="true">·</span> <span>6 min read</span> </div> <div id="post-content" class="prose-body font-blog font-lg leading-7 flex flex-col mt-6 space-y-4"> <p>In another of my series of “seemingly hidden Git features”, I would like to
+introduce <code>git replace</code>.  Now, documentation exists for <code>git replace</code>, but it
+is rather unclear on what you would actually use it for (or even what it really
+does), so let’s go through a couple of examples as it really is quite powerful.</p>
+<p>The <code>replace</code> command basically will take one object in your Git database and
+for most purposes replace it with another object.  This is most commonly useful
+for replacing one commit in your history with another one.</p>
+<p>For example, say you want to split your history into one short history for
+new developers and one much longer and larger history for people interested
+in data mining.  You can graft one history onto the other by <code>replace</code>ing
+the earliest commit in the new line with the latest commit on the older one.  This
+is nice because it means that you don’t actually have to rewrite every commit
+in the new history, as you would normally have to do to join them together
+(because the parentage effects the SHAs).</p>
+<p>Let’s try this out.  Let’s take an existing repository, split it into two
+repositories, one recent and one historical, and then we’ll see how we can
+recombine them without modifying the recent repositories SHA values via <code>replace</code>.</p>
+<p>We’ll use a simple repository with five simple commits:</p>
+<pre class="astro-code github-light" style="background-color:#fff;color:#24292e; overflow-x: auto;" tabindex="0" data-language="plaintext"><code><span class="line"><span>$ git log --oneline</span></span>
+<span class="line"><span>ef989d8 fifth commit</span></span>
+<span class="line"><span>c6e1e95 fourth commit</span></span>
+<span class="line"><span>9c68fdc third commit</span></span>
+<span class="line"><span>945704c second commit</span></span>
+<span class="line"><span>c1822cf first commit</span></span></code></pre>
+<p>We want to break this up into two lines of history.  One line goes from commit
+one to commit four - that will be the historical one.  The second line will
+just be commits four and five - that will be the recent history.</p>
+<center><img src="/images/replace1.png"></center>
+<p>Well, creating the historical history is easy, we can just put a branch in the
+history and then push that branch to the master branch of a new remote repository.</p>
+<pre class="astro-code github-light" style="background-color:#fff;color:#24292e; overflow-x: auto;" tabindex="0" data-language="plaintext"><code><span class="line"><span>$ git branch history c6e1e95</span></span>
+<span class="line"><span>$ git log --oneline --decorate</span></span>
+<span class="line"><span>ef989d8 (HEAD, master) fifth commit</span></span>
+<span class="line"><span>c6e1e95 (history) fourth commit</span></span>
+<span class="line"><span>9c68fdc third commit</span></span>
+<span class="line"><span>945704c second commit</span></span>
+<span class="line"><span>c1822cf first commit</span></span></code></pre>
+<center><img src="/images/replace2.png"></center>
+<p>Now we can push the new history branch to the master branch of our new repository:</p>
+<pre class="astro-code github-light" style="background-color:#fff;color:#24292e; overflow-x: auto;" tabindex="0" data-language="plaintext"><code><span class="line"><span>$ git remote add history git@github.com:schacon/project-history.git</span></span>
+<span class="line"><span>$ git push history history:master</span></span>
+<span class="line"><span>Counting objects: 12, done.</span></span>
+<span class="line"><span>Delta compression using up to 2 threads.</span></span>
+<span class="line"><span>Compressing objects: 100% (4/4), done.</span></span>
+<span class="line"><span>Writing objects: 100% (12/12), 907 bytes, done.</span></span>
+<span class="line"><span>Total 12 (delta 0), reused 0 (delta 0)</span></span>
+<span class="line"><span>Unpacking objects: 100% (12/12), done.</span></span>
+<span class="line"><span>To git@github.com:schacon/project-history.git</span></span>
+<span class="line"><span> * [new branch]      history -> master</span></span></code></pre>
+<p>OK, so our history is published.  Now the harder part is truncating our current
+history down so it’s smaller.  We need an overlap so we can replace a commit
+in one with an equivalent commit in the other, so we’re going to truncate this
+to just commits four and five (so commit four overlaps).</p>
+<pre class="astro-code github-light" style="background-color:#fff;color:#24292e; overflow-x: auto;" tabindex="0" data-language="plaintext"><code><span class="line"><span>$ git log --oneline --decorate</span></span>
+<span class="line"><span>ef989d8 (HEAD, master) fifth commit</span></span>
+<span class="line"><span>c6e1e95 (history) fourth commit</span></span>
+<span class="line"><span>9c68fdc third commit</span></span>
+<span class="line"><span>945704c second commit</span></span>
+<span class="line"><span>c1822cf first commit</span></span></code></pre>
+<p>I think it’s useful in this case to create a base commit that has instructions
+on how to expand the history, so other developers know what to do if they
+hit the first commit in the truncated history and need more.  So, what we’re
+going to do is create an initial commit object as our base point with instructions,
+then rebase the remaining commits (four and five) on top of it.  To do that,
+we need to choose a point to split at, which for us is the third commit, which
+is <code>9c68fdc</code> in SHA-speak.  So, our base commit will be based off of that tree.
+We can create our base commit using the <code>commit-tree</code> command, which just takes
+a tree and will give us a brand new, parentless commit object SHA back.</p>
+<pre class="astro-code github-light" style="background-color:#fff;color:#24292e; overflow-x: auto;" tabindex="0" data-language="plaintext"><code><span class="line"><span>$ echo 'get history from blah blah blah' | git commit-tree 9c68fdc^{tree}</span></span>
+<span class="line"><span>622e88e9cbfbacfb75b5279245b9fb38dfea10cf</span></span></code></pre>
+<center><img src="/images/replace3.png"></center>
+<p>OK, so now that we have a base commit, we can rebase the rest of our history
+on top of that with <code>git rebase --onto</code>.  The <code>--onto</code> argument will be the
+SHA we just got back from <code>commit-tree</code> and the rebase point will be the third
+commit (<code>9c68fdc</code> again):</p>
+<pre class="astro-code github-light" style="background-color:#fff;color:#24292e; overflow-x: auto;" tabindex="0" data-language="plaintext"><code><span class="line"><span>$ git rebase --onto 622e88 9c68fdc</span></span>
+<span class="line"><span>First, rewinding head to replay your work on top of it...</span></span>
+<span class="line"><span>Applying: fourth commit</span></span>
+<span class="line"><span>Applying: fifth commit</span></span></code></pre>
+<center><img src="/images/replace4.png"></center>
+<p>OK, so now we’ve re-written our recent history on top of a throw away base commit
+that now has instructions in it on how to reconstitute the entire history if
+we wanted to. Now let’s see what those instructions would be (here is where
+<code>replace</code> finally comes into play).</p>
+<p>So to get the history data after cloning this truncated repository, one would
+have to add a remote for the historical repository and fetch:</p>
+<pre class="astro-code github-light" style="background-color:#fff;color:#24292e; overflow-x: auto;" tabindex="0" data-language="plaintext"><code><span class="line"><span>$ git remote add history git://github.com/schacon/project-history.git</span></span>
+<span class="line"><span>$ git fetch history</span></span>
+<span class="line"><span>From git://github.com/schacon/project-history.git</span></span>
+<span class="line"><span> * [new branch]      master     -> history/master</span></span></code></pre>
+<p>Now the collaborator would have their recent commits in the ‘master’ branch
+and the historical commits in the ‘history/master’ branch.</p>
+<pre class="astro-code github-light" style="background-color:#fff;color:#24292e; overflow-x: auto;" tabindex="0" data-language="plaintext"><code><span class="line"><span>$ git log --oneline master</span></span>
+<span class="line"><span>e146b5f fifth commit</span></span>
+<span class="line"><span>81a708d fourth commit</span></span>
+<span class="line"><span>622e88e get history from blah blah blah</span></span>
+<span class="line"><span>$ git log --oneline history/master</span></span>
+<span class="line"><span>c6e1e95 fourth commit</span></span>
+<span class="line"><span>9c68fdc third commit</span></span>
+<span class="line"><span>945704c second commit</span></span>
+<span class="line"><span>c1822cf first commit</span></span></code></pre>
+<p>To combine them, you can simply call <code>git replace</code> with the commit you want
+to replace and then the commit you want to replace it with.  So we want to
+replace the ‘fourth’ commit in the master branch with the ‘fourth’ commit in
+the ‘history/master’ branch:</p>
+<pre class="astro-code github-light" style="background-color:#fff;color:#24292e; overflow-x: auto;" tabindex="0" data-language="plaintext"><code><span class="line"><span>$ git replace 81a708d c6e1e95</span></span></code></pre>
+<p>Now, if you look at the history of the <code>master</code> branch, it looks like this:</p>
+<pre class="astro-code github-light" style="background-color:#fff;color:#24292e; overflow-x: auto;" tabindex="0" data-language="plaintext"><code><span class="line"><span>$ git log --oneline</span></span>
+<span class="line"><span>e146b5f fifth commit</span></span>
+<span class="line"><span>81a708d fourth commit</span></span>
+<span class="line"><span>9c68fdc third commit</span></span>
+<span class="line"><span>945704c second commit</span></span>
+<span class="line"><span>c1822cf first commit</span></span></code></pre>
+<p>Cool, right?  Without having to change all the SHAs upstream, we were able to
+replace one commit in our history with an entirely different commit and all the
+normal tools (<code>bisect</code>, <code>blame</code>, etc) will work how we would expect them to.</p>
+<center><img src="/images/replace5.png"></center>
+<p>Interestingly, it still shows <code>81a708d</code> as the SHA, even though it’s actually
+using the <code>c6e1e95</code> commit data that we replaced it with.  Even if you run a
+command like <code>cat-file</code>, it will show you the replaced data:</p>
+<pre class="astro-code github-light" style="background-color:#fff;color:#24292e; overflow-x: auto;" tabindex="0" data-language="plaintext"><code><span class="line"><span>$ git cat-file -p 81a708d</span></span>
+<span class="line"><span>tree 7bc544cf438903b65ca9104a1e30345eee6c083d</span></span>
+<span class="line"><span>parent 9c68fdceee073230f19ebb8b5e7fc71b479c0252</span></span>
+<span class="line"><span>author Scott Chacon &#x3C;schacon@gmail.com> 1268712581 -0700</span></span>
+<span class="line"><span>committer Scott Chacon &#x3C;schacon@gmail.com> 1268712581 -0700</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>fourth commit</span></span></code></pre>
+<p>Remember that the actual parent of <code>81a708d</code> was our placeholder commit (<code>622e88e</code>),
+not <code>9c68fdce</code> as it states here.</p>
+<p>The other cool thing is that this is kept in our references:</p>
+<pre class="astro-code github-light" style="background-color:#fff;color:#24292e; overflow-x: auto;" tabindex="0" data-language="plaintext"><code><span class="line"><span>$ git for-each-ref</span></span>
+<span class="line"><span>e146b5f14e79d4935160c0e83fb9ebe526b8da0d commit	refs/heads/master</span></span>
+<span class="line"><span>c6e1e95051d41771a649f3145423f8809d1a74d4 commit	refs/remotes/history/master</span></span>
+<span class="line"><span>e146b5f14e79d4935160c0e83fb9ebe526b8da0d commit	refs/remotes/origin/HEAD</span></span>
+<span class="line"><span>e146b5f14e79d4935160c0e83fb9ebe526b8da0d commit	refs/remotes/origin/master</span></span>
+<span class="line"><span>c6e1e95051d41771a649f3145423f8809d1a74d4 commit	refs/replace/81a708dd0e167a3f691541c7a6463343bc457040</span></span></code></pre>
+<p>This means that it’s easy to share our replacement with others, because we can
+push this to our server and other people can easily download it.  This is not that
+helpful in the history grafting scenario we’ve gone over here (since everyone
+would be downloading both histories anyhow, so why seperate them?) but it can
+be useful in other circumstances.  I’ll cover some other interesting scenarios
+in another post - I think this is probably enough to process for now.</p> </div> </article> <aside id="toc-wrap" class="hidden lg:block flex-none w-60"> <div class="sticky top-12"> <img src="/assets/images/covers/replace.svg" alt="" class="w-full rounded-xl mb-6 ring-1 ring-zinc-900/5 dark:ring-white/10"> <nav id="toc-nav"> <div class="text-xs font-semibold uppercase tracking-widest text-zinc-400 mb-3">On this page</div> <div class="toc" id="toc"></div> </nav> </div> </aside> </div> </div> </div> </div> </div> <script>
+(function () {
+  var content = document.getElementById('post-content');
+  var toc = document.getElementById('toc');
+  var wrap = document.getElementById('toc-wrap');
+  if (!content || !toc) { return; }
+  var hs = Array.prototype.slice.call(content.querySelectorAll('h2, h3'));
+  if (hs.length < 2) {
+    var nav = document.getElementById('toc-nav');
+    if (nav) { nav.style.display = 'none'; }
+    if (wrap && !wrap.querySelector('img')) { wrap.style.display = 'none'; }
+    return;
+  }
+
+  var links = {};
+  hs.forEach(function (h) {
+    if (!h.id) {
+      h.id = h.textContent.trim().toLowerCase()
+        .replace(/[^\w]+/g, '-').replace(/^-+|-+$/g, '');
+    }
+    var a = document.createElement('a');
+    a.href = '#' + h.id;
+    a.textContent = h.textContent;
+    a.className = h.tagName === 'H3' ? 'lvl-3' : 'lvl-2';
+    toc.appendChild(a);
+    links[h.id] = a;
+  });
+
+  var current = null;
+  function setActive(id) {
+    if (current === id || !links[id]) { return; }
+    if (current && links[current]) { links[current].classList.remove('active'); }
+    current = id;
+    links[id].classList.add('active');
+  }
+
+  var visible = {};
+  var obs = new IntersectionObserver(function (entries) {
+    entries.forEach(function (e) {
+      if (e.isIntersecting) { visible[e.target.id] = true; }
+      else { delete visible[e.target.id]; }
+    });
+    var best = null, bestTop = Infinity;
+    hs.forEach(function (h) {
+      if (visible[h.id]) {
+        var t = h.getBoundingClientRect().top;
+        if (t < bestTop) { bestTop = t; best = h.id; }
+      }
+    });
+    if (best) { setActive(best); }
+    else {
+      var above = null;
+      hs.forEach(function (h) {
+        if (h.getBoundingClientRect().top < 120) { above = h.id; }
+      });
+      if (above) { setActive(above); }
+    }
+  }, { rootMargin: '-80px 0px -65% 0px', threshold: 0 });
+
+  hs.forEach(function (h) { obs.observe(h); });
+  setActive(hs[0].id);
+})();
+</script> </body> </html>

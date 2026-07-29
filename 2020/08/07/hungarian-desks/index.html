@@ -1,0 +1,95 @@
+<!DOCTYPE html><html lang="en-US"> <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="author" content="Scott Chacon"><meta name="description" content="How we replaced our office desk lottery with a weighted-bet form and the Hungarian algorithm to compute the seating that makes everyone happiest."><meta property="og:type" content="article"><meta property="og:site_name" content="Scott Chacon"><meta property="og:title" content="Hungarian Desks: Assigning Office Seats with the Hungarian Algorithm"><meta property="og:description" content="How we replaced our office desk lottery with a weighted-bet form and the Hungarian algorithm to compute the seating that makes everyone happiest."><meta property="og:image" content="https://scottchacon.com/assets/images/covers/hungarian-desks.png"><meta property="og:url" content="https://scottchacon.com/2020/08/07/hungarian-desks/"><meta property="article:published_time" content="2020-08-07T00:00:00.000Z"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:site" content="@chacon"><meta name="twitter:creator" content="@chacon"><meta name="twitter:title" content="Hungarian Desks: Assigning Office Seats with the Hungarian Algorithm"><meta name="twitter:description" content="How we replaced our office desk lottery with a weighted-bet form and the Hungarian algorithm to compute the seating that makes everyone happiest."><meta name="twitter:image" content="https://scottchacon.com/assets/images/covers/hungarian-desks.png"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;900&family=Roboto+Mono:wght@300;400&family=Roboto:wght@100;300;400;500;700&family=Source+Serif+4:opsz,wght@8..60,300;8..60,400&display=swap" rel="stylesheet"><title>Hungarian Desks: Assigning Office Seats with the Hungarian Algorithm - Scott Chacon</title><!-- Privacy-friendly analytics by Plausible --><script async src="https://plausible.io/js/pa-L3isa8WSnas7pGAEYbsHg.js"></script><script>
+    window.plausible=window.plausible||function(){(plausible.q=plausible.q||[]).push(arguments)},plausible.init=plausible.init||function(i){plausible.o=i||{}};
+    plausible.init()
+  </script><link rel="stylesheet" href="/_astro/about.ByQc9HF7.css">
+<style>.prose-body a{color:#55f}.prose-body blockquote{background:#eee;color:#666;border-left:2px solid #888;padding:12px;line-height:1.8em;font-style:italic}.prose-body h2{font-size:2em;margin-top:30px!important;font-weight:700}.prose-body h3{font-size:1.8em;margin-top:30px!important;font-weight:700}.prose-body h4{font-size:1.4em;margin-top:30px!important;font-weight:700}.prose-body code{font-family:var(--font-mono);font-size:.85em;color:#be123c;background-color:#f4f4f5;border:1px solid #e4e4e7;border-radius:4px;padding:.1em .35em;line-height:inherit}.prose-body pre{line-height:1.4em;width:100%;background-color:#f4f4f5;border:1px solid #e4e4e7;border-radius:6px;padding:12px;overflow-x:auto}.prose-body pre[data-language=small]{font-size:.7em;line-height:1.5}.prose-body pre[data-language=small] code{font-size:1em}.prose-body pre code{color:inherit;background:none;border:0;border-radius:0;padding:0;font-size:.9em}.prose-body ul{list-style:circle;margin-left:30px}.prose-body ul li{margin-bottom:10px}.prose-body p{font-size:1.1em;letter-spacing:-.003em;line-height:32px;font-weight:400}.prose-body img{max-width:100%;height:auto}.prose-body figure{margin:32px 0}.prose-body figure img{width:100%;border-radius:12px;display:block}.prose-body figcaption{text-align:center;font-size:.9em;color:#888;margin-top:10px;font-style:italic}.toc{border-left:1px solid #e4e4e7}.toc a{display:block;padding:5px 0 5px 16px;margin-left:-1px;border-left:2px solid transparent;color:#71717a;font-size:.9em;line-height:1.4;text-decoration:none;transition:color .15s,border-color .15s}.toc a.lvl-3{padding-left:32px;font-size:.85em}.toc a:hover{color:#3f3f46}.toc a.active{color:#55f;border-left-color:#55f;font-weight:500}@media(prefers-color-scheme:dark){.prose-body code{color:#fda4af;background-color:#27272a;border-color:#3f3f46}.prose-body pre{background-color:#18181b;border-color:#27272a}.prose-body pre code{color:inherit;background:none}.toc{border-left-color:#27272a}.toc a{color:#a1a1aa}.toc a:hover{color:#e4e4e7}.toc a.active{color:#a5b4fc;border-left-color:#a5b4fc}}
+</style></head> <body> <div class="flex-auto pb-20"> <div class="border-b border-zinc-200 dark:border-zinc-800"> <div class="mx-auto w-full max-w-7xl lg:px-8"> <div class="relative px-4 sm:px-8 lg:px-12"> <div class="mx-auto max-w-2xl lg:max-w-5xl flex items-center justify-between py-4"> <a class="site-mark" href="/">scottchacon.com</a> <a class="back-link" href="/posts"><span aria-hidden="true">←</span> all posts</a> </div> </div> </div> </div> <div class="bg-zinc-100 dark:bg-zinc-800/60 border-b border-zinc-200 dark:border-zinc-800"> <div class="mx-auto w-full max-w-7xl lg:px-8"> <div class="relative px-4 sm:px-8 lg:px-12"> <div class="mx-auto max-w-5xl flex flex-wrap items-center gap-x-1.5 gap-y-1 py-2 text-xs text-zinc-400 dark:text-zinc-500"> <span aria-hidden="true" class="leading-none text-zinc-300 dark:text-zinc-600">&#x29D3;</span> <a href="https://gitbutler.com" class="font-medium text-zinc-500 dark:text-zinc-400 transition-colors hover:text-blue-600">gitbutler.com</a> <span>&mdash; What I'm building now: a better version control system</span> </div> </div> </div> </div> <div class="sm:px-8 mt-9"> <div class="mx-auto w-full max-w-7xl lg:px-8"> <div class="relative px-4 sm:px-8 lg:px-12"> <div class="mx-auto max-w-5xl lg:flex lg:justify-between lg:gap-12 lg:mt-16"> <article class="w-full lg:max-w-2xl min-w-0"> <h1 class="font-head text-4xl sm:text-5xl tracking-tight text-zinc-900 dark:text-zinc-100"> Hungarian Desks: Assigning Office Seats with the Hungarian Algorithm </h1> <div class="mt-4 flex items-center gap-2 text-sm tracking-tight text-zinc-400"> <time datetime="2020-08-07T00:00:00.000Z">August 7, 2020</time> <span aria-hidden="true">·</span> <span>5 years ago</span> <span aria-hidden="true">·</span> <span>4 min read</span> </div> <div id="post-content" class="prose-body font-blog font-lg leading-7 flex flex-col mt-6 space-y-4"> <p>In nearly any company, but especially tech companies, how does one handle seating arrangements? Often this is done by department, but for smaller companies without so much space — and especially now with more flexible work-from-home and partial remote policies — a more fluid use of desk space is often preferable.</p>
+<p>A while ago, I wrote a little tool to solve this in an interesting way, which I’ve put up on GitHub as <a href="https://github.com/schacon/hungarian-desks">schacon/hungarian-desks</a>. Here’s the thinking behind it.</p>
+<h2 id="the-problem-with-seating">The Problem with Seating</h2>
+<p>At Chatterbug, and at GitHub before this, my companies have always had a pretty open seating policy where people could sit pretty much wherever they wanted in the office. Sometimes teams sat near each other, but often they were remote anyhow, so that wasn’t possible. In fact, with remote companies it’s often better to seat people who <em>are</em> in the office apart from each other, so that they communicate asynchronously as well.</p>
+<p>In fact, mixed seating is arguably good for cross-company communication and serendipitous interactions. At GitHub we even had a day every few months where we would play Musical Desks, where everyone who wanted to would pick up and move somewhere new. This is easier if everyone does it at the same time, so there are desks opening up at the same time.</p>
+<h2 id="the-random-method">The Random Method</h2>
+<p>At Chatterbug when we moved into a new space, we needed to determine how to allot seats and the first version was a simple lottery. Each person’s name is drawn and they choose what seat they want in the order drawn.</p>
+<p>This has the fairness of randomness to it, but it’s not actually ideal for optimizing the assignments. Someone could, for example, not care too much and choose a seat semi-randomly that someone else really wanted.</p>
+<figure>
+  <img src="/assets/images/hungarian-lottery.svg" alt="A seat lottery where the first name drawn takes the seat another person wanted most">
+  <figcaption>In the lottery, whoever's name is drawn first picks first — so someone who doesn't much care can grab the one seat another person really wanted.</figcaption>
+</figure>
+<h2 id="the-hungarian-method">The Hungarian Method</h2>
+<p>We tried to solve this issue with version 2 of the seat picker. In this version, we have people give us some information about a few top choices. Also, instead of just ranking them, we have them “bet” on the choices. This way if you don’t really care or want to sit in a specific area, you can put the same bet on all 4 choices. Or if you really care, you can put most of your bet on a single choice.</p>
+<p>This allows us to determine a “happiness” with a set of seats. We assign each user/seat combination a value from <code>0.0</code> to <code>1.0</code>, with zero being totally unhappy (ie, a random seat not in their list) and <code>1.0</code> being totally happy (ie, the choice they bet the most on). We weight the user’s choices to be internally relative, so if one user bets <code>8</code> on one seat and <code>4</code> on another, they would get scores of <code>1.0</code> and <code>0.5</code> for those seats, since one is half as valuable to the user as the top choice. If the user bets the same value on all 4 choices, each seat is assigned <code>1.0</code> since the user would be just as happy with any of them.</p>
+<figure>
+  <img src="/assets/images/hungarian-bets.svg" alt="Two people&#x27;s bets across four seat choices normalized into happiness scores from 0 to 1">
+  <figcaption>Each person spreads a fixed budget of "bets" across their top four choices. Bets are scored relative to that person's own biggest bet, giving a happiness value from 0 to 1 — so betting evenly (happy anywhere) and betting big on a single seat both work.</figcaption>
+</figure>
+<p>Now we essentially have the data to do a cost matrix that we can treat as a classical <a href="https://en.wikipedia.org/wiki/Assignment_problem">assignment problem</a>, since the sets of seats and people are essentially a weighted bipartite graph. We can invert the values of the happiness score (so <code>0</code> is totally happy — no cost, and <code>1</code> is totally unhappy, the highest cost) and use that cost matrix as the input to an implementation of the <a href="https://en.wikipedia.org/wiki/Hungarian_algorithm">Hungarian algorithm</a> to come up with a set of assignments that optimizes for low cost, and thus, highest total assignment happiness.</p>
+<figure>
+  <img src="/assets/images/hungarian-cost-matrix.svg" alt="A people-by-desks happiness matrix with the optimal one-per-row assignment highlighted">
+  <figcaption>Treating people and desks as a weighted bipartite graph, the Hungarian algorithm picks exactly one desk per person to maximize <em>total</em> happiness — here Ada gives up her own top pick (desk A, worth 0.90 to her) so Cleo can take it, because that trade makes the whole team happier.</figcaption>
+</figure>
+<h2 id="the-data-and-code">The Data and Code</h2>
+<p>Now we just need everyone in the company to fill out a form telling us their top choices and bets, so we can calculate the optimal assignments.</p>
+<p>We decided to try the easiest route, which is to have everyone fill out an Airtable form, which gives us a nice simple database of all the users and their choices that is easily API accessible. Then we wrote a script to pull those choices down, do the math, make the assignments and upload the assignments (as well as the calculated “happiness” score for each user).</p>
+<p>The code is on GitHub at <a href="https://github.com/schacon/hungarian-desks">schacon/hungarian-desks</a> if you’d like to try it or adapt it for your own office.</p> </div> </article> <aside id="toc-wrap" class="hidden lg:block flex-none w-60"> <div class="sticky top-12"> <img src="/assets/images/covers/hungarian-desks.svg" alt="" class="w-full rounded-xl mb-6 ring-1 ring-zinc-900/5 dark:ring-white/10"> <nav id="toc-nav"> <div class="text-xs font-semibold uppercase tracking-widest text-zinc-400 mb-3">On this page</div> <div class="toc" id="toc"></div> </nav> </div> </aside> </div> </div> </div> </div> </div> <script>
+(function () {
+  var content = document.getElementById('post-content');
+  var toc = document.getElementById('toc');
+  var wrap = document.getElementById('toc-wrap');
+  if (!content || !toc) { return; }
+  var hs = Array.prototype.slice.call(content.querySelectorAll('h2, h3'));
+  if (hs.length < 2) {
+    var nav = document.getElementById('toc-nav');
+    if (nav) { nav.style.display = 'none'; }
+    if (wrap && !wrap.querySelector('img')) { wrap.style.display = 'none'; }
+    return;
+  }
+
+  var links = {};
+  hs.forEach(function (h) {
+    if (!h.id) {
+      h.id = h.textContent.trim().toLowerCase()
+        .replace(/[^\w]+/g, '-').replace(/^-+|-+$/g, '');
+    }
+    var a = document.createElement('a');
+    a.href = '#' + h.id;
+    a.textContent = h.textContent;
+    a.className = h.tagName === 'H3' ? 'lvl-3' : 'lvl-2';
+    toc.appendChild(a);
+    links[h.id] = a;
+  });
+
+  var current = null;
+  function setActive(id) {
+    if (current === id || !links[id]) { return; }
+    if (current && links[current]) { links[current].classList.remove('active'); }
+    current = id;
+    links[id].classList.add('active');
+  }
+
+  var visible = {};
+  var obs = new IntersectionObserver(function (entries) {
+    entries.forEach(function (e) {
+      if (e.isIntersecting) { visible[e.target.id] = true; }
+      else { delete visible[e.target.id]; }
+    });
+    var best = null, bestTop = Infinity;
+    hs.forEach(function (h) {
+      if (visible[h.id]) {
+        var t = h.getBoundingClientRect().top;
+        if (t < bestTop) { bestTop = t; best = h.id; }
+      }
+    });
+    if (best) { setActive(best); }
+    else {
+      var above = null;
+      hs.forEach(function (h) {
+        if (h.getBoundingClientRect().top < 120) { above = h.id; }
+      });
+      if (above) { setActive(above); }
+    }
+  }, { rootMargin: '-80px 0px -65% 0px', threshold: 0 });
+
+  hs.forEach(function (h) { obs.observe(h); });
+  setActive(hs[0].id);
+})();
+</script> </body> </html>

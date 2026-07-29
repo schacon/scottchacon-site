@@ -1,0 +1,273 @@
+<!DOCTYPE html><html lang="en-US"> <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="author" content="Scott Chacon"><meta name="description" content="Attaching extra data to a commit without changing its SHA, using the little-known git notes command."><meta property="og:type" content="article"><meta property="og:site_name" content="Scott Chacon"><meta property="og:title" content="Note to Self"><meta property="og:description" content="Attaching extra data to a commit without changing its SHA, using the little-known git notes command."><meta property="og:image" content="https://scottchacon.com/assets/images/covers/notes.png"><meta property="og:url" content="https://scottchacon.com/2010/08/25/notes/"><meta property="article:published_time" content="2010-08-25T00:00:00.000Z"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:site" content="@chacon"><meta name="twitter:creator" content="@chacon"><meta name="twitter:title" content="Note to Self"><meta name="twitter:description" content="Attaching extra data to a commit without changing its SHA, using the little-known git notes command."><meta name="twitter:image" content="https://scottchacon.com/assets/images/covers/notes.png"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;900&family=Roboto+Mono:wght@300;400&family=Roboto:wght@100;300;400;500;700&family=Source+Serif+4:opsz,wght@8..60,300;8..60,400&display=swap" rel="stylesheet"><title>Note to Self - Scott Chacon</title><!-- Privacy-friendly analytics by Plausible --><script async src="https://plausible.io/js/pa-L3isa8WSnas7pGAEYbsHg.js"></script><script>
+    window.plausible=window.plausible||function(){(plausible.q=plausible.q||[]).push(arguments)},plausible.init=plausible.init||function(i){plausible.o=i||{}};
+    plausible.init()
+  </script><link rel="stylesheet" href="/_astro/about.ByQc9HF7.css">
+<style>.prose-body a{color:#55f}.prose-body blockquote{background:#eee;color:#666;border-left:2px solid #888;padding:12px;line-height:1.8em;font-style:italic}.prose-body h2{font-size:2em;margin-top:30px!important;font-weight:700}.prose-body h3{font-size:1.8em;margin-top:30px!important;font-weight:700}.prose-body h4{font-size:1.4em;margin-top:30px!important;font-weight:700}.prose-body code{font-family:var(--font-mono);font-size:.85em;color:#be123c;background-color:#f4f4f5;border:1px solid #e4e4e7;border-radius:4px;padding:.1em .35em;line-height:inherit}.prose-body pre{line-height:1.4em;width:100%;background-color:#f4f4f5;border:1px solid #e4e4e7;border-radius:6px;padding:12px;overflow-x:auto}.prose-body pre[data-language=small]{font-size:.7em;line-height:1.5}.prose-body pre[data-language=small] code{font-size:1em}.prose-body pre code{color:inherit;background:none;border:0;border-radius:0;padding:0;font-size:.9em}.prose-body ul{list-style:circle;margin-left:30px}.prose-body ul li{margin-bottom:10px}.prose-body p{font-size:1.1em;letter-spacing:-.003em;line-height:32px;font-weight:400}.prose-body img{max-width:100%;height:auto}.prose-body figure{margin:32px 0}.prose-body figure img{width:100%;border-radius:12px;display:block}.prose-body figcaption{text-align:center;font-size:.9em;color:#888;margin-top:10px;font-style:italic}.toc{border-left:1px solid #e4e4e7}.toc a{display:block;padding:5px 0 5px 16px;margin-left:-1px;border-left:2px solid transparent;color:#71717a;font-size:.9em;line-height:1.4;text-decoration:none;transition:color .15s,border-color .15s}.toc a.lvl-3{padding-left:32px;font-size:.85em}.toc a:hover{color:#3f3f46}.toc a.active{color:#55f;border-left-color:#55f;font-weight:500}@media(prefers-color-scheme:dark){.prose-body code{color:#fda4af;background-color:#27272a;border-color:#3f3f46}.prose-body pre{background-color:#18181b;border-color:#27272a}.prose-body pre code{color:inherit;background:none}.toc{border-left-color:#27272a}.toc a{color:#a1a1aa}.toc a:hover{color:#e4e4e7}.toc a.active{color:#a5b4fc;border-left-color:#a5b4fc}}
+</style></head> <body> <div class="flex-auto pb-20"> <div class="border-b border-zinc-200 dark:border-zinc-800"> <div class="mx-auto w-full max-w-7xl lg:px-8"> <div class="relative px-4 sm:px-8 lg:px-12"> <div class="mx-auto max-w-2xl lg:max-w-5xl flex items-center justify-between py-4"> <a class="site-mark" href="/">scottchacon.com</a> <a class="back-link" href="/posts"><span aria-hidden="true">←</span> all posts</a> </div> </div> </div> </div> <div class="bg-zinc-100 dark:bg-zinc-800/60 border-b border-zinc-200 dark:border-zinc-800"> <div class="mx-auto w-full max-w-7xl lg:px-8"> <div class="relative px-4 sm:px-8 lg:px-12"> <div class="mx-auto max-w-5xl flex flex-wrap items-center gap-x-1.5 gap-y-1 py-2 text-xs text-zinc-400 dark:text-zinc-500"> <span aria-hidden="true" class="leading-none text-zinc-300 dark:text-zinc-600">&#x29D3;</span> <a href="https://gitbutler.com" class="font-medium text-zinc-500 dark:text-zinc-400 transition-colors hover:text-blue-600">gitbutler.com</a> <span>&mdash; What I'm building now: a better version control system</span> </div> </div> </div> </div> <div class="sm:px-8 mt-9"> <div class="mx-auto w-full max-w-7xl lg:px-8"> <div class="relative px-4 sm:px-8 lg:px-12"> <div class="mx-auto max-w-5xl lg:flex lg:justify-between lg:gap-12 lg:mt-16"> <article class="w-full lg:max-w-2xl min-w-0"> <h1 class="font-head text-4xl sm:text-5xl tracking-tight text-zinc-900 dark:text-zinc-100"> Note to Self </h1> <div class="mt-4 flex items-center gap-2 text-sm tracking-tight text-zinc-400"> <time datetime="2010-08-25T00:00:00.000Z">August 25, 2010</time> <span aria-hidden="true">·</span> <span>15 years ago</span> <span aria-hidden="true">·</span> <span>9 min read</span> </div> <div id="post-content" class="prose-body font-blog font-lg leading-7 flex flex-col mt-6 space-y-4"> <p>One of the cool things about Git is that it has strong cryptographic
+integrity.  If you change any bit in the commit data or any of the files it
+keeps, all the checksums change, including the commit SHA and every commit
+SHA since that one.  However, that means that in order to amend the commit
+in any way, for instance to add some comments on something or even sign off
+on a commit, you have to change the SHA of the commit itself.</p>
+<p>Wouldn’t it be nice if you could add data to a commit without changing its
+SHA?  If only there existed an external mechanism to attach data to a commit
+without modifying the commit message itself.  Happy day!  It turns out there
+exists just such a feature in newer versions of Git!  As we can see from the
+Git 1.6.6 release notes where this new functionality was first introduced:</p>
+<pre class="astro-code github-light" style="background-color:#fff;color:#24292e; overflow-x: auto;" tabindex="0" data-language="plaintext"><code><span class="line"><span>* "git notes" command to annotate existing commits.</span></span></code></pre>
+<p>Need any more be said?  Well, maybe.  How do you use it?  What does it do?
+How can it be useful?  I’m not sure I can answer all of these questions, but
+let’s give it a try.  First of all, how does one use it?</p>
+<p>Well, to add a note to a specific commit, you only need to run
+<code>git notes add [commit]</code>, like this:</p>
+<pre class="astro-code github-light" style="background-color:#fff;color:#24292e; overflow-x: auto;" tabindex="0" data-language="plaintext"><code><span class="line"><span>$ git notes add HEAD</span></span></code></pre>
+<p>This will open up your editor to write your commit message.  You can also use
+the <code>-m</code> option to provide the note right on the command line:</p>
+<pre class="astro-code github-light" style="background-color:#fff;color:#24292e; overflow-x: auto;" tabindex="0" data-language="plaintext"><code><span class="line"><span>$ git notes add -m 'I approve - Scott' master~1</span></span></code></pre>
+<p>That will add a note to the first parent on the last commit on the master
+branch.  Now, how to view these notes?  The easiest way is with the <code>git log</code>
+command.</p>
+<pre class="astro-code github-light" style="background-color:#fff;color:#24292e; overflow-x: auto;" tabindex="0" data-language="plaintext"><code><span class="line"><span>$ git log master</span></span>
+<span class="line"><span>commit 0385bcc3bc66d1b1ec07346c237061574335c3b8</span></span>
+<span class="line"><span>Author: Ryan Tomayko &#x3C;rtomayko@gmail.com></span></span>
+<span class="line"><span>Date:   Tue Jun 22 20:09:32 2010 -0700</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>  yield to run block right before accepting connections</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>commit 06ca03a20bb01203e2d6b8996e365f46cb6d59bd</span></span>
+<span class="line"><span>Author: Ryan Tomayko &#x3C;rtomayko@gmail.com></span></span>
+<span class="line"><span>Date:   Wed May 12 06:47:15 2010 -0700</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>  no need to delete these header names now</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>Notes:</span></span>
+<span class="line"><span>  I approve - Scott</span></span></code></pre>
+<p>You can see the notes appended automatically in the log output.  You can only
+have one note per commit in a namespace though (I will explain namespaces in
+the next section), so if you want to add a note to that commit, you have to
+instead edit the existing one.  You can either do this by running:</p>
+<pre class="astro-code github-light" style="background-color:#fff;color:#24292e; overflow-x: auto;" tabindex="0" data-language="plaintext"><code><span class="line"><span>$ git notes edit master~1</span></span></code></pre>
+<p>Which will open a text editor with the existing note so you can edit it:</p>
+<pre class="astro-code github-light" style="background-color:#fff;color:#24292e; overflow-x: auto;" tabindex="0" data-language="plaintext"><code><span class="line"><span>I approve - Scott</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>#</span></span>
+<span class="line"><span># Write/edit the notes for the following object:</span></span>
+<span class="line"><span>#</span></span>
+<span class="line"><span># commit 06ca03a20bb01203e2d6b8996e365f46cb6d59bd</span></span>
+<span class="line"><span># Author: Ryan Tomayko &#x3C;rtomayko@gmail.com></span></span>
+<span class="line"><span># Date:   Wed May 12 06:47:15 2010 -0700</span></span>
+<span class="line"><span># </span></span>
+<span class="line"><span>#     no need to delete these header names now</span></span>
+<span class="line"><span># </span></span>
+<span class="line"><span>#  kidgloves.rb |    2 --</span></span>
+<span class="line"><span>#  1 files changed, 0 insertions(+), 2 deletions(-)</span></span>
+<span class="line"><span>~                                                                               </span></span>
+<span class="line"><span>~                                                                               </span></span>
+<span class="line"><span>~                                                                               </span></span>
+<span class="line"><span>".git/NOTES_EDITMSG" 13L, 338C</span></span></code></pre>
+<p>Sort of weird, but it works.  If you just want to add something to the end of
+an existing note, you can run <code>git notes append SHA</code>, but only in newer
+versions of Git (I think 1.7.1 and above).</p>
+<h2 id="notes-namespaces">Notes Namespaces</h2>
+<p>Since you can only have one note per commit, Git allows you to have multiple
+namespaces for your notes.  The default namespace is called ‘commits’, but
+you can change that.  Let’s say we’re using the ‘commits’ notes namespace to
+store general comments but we want to also store bugzilla information for our
+commits.  We can also have a ‘bugzilla’ namespace.  Here is how we would add
+a bug number to a commit under the bugzilla namespace:</p>
+<pre class="astro-code github-light" style="background-color:#fff;color:#24292e; overflow-x: auto;" tabindex="0" data-language="plaintext"><code><span class="line"><span>$ git notes --ref=bugzilla add -m 'bug #15' 0385bcc3</span></span></code></pre>
+<p>However, now you have to tell Git to specifically look in that namespace:</p>
+<pre class="astro-code github-light" style="background-color:#fff;color:#24292e; overflow-x: auto;" tabindex="0" data-language="plaintext"><code><span class="line"><span>$ git log --show-notes=bugzilla</span></span>
+<span class="line"><span>commit 0385bcc3bc66d1b1ec07346c237061574335c3b8</span></span>
+<span class="line"><span>Author: Ryan Tomayko &#x3C;rtomayko@gmail.com></span></span>
+<span class="line"><span>Date:   Tue Jun 22 20:09:32 2010 -0700</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>  yield to run block right before accepting connections</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>Notes (bugzilla):</span></span>
+<span class="line"><span>  bug #15</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>commit 06ca03a20bb01203e2d6b8996e365f46cb6d59bd</span></span>
+<span class="line"><span>Author: Ryan Tomayko &#x3C;rtomayko@gmail.com></span></span>
+<span class="line"><span>Date:   Wed May 12 06:47:15 2010 -0700</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>  no need to delete these header names now</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>Notes:</span></span>
+<span class="line"><span>  I approve - Scott</span></span></code></pre>
+<p>Notice that it also will show your normal notes.  You can actually have it show
+notes from all your namespaces by running <code>git log --show-notes=*</code> - if you
+have a lot of them, you may want to just alias that.  Here is what your log
+output might look like if you have a number of notes namespaces:</p>
+<pre class="astro-code github-light" style="background-color:#fff;color:#24292e; overflow-x: auto;" tabindex="0" data-language="plaintext"><code><span class="line"><span>$ git log -1 --show-notes=*</span></span>
+<span class="line"><span>commit 0385bcc3bc66d1b1ec07346c237061574335c3b8</span></span>
+<span class="line"><span>Author: Ryan Tomayko &#x3C;rtomayko@gmail.com></span></span>
+<span class="line"><span>Date:   Tue Jun 22 20:09:32 2010 -0700</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>    yield to run block right before accepting connections</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>Notes:</span></span>
+<span class="line"><span>    I approve of this, too - Scott</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>Notes (bugzilla):</span></span>
+<span class="line"><span>    bug #15</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>Notes (build):</span></span>
+<span class="line"><span>    build successful (8/13/10)</span></span></code></pre>
+<p>You can also switch the current namespace you’re using so that the default for
+writing and showing notes is not ‘commits’ but, say, ‘bugzilla’ instead.  If you
+export the variable <code>GIT_NOTES_REF</code> to point to something different, then the
+<code>--ref</code> and <code>--show-notes</code> options are not neccesary.  For example:</p>
+<pre class="astro-code github-light" style="background-color:#fff;color:#24292e; overflow-x: auto;" tabindex="0" data-language="plaintext"><code><span class="line"><span>$ export GIT_NOTES_REF=refs/notes/bugzilla</span></span></code></pre>
+<p>That will set your default to ‘bugzilla’ instead.  It has to start with the ‘refs/notes/’ though.</p>
+<h2 id="sharing-notes">Sharing Notes</h2>
+<p>Now, here is where the general usability of this really breaks down.  I am
+hoping that this will be improved in the future and I put off writing this post
+because of my concern with this phase of the process, but I figured it has
+interesting enough functionality as-is that someone might want to play with it.</p>
+<p>So, the notes (as you may have noticed in the previous section) are stored as
+references, just like branches and tags.  This means you can push them to a
+server.  However, Git has a bit of magic built in to expand a branch name
+like ‘master’ to what it really is, which is ‘refs/heads/master’. Unfortunately,
+Git has no such magic built in for notes.  So, to push your notes to a server,
+you cannot simply run something like <code>git push origin bugzilla</code>.  Git will do
+this:</p>
+<pre class="astro-code github-light" style="background-color:#fff;color:#24292e; overflow-x: auto;" tabindex="0" data-language="plaintext"><code><span class="line"><span>$ git push origin bugzilla</span></span>
+<span class="line"><span>error: src refspec bugzilla does not match any.</span></span>
+<span class="line"><span>error: failed to push some refs to 'git@github.com:schacon/kidgloves.git'</span></span></code></pre>
+<p>However, you can push anything under ‘refs/’ to a server, you just need to be
+more explicit about it.  If you run this it will work fine:</p>
+<pre class="astro-code github-light" style="background-color:#fff;color:#24292e; overflow-x: auto;" tabindex="0" data-language="plaintext"><code><span class="line"><span>$ git push origin refs/notes/bugzilla</span></span>
+<span class="line"><span>Counting objects: 3, done.</span></span>
+<span class="line"><span>Delta compression using up to 2 threads.</span></span>
+<span class="line"><span>Compressing objects: 100% (2/2), done.</span></span>
+<span class="line"><span>Writing objects: 100% (3/3), 263 bytes, done.</span></span>
+<span class="line"><span>Total 3 (delta 0), reused 0 (delta 0)</span></span>
+<span class="line"><span>To git@github.com:schacon/kidgloves.git</span></span>
+<span class="line"><span> * [new branch]      refs/notes/bugzilla -> refs/notes/bugzilla</span></span></code></pre>
+<p>In fact, you may want to just make that <code>git push origin refs/notes/*</code> which
+will push all your notes.  This is what Git does normally for something like
+tags.  When you run <code>git push origin --tags</code> it basically expands to
+<code>git push origin refs/tags/*</code>.</p>
+<h2 id="getting-notes">Getting Notes</h2>
+<p>Unfortunately, getting notes is even more difficult.  Not only is there no
+<code>git fetch --notes</code> or something, you have to specify both sides of the
+refspec (as far as I can tell).</p>
+<pre class="astro-code github-light" style="background-color:#fff;color:#24292e; overflow-x: auto;" tabindex="0" data-language="plaintext"><code><span class="line"><span>$ git fetch origin refs/notes/*:refs/notes/*</span></span>
+<span class="line"><span>remote: Counting objects: 12, done.</span></span>
+<span class="line"><span>remote: Compressing objects: 100% (8/8), done.</span></span>
+<span class="line"><span>remote: Total 12 (delta 0), reused 0 (delta 0)</span></span>
+<span class="line"><span>Unpacking objects: 100% (12/12), done.</span></span>
+<span class="line"><span>From github.com:schacon/kidgloves</span></span>
+<span class="line"><span> * [new branch]      refs/notes/bugzilla -> refs/notes/bugzilla</span></span></code></pre>
+<p>That is basically the only way to get them into your repository from the server.
+Yay.  If you want to, you can setup your Git config file to automatically pull
+them down though.  If you look at your <code>.git/config</code> file you should have a
+section that looks like this:</p>
+<pre class="astro-code github-light" style="background-color:#fff;color:#24292e; overflow-x: auto;" tabindex="0" data-language="plaintext"><code><span class="line"><span>[remote "origin"]</span></span>
+<span class="line"><span>  fetch = +refs/heads/*:refs/remotes/origin/*</span></span>
+<span class="line"><span>  url = git@github.com:schacon/kidgloves.git</span></span></code></pre>
+<p>The ‘fetch’ line is the refspec of what Git will try to do if you run just
+<code>git fetch origin</code>.  It contains the magic formula of what Git will fetch and
+store local references to.  For instance, in this case it will take every
+branch on the server and give you a local branch under ‘remotes/origin/’ so
+you can reference the ‘master’ branch on the server as ‘remotes/origin/master’
+or just ‘origin/master’ (it will look under ‘remotes’ when it’s trying to
+figure out what you’re doing).  If you change that line to
+<code>fetch = +refs/heads/*:refs/remotes/manamana/*</code> then even though your remote
+is named ‘origin’, the master branch from your ‘origin’ server will be under
+‘manamana/master’.</p>
+<p>Anyhow, you can use this to make your notes fetching easier.  If you add
+multiple <code>fetch</code> lines, it will do them all.  So in addition to the current
+<code>fetch</code> line, you can add a line that looks like this:</p>
+<pre class="astro-code github-light" style="background-color:#fff;color:#24292e; overflow-x: auto;" tabindex="0" data-language="plaintext"><code><span class="line"><span>  fetch = +refs/notes/*:refs/notes/*</span></span></code></pre>
+<p>Which says also get all the notes references on the server and store them
+as though they were local notes.  Or you can namespace them if you want, but
+that can cause issues when you try to push them back again.</p>
+<h2 id="collaborating-on-notes">Collaborating on Notes</h2>
+<p>Now, this is where the main problem is.  Merging notes is super difficult.
+This means that if you pull down someone’s notes, you edit any note in a
+namespace locally and the other developer edits any note in that same namespace,
+you’re going to have a hard time getting them back in sync.  When the second
+person tries to push their notes it will look like a non-fast-forward just
+like a normal branch update, but unline a normal branch you can’t just run
+<code>git pull</code> and then try again.  You have to check out your notes ref as if it
+were a normal branch, which will look ridiculously confusing and then do the
+merge and then switch back.  It is do-able, but probably not something you
+really want to do.</p>
+<p>Because of this, it’s probably best to namespace your notes or better
+just have an automated process create them (like build statuses or bugzilla
+artifacts).  If only one entity is updating your notes, you won’t have merge
+issues.  However, if you want to use them to comment on commits within a team,
+it is going to be a bit painful.</p>
+<p>So far, I’ve heard of people using them to have their ticketing system attach
+metadata automatically or have
+<a href="http://article.gmane.org/gmane.comp.version-control.git/109074">a system</a>
+attach associated mailing list emails
+to commits they concern.
+Other people just use them entirely locally without pushing them
+anywhere to store reminders for themselves and whatnot.<br>
+Probably a good start, but the ambitious among you may come up with
+something else interesting to do.  Let me know!</p> </div> </article> <aside id="toc-wrap" class="hidden lg:block flex-none w-60"> <div class="sticky top-12"> <img src="/assets/images/covers/notes.svg" alt="" class="w-full rounded-xl mb-6 ring-1 ring-zinc-900/5 dark:ring-white/10"> <nav id="toc-nav"> <div class="text-xs font-semibold uppercase tracking-widest text-zinc-400 mb-3">On this page</div> <div class="toc" id="toc"></div> </nav> </div> </aside> </div> </div> </div> </div> </div> <script>
+(function () {
+  var content = document.getElementById('post-content');
+  var toc = document.getElementById('toc');
+  var wrap = document.getElementById('toc-wrap');
+  if (!content || !toc) { return; }
+  var hs = Array.prototype.slice.call(content.querySelectorAll('h2, h3'));
+  if (hs.length < 2) {
+    var nav = document.getElementById('toc-nav');
+    if (nav) { nav.style.display = 'none'; }
+    if (wrap && !wrap.querySelector('img')) { wrap.style.display = 'none'; }
+    return;
+  }
+
+  var links = {};
+  hs.forEach(function (h) {
+    if (!h.id) {
+      h.id = h.textContent.trim().toLowerCase()
+        .replace(/[^\w]+/g, '-').replace(/^-+|-+$/g, '');
+    }
+    var a = document.createElement('a');
+    a.href = '#' + h.id;
+    a.textContent = h.textContent;
+    a.className = h.tagName === 'H3' ? 'lvl-3' : 'lvl-2';
+    toc.appendChild(a);
+    links[h.id] = a;
+  });
+
+  var current = null;
+  function setActive(id) {
+    if (current === id || !links[id]) { return; }
+    if (current && links[current]) { links[current].classList.remove('active'); }
+    current = id;
+    links[id].classList.add('active');
+  }
+
+  var visible = {};
+  var obs = new IntersectionObserver(function (entries) {
+    entries.forEach(function (e) {
+      if (e.isIntersecting) { visible[e.target.id] = true; }
+      else { delete visible[e.target.id]; }
+    });
+    var best = null, bestTop = Infinity;
+    hs.forEach(function (h) {
+      if (visible[h.id]) {
+        var t = h.getBoundingClientRect().top;
+        if (t < bestTop) { bestTop = t; best = h.id; }
+      }
+    });
+    if (best) { setActive(best); }
+    else {
+      var above = null;
+      hs.forEach(function (h) {
+        if (h.getBoundingClientRect().top < 120) { above = h.id; }
+      });
+      if (above) { setActive(above); }
+    }
+  }, { rootMargin: '-80px 0px -65% 0px', threshold: 0 });
+
+  hs.forEach(function (h) { obs.observe(h); });
+  setActive(hs[0].id);
+})();
+</script> </body> </html>

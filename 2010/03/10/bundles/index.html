@@ -1,0 +1,181 @@
+<!DOCTYPE html><html lang="en-US"> <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="author" content="Scott Chacon"><meta name="description" content="Moving commits between repositories with no network at all, by packaging a push into a git bundle file."><meta property="og:type" content="article"><meta property="og:site_name" content="Scott Chacon"><meta property="og:title" content="Git's Little Bundle of Joy"><meta property="og:description" content="Moving commits between repositories with no network at all, by packaging a push into a git bundle file."><meta property="og:image" content="https://scottchacon.com/assets/images/covers/bundles.png"><meta property="og:url" content="https://scottchacon.com/2010/03/10/bundles/"><meta property="article:published_time" content="2010-03-10T00:00:00.000Z"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:site" content="@chacon"><meta name="twitter:creator" content="@chacon"><meta name="twitter:title" content="Git's Little Bundle of Joy"><meta name="twitter:description" content="Moving commits between repositories with no network at all, by packaging a push into a git bundle file."><meta name="twitter:image" content="https://scottchacon.com/assets/images/covers/bundles.png"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;900&family=Roboto+Mono:wght@300;400&family=Roboto:wght@100;300;400;500;700&family=Source+Serif+4:opsz,wght@8..60,300;8..60,400&display=swap" rel="stylesheet"><title>Git&#39;s Little Bundle of Joy - Scott Chacon</title><!-- Privacy-friendly analytics by Plausible --><script async src="https://plausible.io/js/pa-L3isa8WSnas7pGAEYbsHg.js"></script><script>
+    window.plausible=window.plausible||function(){(plausible.q=plausible.q||[]).push(arguments)},plausible.init=plausible.init||function(i){plausible.o=i||{}};
+    plausible.init()
+  </script><link rel="stylesheet" href="/_astro/about.ByQc9HF7.css">
+<style>.prose-body a{color:#55f}.prose-body blockquote{background:#eee;color:#666;border-left:2px solid #888;padding:12px;line-height:1.8em;font-style:italic}.prose-body h2{font-size:2em;margin-top:30px!important;font-weight:700}.prose-body h3{font-size:1.8em;margin-top:30px!important;font-weight:700}.prose-body h4{font-size:1.4em;margin-top:30px!important;font-weight:700}.prose-body code{font-family:var(--font-mono);font-size:.85em;color:#be123c;background-color:#f4f4f5;border:1px solid #e4e4e7;border-radius:4px;padding:.1em .35em;line-height:inherit}.prose-body pre{line-height:1.4em;width:100%;background-color:#f4f4f5;border:1px solid #e4e4e7;border-radius:6px;padding:12px;overflow-x:auto}.prose-body pre[data-language=small]{font-size:.7em;line-height:1.5}.prose-body pre[data-language=small] code{font-size:1em}.prose-body pre code{color:inherit;background:none;border:0;border-radius:0;padding:0;font-size:.9em}.prose-body ul{list-style:circle;margin-left:30px}.prose-body ul li{margin-bottom:10px}.prose-body p{font-size:1.1em;letter-spacing:-.003em;line-height:32px;font-weight:400}.prose-body img{max-width:100%;height:auto}.prose-body figure{margin:32px 0}.prose-body figure img{width:100%;border-radius:12px;display:block}.prose-body figcaption{text-align:center;font-size:.9em;color:#888;margin-top:10px;font-style:italic}.toc{border-left:1px solid #e4e4e7}.toc a{display:block;padding:5px 0 5px 16px;margin-left:-1px;border-left:2px solid transparent;color:#71717a;font-size:.9em;line-height:1.4;text-decoration:none;transition:color .15s,border-color .15s}.toc a.lvl-3{padding-left:32px;font-size:.85em}.toc a:hover{color:#3f3f46}.toc a.active{color:#55f;border-left-color:#55f;font-weight:500}@media(prefers-color-scheme:dark){.prose-body code{color:#fda4af;background-color:#27272a;border-color:#3f3f46}.prose-body pre{background-color:#18181b;border-color:#27272a}.prose-body pre code{color:inherit;background:none}.toc{border-left-color:#27272a}.toc a{color:#a1a1aa}.toc a:hover{color:#e4e4e7}.toc a.active{color:#a5b4fc;border-left-color:#a5b4fc}}
+</style></head> <body> <div class="flex-auto pb-20"> <div class="border-b border-zinc-200 dark:border-zinc-800"> <div class="mx-auto w-full max-w-7xl lg:px-8"> <div class="relative px-4 sm:px-8 lg:px-12"> <div class="mx-auto max-w-2xl lg:max-w-5xl flex items-center justify-between py-4"> <a class="site-mark" href="/">scottchacon.com</a> <a class="back-link" href="/posts"><span aria-hidden="true">←</span> all posts</a> </div> </div> </div> </div> <div class="bg-zinc-100 dark:bg-zinc-800/60 border-b border-zinc-200 dark:border-zinc-800"> <div class="mx-auto w-full max-w-7xl lg:px-8"> <div class="relative px-4 sm:px-8 lg:px-12"> <div class="mx-auto max-w-5xl flex flex-wrap items-center gap-x-1.5 gap-y-1 py-2 text-xs text-zinc-400 dark:text-zinc-500"> <span aria-hidden="true" class="leading-none text-zinc-300 dark:text-zinc-600">&#x29D3;</span> <a href="https://gitbutler.com" class="font-medium text-zinc-500 dark:text-zinc-400 transition-colors hover:text-blue-600">gitbutler.com</a> <span>&mdash; What I'm building now: a better version control system</span> </div> </div> </div> </div> <div class="sm:px-8 mt-9"> <div class="mx-auto w-full max-w-7xl lg:px-8"> <div class="relative px-4 sm:px-8 lg:px-12"> <div class="mx-auto max-w-5xl lg:flex lg:justify-between lg:gap-12 lg:mt-16"> <article class="w-full lg:max-w-2xl min-w-0"> <h1 class="font-head text-4xl sm:text-5xl tracking-tight text-zinc-900 dark:text-zinc-100"> Git&#39;s Little Bundle of Joy </h1> <div class="mt-4 flex items-center gap-2 text-sm tracking-tight text-zinc-400"> <time datetime="2010-03-10T00:00:00.000Z">March 10, 2010</time> <span aria-hidden="true">·</span> <span>16 years ago</span> <span aria-hidden="true">·</span> <span>5 min read</span> </div> <div id="post-content" class="prose-body font-blog font-lg leading-7 flex flex-col mt-6 space-y-4"> <p>The scenario is thus: you need to sneakernet a <code>git push</code>.  Maybe your network
+is down and you want to send changes to your co-workers.  Perhaps you’re working
+somewhere onsite and don’t have access to the local network for security reasons.
+Maybe your wireless/ethernet card just broke.  Maybe you don’t have access to
+a shared server for the moment, you want to email someone updates and you don’t
+want to transfer 40 commits via <code>format-patch</code>.</p>
+<p>Enter <code>git bundle</code>.  The <code>bundle</code> command will package up everything that would
+normally be pushed over the wire with a <code>git push</code> command into a binary file
+that you can email or sneakernet around, then unbundle into another repository.</p>
+<p>Let’s see a simple example.  Let’s say you have a repository with two commits:</p>
+<pre class="astro-code github-light" style="background-color:#fff;color:#24292e; overflow-x: auto;" tabindex="0" data-language="plaintext"><code><span class="line"><span>$ git log</span></span>
+<span class="line"><span>commit 9a466c572fe88b195efd356c3f2bbeccdb504102</span></span>
+<span class="line"><span>Author: Scott Chacon &#x3C;schacon@gmail.com></span></span>
+<span class="line"><span>Date:   Wed Mar 10 07:34:10 2010 -0800</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>    second commit</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>commit b1ec3248f39900d2a406049d762aa68e9641be25</span></span>
+<span class="line"><span>Author: Scott Chacon &#x3C;schacon@gmail.com></span></span>
+<span class="line"><span>Date:   Wed Mar 10 07:34:01 2010 -0800</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>    first commit</span></span></code></pre>
+<p>If you want to send that repository to someone and you don’t have access to
+a repository to push to, or simply don’t want to set one up, you can bundle it.</p>
+<pre class="astro-code github-light" style="background-color:#fff;color:#24292e; overflow-x: auto;" tabindex="0" data-language="plaintext"><code><span class="line"><span>$ git bundle create repo.bundle master</span></span>
+<span class="line"><span>Counting objects: 6, done.</span></span>
+<span class="line"><span>Delta compression using up to 2 threads.</span></span>
+<span class="line"><span>Compressing objects: 100% (2/2), done.</span></span>
+<span class="line"><span>Writing objects: 100% (6/6), 441 bytes, done.</span></span>
+<span class="line"><span>Total 6 (delta 0), reused 0 (delta 0)</span></span></code></pre>
+<p>Now you have a file named <code>repo.bundle</code> that has all the data needed to re-create
+the repository.  You can email that to someone else, or put it on a USB drive
+and walk it over.</p>
+<p>Now on the other side, say you are sent this <code>repo.bundle</code> file and want to work
+on the project.</p>
+<pre class="astro-code github-light" style="background-color:#fff;color:#24292e; overflow-x: auto;" tabindex="0" data-language="plaintext"><code><span class="line"><span>$ git clone repo.bundle -b master repo</span></span>
+<span class="line"><span>Initialized empty Git repository in /private/tmp/bundle/repo/.git/</span></span>
+<span class="line"><span>$ cd repo</span></span>
+<span class="line"><span>$ git log --oneline</span></span>
+<span class="line"><span>9a466c5 second commit</span></span>
+<span class="line"><span>b1ec324 first commit</span></span></code></pre>
+<p>I had to specify <code>-b master</code> because otherwise it couldn’t find the HEAD
+reference for some reason, but you may not need to do that.  The point is, you
+have now cloned directly from a file, rather than from a remote server.</p>
+<p>Now let’s say you do three commits on it and want to send the new commits back
+via a bundle on a usb stick or email.</p>
+<pre class="astro-code github-light" style="background-color:#fff;color:#24292e; overflow-x: auto;" tabindex="0" data-language="plaintext"><code><span class="line"><span>$ git log --oneline</span></span>
+<span class="line"><span>71b84da last commit - second repo</span></span>
+<span class="line"><span>c99cf5b fourth commit - second repo</span></span>
+<span class="line"><span>7011d3d third commit - second repo</span></span>
+<span class="line"><span>9a466c5 second commit</span></span>
+<span class="line"><span>b1ec324 first commit</span></span></code></pre>
+<p>First we need to determine the range of commits we want to include in the bundle.
+The easiest way would have been to drop a branch when we started, so we could
+say <code>start_branch..master</code> or <code>master ^start_branch</code>, but if we didn’t we can
+just list the starting SHA explicitly:</p>
+<pre class="astro-code github-light" style="background-color:#fff;color:#24292e; overflow-x: auto;" tabindex="0" data-language="plaintext"><code><span class="line"><span>$ git log --oneline master ^9a466c5</span></span>
+<span class="line"><span>71b84da last commit - second repo</span></span>
+<span class="line"><span>c99cf5b fourth commit - second repo</span></span>
+<span class="line"><span>7011d3d third commit - second repo</span></span></code></pre>
+<p>So we have the list of commits we want to include in the bundle, let’s bundle
+em up.  We do that with the <code>git bundle create</code> command, giving it a filename
+we want our bundle to be and the range of commits we want to go into it.</p>
+<pre class="astro-code github-light" style="background-color:#fff;color:#24292e; overflow-x: auto;" tabindex="0" data-language="plaintext"><code><span class="line"><span>$ git bundle create commits.bundle master ^9a466c5</span></span>
+<span class="line"><span>Counting objects: 11, done.</span></span>
+<span class="line"><span>Delta compression using up to 2 threads.</span></span>
+<span class="line"><span>Compressing objects: 100% (3/3), done.</span></span>
+<span class="line"><span>Writing objects: 100% (9/9), 775 bytes, done.</span></span>
+<span class="line"><span>Total 9 (delta 0), reused 0 (delta 0)</span></span></code></pre>
+<p>Now we will have a <code>commits.bundle</code> file in our directory.  If we take that and
+send it to our partner, she can then import it into the original repository,
+even if more work has been done there in the meantime.</p>
+<p>When she gets the bundle, she can inspect it to see what it contains before she
+imports it into her repository.  The first command is the <code>bundle verify</code> command
+that will make sure the file is actually a valid Git bundle and that you have
+all the neccesary ancestors to reconstitute it properly.</p>
+<pre class="astro-code github-light" style="background-color:#fff;color:#24292e; overflow-x: auto;" tabindex="0" data-language="plaintext"><code><span class="line"><span>$ git bundle verify ../commits.bundle</span></span>
+<span class="line"><span>The bundle contains 1 ref</span></span>
+<span class="line"><span>71b84daaf49abed142a373b6e5c59a22dc6560dc refs/heads/master</span></span>
+<span class="line"><span>The bundle requires these 1 ref</span></span>
+<span class="line"><span>9a466c572fe88b195efd356c3f2bbeccdb504102 second commit</span></span>
+<span class="line"><span>../commits.bundle is okay</span></span></code></pre>
+<p>If the bundler had created a bundle of just the last two commits they had done,
+rather than all three, the original repository would not be able to import it,
+since it is missing requisite history.  The <code>verify</code> command would have looked
+like this instead:</p>
+<pre class="astro-code github-light" style="background-color:#fff;color:#24292e; overflow-x: auto;" tabindex="0" data-language="plaintext"><code><span class="line"><span>$ git bundle verify ../commits-bad.bundle</span></span>
+<span class="line"><span>error: Repository lacks these prerequisite commits:</span></span>
+<span class="line"><span>error: 7011d3d8fc200abe0ad561c011c3852a4b7bbe95 third commit - second repo</span></span></code></pre>
+<p>However, our first bundle is valid, so we can fetch in commits from it.  If you
+want to see what branches are in the bundle that can be imported, there is also
+a command to just list the heads:</p>
+<pre class="astro-code github-light" style="background-color:#fff;color:#24292e; overflow-x: auto;" tabindex="0" data-language="plaintext"><code><span class="line"><span>$ git bundle list-heads ../commits.bundle</span></span>
+<span class="line"><span>71b84daaf49abed142a373b6e5c59a22dc6560dc refs/heads/master</span></span></code></pre>
+<p>The <code>verify</code> sub-command will tell you the heads, too, as will a normal
+<code>git ls-remote</code> command, which you may have used for debugging before.  The point
+is to see what can be pulled in, so you can use the <code>fetch</code> or <code>pull</code> commands
+to import commits from this bundle.  Here we’ll fetch the ‘master’ branch of
+the bundle to a branch named ‘other-master’ in our repository:</p>
+<pre class="astro-code github-light" style="background-color:#fff;color:#24292e; overflow-x: auto;" tabindex="0" data-language="plaintext"><code><span class="line"><span>$ git fetch ../commits.bundle master:other-master</span></span>
+<span class="line"><span>From ../commits.bundle</span></span>
+<span class="line"><span> * [new branch]      master     -> other-master</span></span></code></pre>
+<p>Now we can see that we have the imported commits on the ‘other-master’ branch
+as well as any commits we’ve done in the meantime in our own ‘master’ branch.</p>
+<pre class="astro-code github-light" style="background-color:#fff;color:#24292e; overflow-x: auto;" tabindex="0" data-language="plaintext"><code><span class="line"><span>$ git log --oneline --decorate --graph --all</span></span>
+<span class="line"><span>* 8255d41 (HEAD, master) third commit - first repo</span></span>
+<span class="line"><span>| * 71b84da (other-master) last commit - second repo</span></span>
+<span class="line"><span>| * c99cf5b fourth commit - second repo</span></span>
+<span class="line"><span>| * 7011d3d third commit - second repo</span></span>
+<span class="line"><span>|/</span></span>
+<span class="line"><span>* 9a466c5 second commit</span></span>
+<span class="line"><span>* b1ec324 first commit</span></span></code></pre>
+<p>So, <code>git bundle</code> can be really useful for doing network-y, share-y operations
+when you don’t have the proper network or shared repository to do so.</p> </div> </article> <aside id="toc-wrap" class="hidden lg:block flex-none w-60"> <div class="sticky top-12"> <img src="/assets/images/covers/bundles.svg" alt="" class="w-full rounded-xl mb-6 ring-1 ring-zinc-900/5 dark:ring-white/10"> <nav id="toc-nav"> <div class="text-xs font-semibold uppercase tracking-widest text-zinc-400 mb-3">On this page</div> <div class="toc" id="toc"></div> </nav> </div> </aside> </div> </div> </div> </div> </div> <script>
+(function () {
+  var content = document.getElementById('post-content');
+  var toc = document.getElementById('toc');
+  var wrap = document.getElementById('toc-wrap');
+  if (!content || !toc) { return; }
+  var hs = Array.prototype.slice.call(content.querySelectorAll('h2, h3'));
+  if (hs.length < 2) {
+    var nav = document.getElementById('toc-nav');
+    if (nav) { nav.style.display = 'none'; }
+    if (wrap && !wrap.querySelector('img')) { wrap.style.display = 'none'; }
+    return;
+  }
+
+  var links = {};
+  hs.forEach(function (h) {
+    if (!h.id) {
+      h.id = h.textContent.trim().toLowerCase()
+        .replace(/[^\w]+/g, '-').replace(/^-+|-+$/g, '');
+    }
+    var a = document.createElement('a');
+    a.href = '#' + h.id;
+    a.textContent = h.textContent;
+    a.className = h.tagName === 'H3' ? 'lvl-3' : 'lvl-2';
+    toc.appendChild(a);
+    links[h.id] = a;
+  });
+
+  var current = null;
+  function setActive(id) {
+    if (current === id || !links[id]) { return; }
+    if (current && links[current]) { links[current].classList.remove('active'); }
+    current = id;
+    links[id].classList.add('active');
+  }
+
+  var visible = {};
+  var obs = new IntersectionObserver(function (entries) {
+    entries.forEach(function (e) {
+      if (e.isIntersecting) { visible[e.target.id] = true; }
+      else { delete visible[e.target.id]; }
+    });
+    var best = null, bestTop = Infinity;
+    hs.forEach(function (h) {
+      if (visible[h.id]) {
+        var t = h.getBoundingClientRect().top;
+        if (t < bestTop) { bestTop = t; best = h.id; }
+      }
+    });
+    if (best) { setActive(best); }
+    else {
+      var above = null;
+      hs.forEach(function (h) {
+        if (h.getBoundingClientRect().top < 120) { above = h.id; }
+      });
+      if (above) { setActive(above); }
+    }
+  }, { rootMargin: '-80px 0px -65% 0px', threshold: 0 });
+
+  hs.forEach(function (h) { obs.observe(h); });
+  setActive(hs[0].id);
+})();
+</script> </body> </html>

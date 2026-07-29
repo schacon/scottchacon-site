@@ -1,0 +1,195 @@
+<!DOCTYPE html><html lang="en-US"> <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="author" content="Scott Chacon"><meta name="description" content="The new Smart HTTP transport in Git, and how it makes cloning and fetching over plain HTTP fast."><meta property="og:type" content="article"><meta property="og:site_name" content="Scott Chacon"><meta property="og:title" content="Smart HTTP Transport"><meta property="og:description" content="The new Smart HTTP transport in Git, and how it makes cloning and fetching over plain HTTP fast."><meta property="og:image" content="https://scottchacon.com/assets/images/covers/smart-http.png"><meta property="og:url" content="https://scottchacon.com/2010/03/04/smart-http/"><meta property="article:published_time" content="2010-03-04T00:00:00.000Z"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:site" content="@chacon"><meta name="twitter:creator" content="@chacon"><meta name="twitter:title" content="Smart HTTP Transport"><meta name="twitter:description" content="The new Smart HTTP transport in Git, and how it makes cloning and fetching over plain HTTP fast."><meta name="twitter:image" content="https://scottchacon.com/assets/images/covers/smart-http.png"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;900&family=Roboto+Mono:wght@300;400&family=Roboto:wght@100;300;400;500;700&family=Source+Serif+4:opsz,wght@8..60,300;8..60,400&display=swap" rel="stylesheet"><title>Smart HTTP Transport - Scott Chacon</title><!-- Privacy-friendly analytics by Plausible --><script async src="https://plausible.io/js/pa-L3isa8WSnas7pGAEYbsHg.js"></script><script>
+    window.plausible=window.plausible||function(){(plausible.q=plausible.q||[]).push(arguments)},plausible.init=plausible.init||function(i){plausible.o=i||{}};
+    plausible.init()
+  </script><link rel="stylesheet" href="/_astro/about.ByQc9HF7.css">
+<style>.prose-body a{color:#55f}.prose-body blockquote{background:#eee;color:#666;border-left:2px solid #888;padding:12px;line-height:1.8em;font-style:italic}.prose-body h2{font-size:2em;margin-top:30px!important;font-weight:700}.prose-body h3{font-size:1.8em;margin-top:30px!important;font-weight:700}.prose-body h4{font-size:1.4em;margin-top:30px!important;font-weight:700}.prose-body code{font-family:var(--font-mono);font-size:.85em;color:#be123c;background-color:#f4f4f5;border:1px solid #e4e4e7;border-radius:4px;padding:.1em .35em;line-height:inherit}.prose-body pre{line-height:1.4em;width:100%;background-color:#f4f4f5;border:1px solid #e4e4e7;border-radius:6px;padding:12px;overflow-x:auto}.prose-body pre[data-language=small]{font-size:.7em;line-height:1.5}.prose-body pre[data-language=small] code{font-size:1em}.prose-body pre code{color:inherit;background:none;border:0;border-radius:0;padding:0;font-size:.9em}.prose-body ul{list-style:circle;margin-left:30px}.prose-body ul li{margin-bottom:10px}.prose-body p{font-size:1.1em;letter-spacing:-.003em;line-height:32px;font-weight:400}.prose-body img{max-width:100%;height:auto}.prose-body figure{margin:32px 0}.prose-body figure img{width:100%;border-radius:12px;display:block}.prose-body figcaption{text-align:center;font-size:.9em;color:#888;margin-top:10px;font-style:italic}.toc{border-left:1px solid #e4e4e7}.toc a{display:block;padding:5px 0 5px 16px;margin-left:-1px;border-left:2px solid transparent;color:#71717a;font-size:.9em;line-height:1.4;text-decoration:none;transition:color .15s,border-color .15s}.toc a.lvl-3{padding-left:32px;font-size:.85em}.toc a:hover{color:#3f3f46}.toc a.active{color:#55f;border-left-color:#55f;font-weight:500}@media(prefers-color-scheme:dark){.prose-body code{color:#fda4af;background-color:#27272a;border-color:#3f3f46}.prose-body pre{background-color:#18181b;border-color:#27272a}.prose-body pre code{color:inherit;background:none}.toc{border-left-color:#27272a}.toc a{color:#a1a1aa}.toc a:hover{color:#e4e4e7}.toc a.active{color:#a5b4fc;border-left-color:#a5b4fc}}
+</style></head> <body> <div class="flex-auto pb-20"> <div class="border-b border-zinc-200 dark:border-zinc-800"> <div class="mx-auto w-full max-w-7xl lg:px-8"> <div class="relative px-4 sm:px-8 lg:px-12"> <div class="mx-auto max-w-2xl lg:max-w-5xl flex items-center justify-between py-4"> <a class="site-mark" href="/">scottchacon.com</a> <a class="back-link" href="/posts"><span aria-hidden="true">←</span> all posts</a> </div> </div> </div> </div> <div class="bg-zinc-100 dark:bg-zinc-800/60 border-b border-zinc-200 dark:border-zinc-800"> <div class="mx-auto w-full max-w-7xl lg:px-8"> <div class="relative px-4 sm:px-8 lg:px-12"> <div class="mx-auto max-w-5xl flex flex-wrap items-center gap-x-1.5 gap-y-1 py-2 text-xs text-zinc-400 dark:text-zinc-500"> <span aria-hidden="true" class="leading-none text-zinc-300 dark:text-zinc-600">&#x29D3;</span> <a href="https://gitbutler.com" class="font-medium text-zinc-500 dark:text-zinc-400 transition-colors hover:text-blue-600">gitbutler.com</a> <span>&mdash; What I'm building now: a better version control system</span> </div> </div> </div> </div> <div class="sm:px-8 mt-9"> <div class="mx-auto w-full max-w-7xl lg:px-8"> <div class="relative px-4 sm:px-8 lg:px-12"> <div class="mx-auto max-w-5xl lg:flex lg:justify-between lg:gap-12 lg:mt-16"> <article class="w-full lg:max-w-2xl min-w-0"> <h1 class="font-head text-4xl sm:text-5xl tracking-tight text-zinc-900 dark:text-zinc-100"> Smart HTTP Transport </h1> <div class="mt-4 flex items-center gap-2 text-sm tracking-tight text-zinc-400"> <time datetime="2010-03-04T00:00:00.000Z">March 4, 2010</time> <span aria-hidden="true">·</span> <span>16 years ago</span> <span aria-hidden="true">·</span> <span>6 min read</span> </div> <div id="post-content" class="prose-body font-blog font-lg leading-7 flex flex-col mt-6 space-y-4"> <p>When I was done writing Pro Git, the only transfer protocols that existed were
+the <code>git://</code>, <code>ssh://</code> and basic <code>http://</code> transports.  I wrote about the basic
+strengths and weaknesses of each in <a href="/book/ch4-1.html">Chapter 4</a>.
+At the time, one of the big differences between Git and most other VCS’s was
+that HTTP was not a mainly used protocol - that’s because it was read-only and
+very inefficient.  Git would simply use the webserver to ask for individual
+objects and packfiles that it needed.  It would even ask for big packfiles even
+if it only needed one object from it.</p>
+<p>As of the release of version 1.6.6 at the end of last year, however, Git can
+now use the HTTP protocol just about as efficiently as the <code>git</code> or <code>ssh</code>
+versions (thanks to the amazing work by Shawn Pearce, who also happened to have
+been the technical editor of Pro Git).  Amusingly, it has been given very little
+fanfare - the release notes for 1.6.6 state only this:</p>
+<pre class="astro-code github-light" style="background-color:#fff;color:#24292e; overflow-x: auto;" tabindex="0" data-language="plaintext"><code><span class="line"><span>* "git fetch" over http learned a new mode that is different from the</span></span>
+<span class="line"><span>  traditional "dumb commit walker".</span></span></code></pre>
+<p>Which is a huge understatement, given that I think this will become the
+standard Git protocol in the very near future.  I believe this because it’s
+both efficient and can be run either secure and authenticated (https) or open
+and unauthenticated (http).  It also has the huge advantage that most
+firewalls have those ports (80 and 443) open already and normal users don’t
+have to deal with <code>ssh-keygen</code> and the like.  Once most clients have updated
+to at least v1.6.6, <code>http</code> will have a big place in the Git world.</p>
+<h2>What is "Smart" HTTP?</h2>
+<p>Before version 1.6.6, Git clients, when you clone or fetch over HTTP would
+basically just do a series of GETs to grab individual objects and packfiles on
+the server from bare Git repositories, since it knows the layout of the repo.
+This functionality is documented fairly completely in <a href="http://progit.org/book/ch9-6.html">Chapter 9</a>.
+Conversations over this protocol used to look like this:</p>
+<pre class="astro-code github-light" style="background-color:#fff;color:#24292e; overflow-x: auto;" tabindex="0" data-language="plaintext"><code><span class="line"><span>$ git clone http://github.com/schacon/simplegit-progit.git</span></span>
+<span class="line"><span>Initialized empty Git repository in /private/tmp/simplegit-progit/.git/</span></span>
+<span class="line"><span>got ca82a6dff817ec66f44342007202690a93763949</span></span>
+<span class="line"><span>walk ca82a6dff817ec66f44342007202690a93763949</span></span>
+<span class="line"><span>got 085bb3bcb608e1e8451d4b2432f8ecbe6306e7e7</span></span>
+<span class="line"><span>Getting alternates list for http://github.com/schacon/simplegit-progit.git</span></span>
+<span class="line"><span>Getting pack list for http://github.com/schacon/simplegit-progit.git</span></span>
+<span class="line"><span>Getting index for pack 816a9b2334da9953e530f27bcac22082a9f5b835</span></span>
+<span class="line"><span>Getting pack 816a9b2334da9953e530f27bcac22082a9f5b835</span></span>
+<span class="line"><span> which contains cfda3bf379e4f8dba8717dee55aab78aef7f4daf</span></span>
+<span class="line"><span>walk 085bb3bcb608e1e8451d4b2432f8ecbe6306e7e7</span></span>
+<span class="line"><span>walk a11bef06a3f659402fe7563abf99ad00de2209e6</span></span></code></pre>
+<p>It is a completly passive server, and if the client needs one object in a packfile
+of thousands, the server cannot pull the single object out, the client is forced
+to request the entire packfile.</p>
+<img src="/images/smarthttp1.png">
+<p>In contrast, the smarter protocols (<code>git</code> and <code>ssh</code>) would instead have a
+conversation with the <code>git upload-pack</code> process on the server which would
+determine the exact set of objects the client needs and build a custom packfile
+with just those objects and stream it over.</p>
+<p>The new clients will now send a request with an extra GET parameter that older
+servers will simply ignore, but servers running the smart CGI will recognize
+and switch modes to a multi-POST mode that is similar to the conversation that
+happens over the <code>git</code> protocol.  Once this series of POSTs is complete, the
+server knows what objects the client needs and can build a custom packfile and
+stream it back.</p>
+<img src="/images/smarthttp2.png">
+<p>Furthermore, in the olden days if you wanted to push over http, you had to setup
+a DAV-based server, which was rather difficult and also pretty inefficient compared
+to the smarter protocols.  Now you can push over this CGI, which again is very
+similar to the push mechanisms for the <code>git</code> and <code>ssh</code> protocols.  You simply
+have to authenticate via an HTTP-based method, like basic auth or the like
+(assuming you don’t want your repository to be world-writable).</p>
+<p>The rest of this article will explain setting up a server with the “smart”-http
+protocol, so you can test out this cool new feature.  This feature is referred
+to as “smart” HTTP vs “dumb” HTTP because it requires having the Git binary
+installed on the server, where the previous incantation of HTTP transfer
+required only a simple webserver.  It has a real conversation with the client,
+rather than just dumbly pushing out data.</p>
+<h2>Setting up Smart HTTP</h2>
+<p>So, Smart-HTTP is basically just enabling the new CGI script that is provided
+with Git called
+<a href="http://www.kernel.org/pub/software/scm/git/docs/git-http-backend.html"><code>git-http-backend</code></a>
+on the server.  This CGI will read the path and
+headers sent by the revamped <code>git fetch</code> and <code>git push</code> binaries who have
+learned to communicate in a specific way with a smart server.  If the CGI sees
+that the client is smart, it will communicate smartly with it, otherwise it will
+simply fall back to the dumb behavior (so it is backward compatible for reads
+with older clients).</p>
+<p>To set it up, it’s best to walk through the instructions on the
+<a href="http://www.kernel.org/pub/software/scm/git/docs/git-http-backend.html"><code>git-http-backend</code></a>
+documentation page.  Basically, you have to install Git v1.6.6 or higher on
+a server with an Apache 2.x webserver (it has to be Apache, currently - other
+CGI servers don’t work, last I checked).  Then you add something similar to this
+to your http.conf file:</p>
+<pre class="astro-code github-light" style="background-color:#fff;color:#24292e; overflow-x: auto;" tabindex="0" data-language="plaintext"><code><span class="line"><span>SetEnv GIT_PROJECT_ROOT /var/www/git</span></span>
+<span class="line"><span>SetEnv GIT_HTTP_EXPORT_ALL</span></span>
+<span class="line"><span>ScriptAlias /git/ /usr/libexec/git-core/git-http-backend/</span></span></code></pre>
+<p>Then you’ll want to make writes be authenticated somehow, possibly with an Auth
+block like this:</p>
+<pre class="astro-code github-light" style="background-color:#fff;color:#24292e; overflow-x: auto;" tabindex="0" data-language="plaintext"><code><span class="line"><span>&#x3C;LocationMatch "^/git/.*/git-receive-pack$"></span></span>
+<span class="line"><span>        AuthType Basic</span></span>
+<span class="line"><span>        AuthName "Git Access"</span></span>
+<span class="line"><span>        Require group committers</span></span>
+<span class="line"><span>        ...</span></span>
+<span class="line"><span>&#x3C;/LocationMatch></span></span></code></pre>
+<p>That is all that is really required to get this running.  Now you have a smart
+http-based Git server that can do anonymous reads and authenticated writes with
+clients that have upgraded to 1.6.6 and above.
+How awesome is that?  The <a href="http://www.kernel.org/pub/software/scm/git/docs/git-http-backend.html">documentation</a>
+goes over more complex examples, like making it work with GitWeb and accelerating
+the dumb fallback reads, if you’re interested.</p>
+<h2>Rack-based Git Server</h2>
+<p>If you’re not a fan of Apache or you’re running some other web server, you may
+want to take a look at an app that I wrote called <a href="http://github.com/schacon/grack">Grack</a>, which
+is a <a href="http://rack.rubyforge.org/">Rack</a>-based application for Smart-HTTP Git.
+<a href="http://rack.rubyforge.org/">Rack</a> is a generic webserver interface
+for Ruby (similar to WSGI for Python) that has adapters for a ton of web servers.
+It basically replaces <code>git http-backend</code> for non-Apache servers that can’t run it.</p>
+<p>This means that I can write the web handler independent of the web server and it
+will work with any web server that has a Rack handler.  This currently means any FCGI server,
+Mongrel (and EventedMongrel and SwiftipliedMongrel), WEBrick, SCGI, LiteSpeed,
+Thin, Ebb, Phusion Passenger and Unicorn.  Even cooler, using
+<a href="http://caldersphere.rubyforge.org/warbler/classes/Warbler.html">Warbler</a>
+and JRuby, you can generate a WAR file that is deployable in any Java web
+application server (Tomcat, Glassfish, Websphere, JBoss, etc).</p>
+<p>So, if you don’t use Apache and you are interested in a Smart-HTTP Git server,
+you may want to check out Grack.  At <a href="http://github.com">GitHub</a>, this
+is the adapter we’re using to eventually implement Smart-HTTP support for all
+the GitHub repositories. (It’s currently a tad bit behind, but I’ll be starting
+up on it again soon as I get it into production at GitHub - send pull requests if you
+find any issues)</p>
+<p>Grack is about half as fast as the Apache version for simple ref-listing stuff,
+but we’re talking 10ths of a second.  For most clones and pushes, the data transfer
+will be the main time-sink, so the load time of the app should be negligible.</p>
+<h2>In Conclusion</h2>
+<p>I think HTTP based Git will be a huge part of the future of Git, so if you’re
+running your own Git server, you should really check it out.  If you’re not,
+GitHub and I’m sure other hosts will soon be supporting it - upgrade your Git
+client to 1.7ish soon so you can take advantage of it when it happens.</p> </div> </article> <aside id="toc-wrap" class="hidden lg:block flex-none w-60"> <div class="sticky top-12"> <img src="/assets/images/covers/smart-http.svg" alt="" class="w-full rounded-xl mb-6 ring-1 ring-zinc-900/5 dark:ring-white/10"> <nav id="toc-nav"> <div class="text-xs font-semibold uppercase tracking-widest text-zinc-400 mb-3">On this page</div> <div class="toc" id="toc"></div> </nav> </div> </aside> </div> </div> </div> </div> </div> <script>
+(function () {
+  var content = document.getElementById('post-content');
+  var toc = document.getElementById('toc');
+  var wrap = document.getElementById('toc-wrap');
+  if (!content || !toc) { return; }
+  var hs = Array.prototype.slice.call(content.querySelectorAll('h2, h3'));
+  if (hs.length < 2) {
+    var nav = document.getElementById('toc-nav');
+    if (nav) { nav.style.display = 'none'; }
+    if (wrap && !wrap.querySelector('img')) { wrap.style.display = 'none'; }
+    return;
+  }
+
+  var links = {};
+  hs.forEach(function (h) {
+    if (!h.id) {
+      h.id = h.textContent.trim().toLowerCase()
+        .replace(/[^\w]+/g, '-').replace(/^-+|-+$/g, '');
+    }
+    var a = document.createElement('a');
+    a.href = '#' + h.id;
+    a.textContent = h.textContent;
+    a.className = h.tagName === 'H3' ? 'lvl-3' : 'lvl-2';
+    toc.appendChild(a);
+    links[h.id] = a;
+  });
+
+  var current = null;
+  function setActive(id) {
+    if (current === id || !links[id]) { return; }
+    if (current && links[current]) { links[current].classList.remove('active'); }
+    current = id;
+    links[id].classList.add('active');
+  }
+
+  var visible = {};
+  var obs = new IntersectionObserver(function (entries) {
+    entries.forEach(function (e) {
+      if (e.isIntersecting) { visible[e.target.id] = true; }
+      else { delete visible[e.target.id]; }
+    });
+    var best = null, bestTop = Infinity;
+    hs.forEach(function (h) {
+      if (visible[h.id]) {
+        var t = h.getBoundingClientRect().top;
+        if (t < bestTop) { bestTop = t; best = h.id; }
+      }
+    });
+    if (best) { setActive(best); }
+    else {
+      var above = null;
+      hs.forEach(function (h) {
+        if (h.getBoundingClientRect().top < 120) { above = h.id; }
+      });
+      if (above) { setActive(above); }
+    }
+  }, { rootMargin: '-80px 0px -65% 0px', threshold: 0 });
+
+  hs.forEach(function (h) { obs.observe(h); });
+  setActive(hs[0].id);
+})();
+</script> </body> </html>

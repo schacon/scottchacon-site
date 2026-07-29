@@ -1,0 +1,155 @@
+<!DOCTYPE html><html lang="en-US"> <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="author" content="Scott Chacon"><meta name="description" content="Kicking off a series of Git tips with the tricky business of undoing a merge that's already been committed."><meta property="og:type" content="article"><meta property="og:site_name" content="Scott Chacon"><meta property="og:title" content="Undoing Merges"><meta property="og:description" content="Kicking off a series of Git tips with the tricky business of undoing a merge that's already been committed."><meta property="og:image" content="https://scottchacon.com/assets/images/covers/undoing-merges.png"><meta property="og:url" content="https://scottchacon.com/2010/03/02/undoing-merges/"><meta property="article:published_time" content="2010-03-02T00:00:00.000Z"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:site" content="@chacon"><meta name="twitter:creator" content="@chacon"><meta name="twitter:title" content="Undoing Merges"><meta name="twitter:description" content="Kicking off a series of Git tips with the tricky business of undoing a merge that's already been committed."><meta name="twitter:image" content="https://scottchacon.com/assets/images/covers/undoing-merges.png"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;900&family=Roboto+Mono:wght@300;400&family=Roboto:wght@100;300;400;500;700&family=Source+Serif+4:opsz,wght@8..60,300;8..60,400&display=swap" rel="stylesheet"><title>Undoing Merges - Scott Chacon</title><!-- Privacy-friendly analytics by Plausible --><script async src="https://plausible.io/js/pa-L3isa8WSnas7pGAEYbsHg.js"></script><script>
+    window.plausible=window.plausible||function(){(plausible.q=plausible.q||[]).push(arguments)},plausible.init=plausible.init||function(i){plausible.o=i||{}};
+    plausible.init()
+  </script><link rel="stylesheet" href="/_astro/about.ByQc9HF7.css">
+<style>.prose-body a{color:#55f}.prose-body blockquote{background:#eee;color:#666;border-left:2px solid #888;padding:12px;line-height:1.8em;font-style:italic}.prose-body h2{font-size:2em;margin-top:30px!important;font-weight:700}.prose-body h3{font-size:1.8em;margin-top:30px!important;font-weight:700}.prose-body h4{font-size:1.4em;margin-top:30px!important;font-weight:700}.prose-body code{font-family:var(--font-mono);font-size:.85em;color:#be123c;background-color:#f4f4f5;border:1px solid #e4e4e7;border-radius:4px;padding:.1em .35em;line-height:inherit}.prose-body pre{line-height:1.4em;width:100%;background-color:#f4f4f5;border:1px solid #e4e4e7;border-radius:6px;padding:12px;overflow-x:auto}.prose-body pre[data-language=small]{font-size:.7em;line-height:1.5}.prose-body pre[data-language=small] code{font-size:1em}.prose-body pre code{color:inherit;background:none;border:0;border-radius:0;padding:0;font-size:.9em}.prose-body ul{list-style:circle;margin-left:30px}.prose-body ul li{margin-bottom:10px}.prose-body p{font-size:1.1em;letter-spacing:-.003em;line-height:32px;font-weight:400}.prose-body img{max-width:100%;height:auto}.prose-body figure{margin:32px 0}.prose-body figure img{width:100%;border-radius:12px;display:block}.prose-body figcaption{text-align:center;font-size:.9em;color:#888;margin-top:10px;font-style:italic}.toc{border-left:1px solid #e4e4e7}.toc a{display:block;padding:5px 0 5px 16px;margin-left:-1px;border-left:2px solid transparent;color:#71717a;font-size:.9em;line-height:1.4;text-decoration:none;transition:color .15s,border-color .15s}.toc a.lvl-3{padding-left:32px;font-size:.85em}.toc a:hover{color:#3f3f46}.toc a.active{color:#55f;border-left-color:#55f;font-weight:500}@media(prefers-color-scheme:dark){.prose-body code{color:#fda4af;background-color:#27272a;border-color:#3f3f46}.prose-body pre{background-color:#18181b;border-color:#27272a}.prose-body pre code{color:inherit;background:none}.toc{border-left-color:#27272a}.toc a{color:#a1a1aa}.toc a:hover{color:#e4e4e7}.toc a.active{color:#a5b4fc;border-left-color:#a5b4fc}}
+</style></head> <body> <div class="flex-auto pb-20"> <div class="border-b border-zinc-200 dark:border-zinc-800"> <div class="mx-auto w-full max-w-7xl lg:px-8"> <div class="relative px-4 sm:px-8 lg:px-12"> <div class="mx-auto max-w-2xl lg:max-w-5xl flex items-center justify-between py-4"> <a class="site-mark" href="/">scottchacon.com</a> <a class="back-link" href="/posts"><span aria-hidden="true">←</span> all posts</a> </div> </div> </div> </div> <div class="bg-zinc-100 dark:bg-zinc-800/60 border-b border-zinc-200 dark:border-zinc-800"> <div class="mx-auto w-full max-w-7xl lg:px-8"> <div class="relative px-4 sm:px-8 lg:px-12"> <div class="mx-auto max-w-5xl flex flex-wrap items-center gap-x-1.5 gap-y-1 py-2 text-xs text-zinc-400 dark:text-zinc-500"> <span aria-hidden="true" class="leading-none text-zinc-300 dark:text-zinc-600">&#x29D3;</span> <a href="https://gitbutler.com" class="font-medium text-zinc-500 dark:text-zinc-400 transition-colors hover:text-blue-600">gitbutler.com</a> <span>&mdash; What I'm building now: a better version control system</span> </div> </div> </div> </div> <div class="sm:px-8 mt-9"> <div class="mx-auto w-full max-w-7xl lg:px-8"> <div class="relative px-4 sm:px-8 lg:px-12"> <div class="mx-auto max-w-5xl lg:flex lg:justify-between lg:gap-12 lg:mt-16"> <article class="w-full lg:max-w-2xl min-w-0"> <h1 class="font-head text-4xl sm:text-5xl tracking-tight text-zinc-900 dark:text-zinc-100"> Undoing Merges </h1> <div class="mt-4 flex items-center gap-2 text-sm tracking-tight text-zinc-400"> <time datetime="2010-03-02T00:00:00.000Z">March 2, 2010</time> <span aria-hidden="true">·</span> <span>16 years ago</span> <span aria-hidden="true">·</span> <span>4 min read</span> </div> <div id="post-content" class="prose-body font-blog font-lg leading-7 flex flex-col mt-6 space-y-4"> <p>I would like to start writing more here about general Git tips, tricks and
+upcoming features.  There has actually been a lot of cool stuff that has
+happened since the book was first published, and a number of interesting
+things that I didn’t get around to covering in the book.  I figure if I start
+blogging about the more interesting stuff, it should serve as a pretty handy
+guide should I ever start writing a second edition.</p>
+<p>For the first such post, I’m going to cover a topic that was asked about
+at a training I did recently.  The question was about a workflow where long
+running branches are merged occasionally, much like the <a href="http://progit.org/book/ch5-3.html#largemerging_workflows">Large Merging</a>
+workflow that I describe in the book.  They asked how to unmerge a branch,
+either permenantly or allowing you to merge it in later.</p>
+<p>You can actually do this a number of ways.  Let’s say you have history that
+looks something like this:</p>
+<img src="http://git-scm.com/images/unmerge1.png">
+<p>You have a couple of topic branches that you have developed and then integrated
+together by a series of merges.  Now you want to revert something back in the
+history, say ‘C10’ in this case.</p>
+<p>The first way to solve the problem could be to rewind ‘master’ back to C8 and
+then merge the remaining two lines back in again.  This requires that anyone
+you’re collaborating with knows how to handle rewound heads, but if that’s not
+an issue, this is a perfectly viable solution.  This is basically how the ‘pu’
+branch is handled in the Git project itself.</p>
+<pre class="astro-code github-light" style="background-color:#fff;color:#24292e; overflow-x: auto;" tabindex="0" data-language="plaintext"><code><span class="line"><span>$ git checkout master</span></span>
+<span class="line"><span>$ git reset --hard [sha_of_C8]</span></span>
+<span class="line"><span>$ git merge jk/post-checkout</span></span>
+<span class="line"><span>$ git merge db/push-cleanup</span></span></code></pre>
+<p>Once you rewind and remerge, you’ll instead have a history that looks more
+like this:</p>
+<img src="http://git-scm.com/images/unmerge2.png">
+<p>Now you can go back and work on that newly unmerged line and merge it again
+at a later point, or perhaps ignore it entirely.</p>
+<h2>Reverting a Merge</h2>
+<p>However, what if you didn’t find this out until later, or perhaps you or one
+of your collaborators have done work after this merge series? What if your
+history looks more like this:</p>
+<img src="http://git-scm.com/images/unmerge3.png">
+<p>Now you either have to revert one of the merges, or go back, remerge and then
+cherry-pick the remaining changes again (C9 and C10 in this case), which is
+confusing and difficult, especially if there are a lot of commits after those
+merges.</p>
+<p>Well, it turns out that Git is actually pretty good at reverting an entire merge.
+Although you’ve probably only used the <code>git revert</code> command to revert a single
+commit (if you’ve used it at all), you can also use it to revert merge commits.</p>
+<p>All you have to do is specify the merge commit you want to revert and the parent
+line you want to keep.  Let’s say that we want to revert the merge of the
+<code>jk/post-checkout</code> line.  We can do so like this:</p>
+<pre class="astro-code github-light" style="background-color:#fff;color:#24292e; overflow-x: auto;" tabindex="0" data-language="plaintext"><code><span class="line"><span>$ git revert -m 1 [sha_of_C8]</span></span>
+<span class="line"><span>Finished one revert.</span></span>
+<span class="line"><span>[master 88edd6d] Revert "Merge branch 'jk/post-checkout'"</span></span>
+<span class="line"><span> 1 files changed, 0 insertions(+), 2 deletions(-)</span></span></code></pre>
+<p>That will introduce a new commit that undoes the changes introduced by merging
+in the branch in the first place - sort of like a reverse cherry pick of all
+of the commits that were unique to that branch.  Pretty cool.</p>
+<img src="http://git-scm.com/images/unmerge4.png">
+<p>However, we’re not done.</p>
+<h2>Reverting the Revert</h2>
+<p>Let’s say now that you want to re-merge that work again.  If you try to merge
+it again, Git will see that the commits on that branch are in the history and
+will assume that you are mistakenly trying to merge something you already have.</p>
+<pre class="astro-code github-light" style="background-color:#fff;color:#24292e; overflow-x: auto;" tabindex="0" data-language="plaintext"><code><span class="line"><span>$ git merge jk/post-checkout</span></span>
+<span class="line"><span>Already up-to-date.</span></span></code></pre>
+<p>Oops - it did nothing at all. Even more confusing is if you went back and committed on that branch
+and then tried to merge it in, it would only introduce the changes <em>since</em> you
+originally merged.</p>
+<img src="http://git-scm.com/images/unmerge5.png">
+<p>Gah.  Now that’s really a strange state and is likely to cause a bunch of
+conflicts or confusing errors.  What you want to do instead is revert the revert
+of the merge:</p>
+<pre class="astro-code github-light" style="background-color:#fff;color:#24292e; overflow-x: auto;" tabindex="0" data-language="plaintext"><code><span class="line"><span>$ git revert 88edd6d</span></span>
+<span class="line"><span>Finished one revert.</span></span>
+<span class="line"><span>[master 268e243] Revert "Revert "Merge branch 'jk/post-checkout'""</span></span>
+<span class="line"><span> 1 files changed, 2 insertions(+), 0 deletions(-)</span></span></code></pre>
+<img src="http://git-scm.com/images/unmerge6.png">
+<p>Cool, so now we’ve basically reintroduced everything that was in the branch
+that we had reverted out before.  Now if we have more work on that branch
+in the meantime, we can just re-merge it.</p>
+<pre class="astro-code github-light" style="background-color:#fff;color:#24292e; overflow-x: auto;" tabindex="0" data-language="plaintext"><code><span class="line"><span>$ git merge jk/post-checkout</span></span>
+<span class="line"><span>Auto-merging test.txt</span></span>
+<span class="line"><span>Merge made by recursive.</span></span>
+<span class="line"><span> test.txt |    1 +</span></span>
+<span class="line"><span> 1 files changed, 1 insertions(+), 0 deletions(-)</span></span></code></pre>
+<img src="http://git-scm.com/images/unmerge7.png">
+<p>So, I hope that’s helpful.  This can be particularly useful if you have a merge-heavy
+development process.  In fact, if you work mostly in topic branches before
+merging for intergration purposes, you may want to use the <code>git merge --no-ff</code>
+option so that the first merge is not a fast forward and can be reverted out
+in this manner.</p>
+<p>Until next time.</p> </div> </article> <aside id="toc-wrap" class="hidden lg:block flex-none w-60"> <div class="sticky top-12"> <img src="/assets/images/covers/undoing-merges.svg" alt="" class="w-full rounded-xl mb-6 ring-1 ring-zinc-900/5 dark:ring-white/10"> <nav id="toc-nav"> <div class="text-xs font-semibold uppercase tracking-widest text-zinc-400 mb-3">On this page</div> <div class="toc" id="toc"></div> </nav> </div> </aside> </div> </div> </div> </div> </div> <script>
+(function () {
+  var content = document.getElementById('post-content');
+  var toc = document.getElementById('toc');
+  var wrap = document.getElementById('toc-wrap');
+  if (!content || !toc) { return; }
+  var hs = Array.prototype.slice.call(content.querySelectorAll('h2, h3'));
+  if (hs.length < 2) {
+    var nav = document.getElementById('toc-nav');
+    if (nav) { nav.style.display = 'none'; }
+    if (wrap && !wrap.querySelector('img')) { wrap.style.display = 'none'; }
+    return;
+  }
+
+  var links = {};
+  hs.forEach(function (h) {
+    if (!h.id) {
+      h.id = h.textContent.trim().toLowerCase()
+        .replace(/[^\w]+/g, '-').replace(/^-+|-+$/g, '');
+    }
+    var a = document.createElement('a');
+    a.href = '#' + h.id;
+    a.textContent = h.textContent;
+    a.className = h.tagName === 'H3' ? 'lvl-3' : 'lvl-2';
+    toc.appendChild(a);
+    links[h.id] = a;
+  });
+
+  var current = null;
+  function setActive(id) {
+    if (current === id || !links[id]) { return; }
+    if (current && links[current]) { links[current].classList.remove('active'); }
+    current = id;
+    links[id].classList.add('active');
+  }
+
+  var visible = {};
+  var obs = new IntersectionObserver(function (entries) {
+    entries.forEach(function (e) {
+      if (e.isIntersecting) { visible[e.target.id] = true; }
+      else { delete visible[e.target.id]; }
+    });
+    var best = null, bestTop = Infinity;
+    hs.forEach(function (h) {
+      if (visible[h.id]) {
+        var t = h.getBoundingClientRect().top;
+        if (t < bestTop) { bestTop = t; best = h.id; }
+      }
+    });
+    if (best) { setActive(best); }
+    else {
+      var above = null;
+      hs.forEach(function (h) {
+        if (h.getBoundingClientRect().top < 120) { above = h.id; }
+      });
+      if (above) { setActive(above); }
+    }
+  }, { rootMargin: '-80px 0px -65% 0px', threshold: 0 });
+
+  hs.forEach(function (h) { obs.observe(h); });
+  setActive(hs[0].id);
+})();
+</script> </body> </html>

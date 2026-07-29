@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GitButler CLI + Python JSON Processing Patterns</title>
+<style>
+  :root {
+    --bg: #ffffff;
+    --fg: #1a1a2e;
+    --muted: #6b7280;
+    --border: #e5e7eb;
+    --code-bg: #f8f9fc;
+    --output-bg: #f0fdf4;
+    --accent: #4f46e5;
+    --accent-light: #eef2ff;
+    --card-shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.06);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0f172a;
+      --fg: #e2e8f0;
+      --muted: #94a3b8;
+      --border: #334155;
+      --code-bg: #1e293b;
+      --output-bg: #0f2a1e;
+      --accent: #818cf8;
+      --accent-light: #1e1b4b;
+      --card-shadow: 0 1px 3px rgba(0,0,0,0.3);
+    }
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--fg);
+    line-height: 1.6;
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem 4rem;
+  }
+  header {
+    margin-bottom: 2.5rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 2px solid var(--border);
+  }
+  header h1 {
+    font-size: 1.75rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+  }
+  header p {
+    color: var(--muted);
+    font-size: 0.95rem;
+  }
+  h2 {
+    font-size: 1.3rem;
+    font-weight: 700;
+    margin: 2.5rem 0 0.75rem;
+    padding-bottom: 0.4rem;
+    border-bottom: 1px solid var(--border);
+    color: var(--accent);
+  }
+  .pattern {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    margin: 1.25rem 0;
+    box-shadow: var(--card-shadow);
+    overflow: hidden;
+  }
+  .pattern-header {
+    padding: 0.75rem 1rem;
+    background: var(--accent-light);
+    border-bottom: 1px solid var(--border);
+    font-weight: 600;
+    font-size: 0.9rem;
+  }
+  .pattern-desc {
+    padding: 0.5rem 1rem;
+    color: var(--muted);
+    font-size: 0.85rem;
+  }
+  pre {
+    margin: 0;
+    padding: 1rem;
+    overflow-x: auto;
+    font-size: 0.82rem;
+    line-height: 1.5;
+    font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', Menlo, monospace;
+  }
+  .cmd {
+    background: var(--code-bg);
+    border-top: 1px solid var(--border);
+  }
+  .output {
+    background: var(--output-bg);
+    border-top: 1px solid var(--border);
+    position: relative;
+  }
+  .output::before {
+    content: 'OUTPUT';
+    position: absolute;
+    top: 0.4rem;
+    right: 0.75rem;
+    font-size: 0.6rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  }
+  .summary {
+    margin-top: 2.5rem;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: var(--card-shadow);
+  }
+  .summary table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.88rem;
+  }
+  .summary th {
+    text-align: left;
+    padding: 0.6rem 1rem;
+    background: var(--accent-light);
+    font-weight: 600;
+    border-bottom: 1px solid var(--border);
+  }
+  .summary td {
+    padding: 0.5rem 1rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .summary tr:last-child td { border-bottom: none; }
+  .badge {
+    display: inline-block;
+    background: var(--accent);
+    color: #fff;
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 0.15rem 0.5rem;
+    border-radius: 999px;
+    margin-left: 0.5rem;
+    vertical-align: middle;
+  }
+  footer {
+    margin-top: 3rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border);
+    color: var(--muted);
+    font-size: 0.8rem;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>GitButler CLI + Python JSON Patterns</h1>
+  <p>All observed patterns of piping <code>but</code> commands through <code>python3 -c</code> for JSON processing. 26 unique variants from Claude Code sessions. No <code>jq</code> variants were used.</p>
+</header>
+
+<h2>but status &mdash; List Unassigned Changes</h2>
+
+<div class="pattern">
+  <div class="pattern-header">Simple two-column list (cliId + filePath)</div>
+  <pre class="cmd">but status --json 2&gt;&amp;1 | python3 -c "import sys,json; d=json.load(sys.stdin); \
+  [print(c['cliId'], c['filePath']) for c in d['unassignedChanges']]"</pre>
+  <pre class="output">sx .claude/settings.local.json
+xr src/lib/davinci-to-srt.ts</pre>
+</div>
+
+<div class="pattern">
+  <div class="pattern-header">Tab-separated list (cliId + filePath)</div>
+  <pre class="cmd">but status --json 2&gt;&amp;1 | python3 -c "import sys,json; d=json.load(sys.stdin); \
+  [print(f\"{c['cliId']}\t{c['filePath']}\") for c in d['unassignedChanges']]"</pre>
+  <pre class="output">mp	src/app/api/posts/[id]/comments/route.ts
+zl	src/app/api/posts/[id]/reactions/route.ts
+wto	src/app/api/posts/[id]/route.ts
+yo	src/app/api/posts/route.ts</pre>
+</div>
+
+<div class="pattern">
+  <div class="pattern-header">Full workspace overview (unassigned + all branches)</div>
+  <pre class="cmd">but status --json 2&gt;&amp;1 | python3 -c "
+import json, sys
+data = json.load(sys.stdin)
+print('UNASSIGNED:')
+for c in data.get('unassignedChanges', []):
+    print(f'  {c[\"cliId\"]}: {c[\"filePath\"]} ({c[\"changeType\"]})')
+print()
+for stack in data.get('stacks', []):
+    for branch in stack.get('branches', []):
+        print(f'BRANCH {branch[\"name\"]}:')
+        print(f'  Commits: {len(branch.get(\"commits\", []))}')
+        print(f'  Assigned: {len(stack.get(\"assignedChanges\", []))}')
+        for c in stack.get('assignedChanges', []):
+            print(f'    {c[\"cliId\"]}: {c[\"filePath\"]} ({c[\"changeType\"]})')
+"</pre>
+  <pre class="output">UNASSIGNED:
+  sx: .claude/settings.local.json (modified)
+  nuw: src/app/dashboard/page.tsx (modified)
+  wtpt: src/app/dashboard/posts/[id]/edit/page.tsx (added)
+
+BRANCH pitches-feature:
+  Commits: 0
+  Assigned: 5
+    nuz: src/app/api/posts/[id]/comments/route.ts (added)
+    tm: src/app/api/posts/[id]/reactions/route.ts (added)</pre>
+</div>
+
+<div class="pattern">
+  <div class="pattern-header">Filtered branch view (single branch)</div>
+  <pre class="cmd">but status --json 2&gt;&amp;1 | python3 -c "
+import json, sys
+data = json.load(sys.stdin)
+print('Unassigned:')
+for c in data.get('unassignedChanges', []):
+    print(f'  {c[\"cliId\"]}: {c[\"filePath\"]} ({c[\"changeType\"]})')
+print()
+for stack in data.get('stacks', []):
+    for branch in stack.get('branches', []):
+        if branch.get('name') == 'pitches-feature':
+            print(f'pitches-feature assigned:', stack.get('assignedChanges', []))
+"</pre>
+  <pre class="output">Unassigned:
+  sx: .claude/settings.local.json (modified)
+  ol: src/app/dashboard/profile/profile-editor.tsx (modified)
+
+pitches-feature assigned: [{'cliId': 'nu', 'filePath': 'src/app/api/posts/...'}]</pre>
+</div>
+
+<h2>but status &mdash; Query Specific Branch</h2>
+
+<div class="pattern">
+  <div class="pattern-header">Get commit ID + assigned change IDs for a named branch</div>
+  <pre class="cmd">but status --json 2&gt;&amp;1 | python3 -c "import json,sys; d=json.load(sys.stdin); \
+  branch = [s for s in d['stacks'] \
+    if any(b['name']=='topics-feature' for b in s['branches'])][0]; \
+  print('Commit:', branch['branches'][0]['commits'][0]['cliId']); \
+  print('Assigned:', [c['cliId'] for c in branch['assignedChanges']])"</pre>
+  <pre class="output">Commit: d6
+Assigned: ['vs', 'wu', 'xr', 'ns', 'qs']</pre>
+</div>
+
+<div class="pattern">
+  <div class="pattern-header">Extract just the commit cliId (for use in subshells)</div>
+  <pre class="cmd">but status --json 2&gt;&amp;1 | python3 -c "import json,sys; d=json.load(sys.stdin); \
+  branch = [s for s in d['stacks'] \
+    if any(b['name']=='topics-feature' for b in s['branches'])][0]; \
+  print(branch['branches'][0]['commits'][0]['cliId'])"</pre>
+  <pre class="output">00</pre>
+</div>
+
+<div class="pattern">
+  <div class="pattern-header">Assigned file paths + commit messages for a branch</div>
+  <pre class="cmd">but status --json 2&gt;&amp;1 | python3 -c "
+import json,sys
+d=json.load(sys.stdin)
+branch = [s for s in d['stacks']
+  if any(b['name']=='topics-feature' for b in s['branches'])][0]
+print('Assigned:', [(c['cliId'], c['filePath']) for c in branch['assignedChanges']])
+print('Commits:', [(c['cliId'], c['message']) for c in branch['branches'][0]['commits']])
+"</pre>
+  <pre class="output">Assigned: [('qs', 'src/db/queries.ts')]
+Commits: [('00', 'Add Topics feature')]</pre>
+</div>
+
+<h2>Subshell Extract + but amend</h2>
+
+<div class="pattern">
+  <div class="pattern-header">Extract commit ID then amend a change into it</div>
+  <div class="pattern-desc">Uses command substitution to get the commit cliId, then passes it to <code>but amend</code>.</div>
+  <pre class="cmd">CID=$(but status --json 2&gt;&amp;1 | python3 -c "import json,sys; \
+  d=json.load(sys.stdin); \
+  branch = [s for s in d['stacks'] \
+    if any(b['name']=='topics-feature' for b in s['branches'])][0]; \
+  print(branch['branches'][0]['commits'][0]['cliId'])") \
+  &amp;&amp; but amend ns $CID --json 2&gt;&amp;1</pre>
+  <pre class="output">{"new_commit_id": "0009d25a7c26aa3ba4672a8abbc3a130edf75354", "ok": true}</pre>
+</div>
+
+<div class="pattern">
+  <div class="pattern-header">Same pattern with --status-after</div>
+  <pre class="cmd">CID=$(but status --json 2&gt;&amp;1 | python3 -c "...extract cliId...") \
+  &amp;&amp; but amend qs $CID --json --status-after 2&gt;&amp;1</pre>
+  <pre class="output">{
+  "result": {"new_commit_id": null, "ok": true},
+  "status": { "mergeBase": {...}, "stacks": [...] }
+}</pre>
+</div>
+
+<h2>but amend &mdash; Direct with Result Parsing</h2>
+
+<div class="pattern">
+  <div class="pattern-header">Amend a change into a known commit, show remaining unassigned</div>
+  <pre class="cmd">but amend mp 4281 --json --status-after 2&gt;&amp;1 | python3 -c "
+import json, sys
+data = json.load(sys.stdin)
+print('Result:', json.dumps(data.get('result', {})))
+unassigned = [c['cliId'] for c in data.get('status', {}).get('unassignedChanges', [])]
+print('Still unassigned:', unassigned)
+"</pre>
+  <pre class="output">Result: {"new_commit_id": null, "ok": true}
+Still unassigned: ['sx', 'mp', 'zl', 'wt', 'yo', 'wy', 'wr', 'qo']</pre>
+</div>
+
+<h2>but rub &mdash; Move Changes Between Branches</h2>
+
+<div class="pattern">
+  <div class="pattern-header">Single move with verification</div>
+  <pre class="cmd">but rub mp pi --json --status-after 2&gt;&amp;1 | python3 -c "
+import json, sys
+data = json.load(sys.stdin)
+print('Result:', json.dumps(data.get('result', {})))
+unassigned = [c['cliId'] for c in data.get('status', {}).get('unassignedChanges', [])]
+print('Still unassigned:', unassigned)
+"</pre>
+  <pre class="output">Result: {"ok": true}
+Still unassigned: ['sx', 'zl', 'wt', 'yo', 'wy', 'wr', 'qo', 'ol']</pre>
+</div>
+
+<div class="pattern">
+  <div class="pattern-header">Detailed move with truncated unassigned list + branch stats</div>
+  <pre class="cmd">but rub 4281 zz --json --status-after 2&gt;&amp;1 | python3 -c "
+import json, sys
+data = json.load(sys.stdin)
+result = data.get('result', {})
+print('Result:', json.dumps(result))
+unassigned = data.get('status', {}).get('unassignedChanges', [])
+print(f'Unassigned count: {len(unassigned)}')
+for c in unassigned[:5]:
+    print(f'  {c[\"cliId\"]}: {c[\"filePath\"]} ({c[\"changeType\"]})')
+if len(unassigned) &gt; 5:
+    print(f'  ... and {len(unassigned)-5} more')
+for stack in data.get('status', {}).get('stacks', []):
+    for branch in stack.get('branches', []):
+        if branch.get('name') == 'pitches-feature':
+            print(f'pitches-feature commits: {len(branch.get(\"commits\", []))}')
+            print(f'pitches-feature assigned: {len(stack.get(\"assignedChanges\", []))}')
+"</pre>
+  <pre class="output">Result: {"ok": true}
+Unassigned count: 14
+  sx: .claude/settings.local.json (modified)
+  nuw: src/app/dashboard/page.tsx (modified)
+  wtpt: src/app/dashboard/posts/[id]/edit/page.tsx (added)
+  no: src/app/dashboard/posts/[id]/edit/post-editor.tsx (added)
+  wy: src/app/dashboard/posts/[id]/page.tsx (added)
+  ... and 9 more
+pitches-feature commits: 0
+pitches-feature assigned: 5</pre>
+</div>
+
+<div class="pattern">
+  <div class="pattern-header">Batch move with for-loop</div>
+  <pre class="cmd">for id in nuw wtpt no wy os wrn xk wtpp su vp wrq qm; do
+  echo -n "$id: "
+  but rub $id pi --json 2&gt;&amp;1 | python3 -c \
+    "import json,sys; d=json.load(sys.stdin); print(d.get('result',{}).get('ok',''))"
+done</pre>
+  <pre class="output">nuw:
+wtpt:
+no:
+wy:
+os: </pre>
+</div>
+
+<h2>but absorb &mdash; Auto-absorb Changes</h2>
+
+<div class="pattern">
+  <div class="pattern-header">Raw JSON dump (truncated, for structure discovery)</div>
+  <pre class="cmd">but absorb mp --json --status-after 2&gt;&amp;1 | python3 -c "
+import json, sys
+data = json.load(sys.stdin)
+print(json.dumps(data, indent=2)[:2000])
+"</pre>
+  <pre class="output">{
+  "result": { "ok": false, "rejected": 1, "plan": { "commits": [...], ... } },
+  "status": { ... }
+}</pre>
+</div>
+
+<div class="pattern">
+  <div class="pattern-header">Structured summary with branch status</div>
+  <pre class="cmd">but absorb pi --json --status-after 2&gt;&amp;1 | python3 -c "
+import json, sys
+data = json.load(sys.stdin)
+result = data.get('result', {})
+print('OK:', result.get('ok'))
+print('Rejected:', result.get('rejected', 0))
+if result.get('plan'):
+    print('Plan commits:', len(result['plan'].get('commits', [])))
+    print('Plan total_files:', result['plan'].get('total_files'))
+unassigned = data.get('status', {}).get('unassignedChanges', [])
+print('Unassigned remaining:', [c['cliId'] for c in unassigned])
+"</pre>
+  <pre class="output">OK: False
+Rejected: 7
+Plan commits: 1
+Plan total_files: 7
+Unassigned remaining: ['sx', 'ol']</pre>
+</div>
+
+<h2>but show &mdash; Inspect Commit Files</h2>
+
+<div class="pattern">
+  <div class="pattern-header">Files sorted by path with status</div>
+  <pre class="cmd">but show 4281 --json 2&gt;&amp;1 | python3 -c "
+import json, sys
+data = json.load(sys.stdin)
+for f in sorted(data.get('files', []), key=lambda x: x['path']):
+    print(f'{f[\"status\"]:10} {f[\"path\"]}')
+"</pre>
+  <pre class="output">added      src/app/api/pitches/[id]/comments/route.ts
+added      src/app/api/pitches/[id]/reactions/route.ts
+added      src/app/api/pitches/[id]/route.ts
+added      src/app/api/pitches/route.ts
+modified   src/app/dashboard/page.tsx</pre>
+</div>
+
+<div class="pattern">
+  <div class="pattern-header">Simple file list with dash-separated status</div>
+  <pre class="cmd">but show e7 --json 2&gt;&amp;1 | python3 -c "
+import json, sys
+data = json.load(sys.stdin)
+for f in data.get('files', []):
+    print(f.get('path', ''), '-', f.get('status', ''))
+"</pre>
+  <pre class="output">src/app/api/pitches/[id]/comments/route.ts - added
+src/app/api/pitches/[id]/reactions/route.ts - added</pre>
+</div>
+
+<h2>but diff &mdash; Batch Diff for Change IDs</h2>
+
+<div class="pattern">
+  <div class="pattern-header">Loop over changes to extract hunk IDs</div>
+  <pre class="cmd">for id in mp zl wt yo wy wr qo; do
+  echo "=== $id ==="
+  but diff $id --json 2&gt;&amp;1 | python3 -c \
+    "import json,sys; data=json.load(sys.stdin); [print(c['id']) for c in data.get('changes',[])]"
+done</pre>
+  <pre class="output">=== mp ===
+o0
+p0
+q0
+=== zl ===
+n1
+o1
+p1
+=== wt ===
+v0
+w0
+x0
+y0</pre>
+</div>
+
+<h2>but commit &mdash; Create Commit with Status Parsing</h2>
+
+<div class="pattern">
+  <div class="pattern-header">Commit assigned changes, parse result + remaining unassigned</div>
+  <pre class="cmd">but commit pitches-feature --only \
+  -m "Complete pitches-to-posts rename" \
+  --json --status-after 2&gt;&amp;1 | python3 -c "
+import json, sys
+data = json.load(sys.stdin)
+result = data.get('result', {})
+print('commit_id:', result.get('commit_id'))
+unassigned = [c['cliId'] for c in data.get('status', {}).get('unassignedChanges', [])]
+print('Unassigned:', unassigned)
+for stack in data.get('status', {}).get('stacks', []):
+    for branch in stack.get('branches', []):
+        if branch.get('name') == 'pitches-feature':
+            for c in branch.get('commits', []):
+                print(f'  commit {c[\"cliId\"]}: {c[\"message\"][:80]}')
+"</pre>
+  <pre class="output">commit_id: None
+Unassigned: ['sx', 'ol']
+  commit 4281: Add Posts feature with categories, rich text editor, reactions, and comments</pre>
+</div>
+
+<h2>Summary</h2>
+
+<div class="summary">
+<table>
+  <tr><th>but subcommand</th><th>Variants</th><th>Pattern</th></tr>
+  <tr><td><code>but status</code></td><td>11</td><td>List branches, unassigned changes, filter by branch name, extract commit IDs</td></tr>
+  <tr><td><code>but rub</code></td><td>6</td><td>Move/reassign changes between branches, batch operations</td></tr>
+  <tr><td><code>CID=$(...) &amp;&amp; but amend</code></td><td>3</td><td>Subshell to extract commit ID then amend a change into it</td></tr>
+  <tr><td><code>but show</code></td><td>4</td><td>Inspect commit files and metadata</td></tr>
+  <tr><td><code>but absorb</code></td><td>2</td><td>Auto-absorb changes into matching commits</td></tr>
+  <tr><td><code>but amend</code> (direct)</td><td>1</td><td>Amend a change into a known commit ID</td></tr>
+  <tr><td><code>but commit</code></td><td>1</td><td>Create a commit on a named branch</td></tr>
+  <tr><td><code>but diff</code></td><td>1</td><td>Show diff change IDs</td></tr>
+</table>
+</div>
+
+<footer>
+  All 26 variants use <code>python3 -c "import json,sys; d=json.load(sys.stdin)..."</code> as the common preamble. No <code>jq</code> variants were found. Generated from Claude Code session transcripts, February 2026.
+</footer>
+
+</body>
+</html>
