@@ -11,8 +11,9 @@ interface Row {
   yr: string;
   does: string;
   enabled?: boolean; // advertised by default (green row) vs needs config (grey row)
+  deprecated?: boolean; // disabled by default / discouraged — renders a struck, red-tinted row
   purpose: string; // Purpose tag text (e.g. "Core", "Large repo")
-  tone?: 'core' | 'on' | 'gated' | 'new' | 'hot'; // Purpose tag colour
+  tone?: 'core' | 'on' | 'gated' | 'new' | 'hot' | 'deprecated'; // Purpose tag colour
   author?: string;
   sha?: string;
   subject?: string;
@@ -67,7 +68,7 @@ function groupConfig(cfg: Config[]): [string, Config[]][] {
         const rowCls = [
           'cap-row',
           hasDetail ? 'cap-row--toggle' : '',
-          r.enabled ? 'cap-row--default' : 'cap-row--gated',
+          r.deprecated ? 'cap-row--deprecated' : r.enabled ? 'cap-row--default' : 'cap-row--gated',
         ].filter(Boolean).join(' ');
         return (
           <Fragment>

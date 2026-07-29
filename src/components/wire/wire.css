@@ -187,6 +187,15 @@
 .prose-body .captable .cap-row--default.is-open td { background: color-mix(in srgb, var(--good) 17%, var(--paper)); }
 .prose-body .captable .cap-row--gated.is-open td { background: color-mix(in srgb, var(--muted) 10%, var(--paper)); }
 .prose-body .captable .cap-row--toggle.is-open td:first-child { box-shadow: inset 2px 0 0 var(--accent); }
+/* Deprecated / disabled-by-default row: red tint + struck capability name */
+.prose-body .captable .cap-row--deprecated td { background: color-mix(in srgb, var(--ember) 8%, var(--paper)); color: var(--muted); }
+.prose-body .captable .cap-row--deprecated.cap-row--toggle:hover td { background: color-mix(in srgb, var(--ember) 14%, var(--paper)); }
+.prose-body .captable .cap-row--deprecated.is-open td { background: color-mix(in srgb, var(--ember) 16%, var(--paper)); }
+.prose-body .captable .cap-row--deprecated.is-open td:first-child { box-shadow: inset 2px 0 0 var(--ember); }
+.prose-body .captable .cap-row--deprecated td:nth-child(2) {
+  text-decoration: line-through; text-decoration-color: color-mix(in srgb, var(--ember) 55%, transparent);
+  color: var(--muted); font-style: italic;
+}
 .prose-body .captable .caret {
   display: inline-block; width: 7px; height: 7px; margin-top: -3px;
   border-right: 2px solid var(--muted); border-bottom: 2px solid var(--muted);
@@ -204,6 +213,7 @@
 .prose-body .cap-status--gated { background: var(--slate-bg); color: var(--muted); }
 .prose-body .cap-status--new { background: var(--amber-bg); color: var(--amber); }
 .prose-body .cap-status--hot { background: var(--ember-bg); color: var(--ember); }
+.prose-body .cap-status--deprecated { background: var(--ember-bg); color: var(--ember); text-decoration: line-through; }
 
 /* Expanded detail row — reset the mono/nowrap the base td:first-child rule imposes */
 .prose-body .captable .cap-detail > td {
