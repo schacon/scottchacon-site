@@ -1,5 +1,5 @@
 ---
-title: "Git Wire Protocol v2: A Deep Dive Through Its History"
+title: "Git Wire Protocol v2: A Deep Dive"
 image: /assets/images/covers/git-wire-v2.svg
 excerpt: "How Git's wire protocol was quietly rebuilt for the age of huge repos, load-balanced servers, and CDNs — one capability at a time."
 ---
@@ -24,15 +24,15 @@ import Commit from "../../components/wire/Commit.astro";
 
 Recently, I've been messing about with Git server stuff for some experimental work for [GitButler](https://gitbutler.com). In doing that, one of the things that I've been digging into is the [bundle-uri](https://blog.gitbutler.com/going-down-the-rabbit-hole-of-gits-new-bundle-uri) and [packfile-uri](https://git-scm.com/docs/packfile-uri) capabilities.
 
-However, it made me realize that I'm not as familiar with how Git's HTTP service works these days as I thought I was.
+Looking more into it made me realize that I'm not as familiar with how Git's server works these days as I thought I was. Specifically, I had never really learned about Git's new "v2" server protocol, which is what those capabilities are built on. So I did a bit of a deep dive.
 
 ## Smart HTTP, First Edition
 
 When I published the first version of the [Pro Git book](https://git-scm.com/book/en/v2) in August of 2009, Git barely had HTTP support at all. What it had then is now referred to as the "dumb" protocol, just serving static files directly over HTTP.
 
-In December of 2009, Git 1.6.6 landed with the first "smart" protocol - a CGI script you could load into Apache or whatever to handle ref advertisement and object negotiation via new `git-upload-pack` and `git-receive-pack` binaries.
+In December of 2009, Git 1.6.6 landed with the first "smart" HTTP protocol - a CGI script you could load into Apache or whatever to handle ref advertisement and object negotiation via the same `git-upload-pack` and `git-receive-pack` binaries that SSH runs via `git-shell` for communication.
 
-That smart-HTTP support landed as part of a sprawling 28-patch series from Shawn O. Pearce on the Git mailing list — the origin of `git-http-backend` and the smart client and server we still use:
+That first "smart" HTTP support landed as part of a huge 28-patch series from Shawn Pearce — the origin of `git-http-backend` and the smart client and server we still use:
 
 <EmailThread
   author="Shawn O. Pearce"
@@ -63,7 +63,7 @@ reasonably happy with the code.`}
   ]}
 />
 
-Since this landed after Pro Git was published, one of the bigger updates in the second edition of the book was to make HTTP a first class protocol to use. I also wrote a blog post [here](/2010/03/04/smart-http/) outlining the changes in the meantime.
+Since this landed after Pro Git (ed 1) was published, one of the bigger updates in the second edition of the book was to describe HTTP as a first-class protocol to use. I actually wrote a blog post [here](/2010/03/04/smart-http/) in 2010 outlining the new "smart" HTTP.
 
 ## HTTP Protocol V2
 
@@ -77,11 +77,18 @@ The first version of the smart protocol would basically do a dump of every refer
 
 That's fine for most projects, but when your repository has hundreds of thousands of refs, it becomes a lot of data to send over the wire every time you want to do anything at all. So one of the first things the new protocol could do was filter the refs advertised with the `ls-refs` command.
 
+<Aside label="GitLab's references" icon="!">
+  The [gitlab](https://gitlab.com/gitlab-org/gitlab) project has over 800k
+  references. A full `git ls-remote` on that repository takes almost 9 seconds
+  and sends 58M over the wire. Imagine having to run that before even a tiny
+  incremental push or fetch.
+</Aside>
+
 Another problem was capabilities advertisement. The first version sort of shoehorned them in to the first reference line, hidden behind a NUL byte, which means a server could never advertise more than the size of a pkt-line.
 
 Finally, instead of multiple service names, in v2, multiple commands can be supported by a single service. This means that instead of adding new commands by adding new http endpoints, the `git-upload-pack` service can now be asked to do lots of different things other than producing packfiles (like listing filtered references, for example).
 
-To lay the foundation to address these issues, Brandon Williams of Google introduced `git-serve` in March 2018, along with the first two capabilities, `ls-refs` and `fetch`. It finally became the default protocol for the client in Git 2.29, released in October 2020.
+To lay the foundation to address these issues, Brandon Williams of Google introduced `git-serve` in March 2018, along with the first two capabilities, `ls-refs` and `fetch`.
 
 <Commit
   repo="git/git"
@@ -91,6 +98,8 @@ To lay the foundation to address these issues, Brandon Williams of Google introd
   subject="serve: introduce git-serve"
   comment="The introduction of the v2 capable server"
 />
+
+It finally became the default protocol for the client in Git 2.29, released in October 2020.
 
 ## Anatomy of a Git HTTP conversation
 
@@ -170,11 +179,11 @@ Let's look at each HTTP request in a bit of detail. The first roundtrip is a GET
   items={[
     {
       k: "?service=<br>git-upload-pack",
-      d: `Selects the <b>service</b>. <code>git-upload-pack</code> means "I want to fetch.", <code>git-receive-pack</code> means "I want to push".`,
+      d: `Selects the service. <code>git-upload-pack</code> means "I want to fetch.", <code>git-receive-pack</code> means "I want to push".`,
     },
     {
       k: "001e# service=…",
-      d: `A smart-HTTP-only preamble that lets the client confirm it reached a <b>smart</b> server (not a dumb file server), followed by a <code>0000</code> flush.`,
+      d: `A smart-HTTP-only preamble that lets the client confirm it reached a smart server (not a dumb file server), followed by a <code>0000</code> flush.`,
     },
     {
       k: "HEAD\\0…caps",
@@ -182,7 +191,7 @@ Let's look at each HTTP request in a bit of detail. The first roundtrip is a GET
     },
     {
       k: "symref=HEAD:<br>refs/heads/main",
-      d: `Another sort of hack that allows the smart protocol tos muggles the fact that <code>HEAD</code> is symbolic, because there was nowhere else to put this information.`,
+      d: `Another sort of hack that allows the smart protocol to smuggle the fact that <code>HEAD</code> is symbolic, because there was nowhere else to put this information.`,
     },
     {
       k: "refs/pull/1/head",
@@ -261,7 +270,7 @@ The second request is a POST body that says what heads we want data for and the 
   items={[
     {
       k: "want &lt;oid&gt; caps",
-      d: `The client asks for objects <b>by object id</b> (not by name). It wants both tips — <code>ee93348…</code> (main/HEAD) and <code>9cb163a…</code> (sc-branch-1). The capabilities it actually intends to use ride on the <b>first</b> <code>want</code> line.`,
+      d: `The client asks for objects by object id (not by name). It wants both tips — <code>ee93348…</code> (main/HEAD) and <code>9cb163a…</code> (sc-branch-1). The capabilities it actually intends to use ride on the first <code>want</code> line.`,
     },
     {
       k: "0000 then done",
@@ -269,20 +278,16 @@ The second request is a POST body that says what heads we want data for and the 
     },
     {
       k: "NAK",
-      d: `"No common commit found" — expected for a first clone. In an incremental fetch this is where <code>ACK &lt;oid&gt;</code> lines would appear as the two sides find shared history.`,
+      d: `"No common commit found". Because this is a clone. In an incremental fetch this is where <code>ACK &lt;oid&gt;</code> lines would appear as the two sides find shared history.`,
     },
     {
       k: "\\x01 / \\x02",
-      d: `The packfile is <b>multiplexed on a side-band</b>: a leading byte per chunk marks channel 1 (pack bytes), 2 (progress), or 3 (error). One stream carries both your data and the "Receiving objects…" meter.`,
+      d: `The packfile is multiplexed on a side-band: a leading byte per chunk marks channel 1 (pack bytes), 2 (progress), or 3 (error). This is so the client can do the "Receiving objects…" meter that you see on a clone.`,
     },
   ]}
 />
 
 ---
-
-### The v2 Protocol
-
-The newer protocol starts with a capability advertisement - what can the server _do_? Then the client can run one or more of those commands.
 
 <Sidebar tag="Sidebar · The pkt-line">
   <p>
@@ -308,6 +313,8 @@ The newer protocol starts with a capability advertisement - what can the server 
     top of the existing 0000 flush."
   </p>
 </Sidebar>
+
+### The v2 Protocol
 
 Here's that same clone, this time in v2. This time it's three round trips rather than two. The first just to determine capabilities. Then a ref advertisement using the `ls-refs` command. Then a packfile request using the `fetch` command.
 
@@ -381,7 +388,7 @@ OK, so now the client knows what the server can do, including what object format
 
 Now that we know that, we can then start POSTing commands to run. For a clone, we start with `ls-refs`, which is similar to the first GET we did in the previous protocol, but crucially we can filter the returned values.
 
-This is a little funny, because now in v2 the GET to `/info/refs` does not return refs, it returns capabilities. Then a POST to `/git-upload-pack` with a command is used to actually return the refs we want to inspect (as upload-pack is now just a service endpoint used to run any of several commands).
+This is a little funny, because now in v2 the GET to `/info/refs` does not return refs, it returns capabilities. Then a POST to `/git-upload-pack` with a `ls-refs` command is used to actually return the refs we want to inspect (as upload-pack is now just a service endpoint used to run any of several commands).
 
 ---
 
@@ -448,7 +455,7 @@ This is a little funny, because now in v2 the GET to `/info/refs` does not retur
     },
     {
       k: "0001 delimiter",
-      d: `Separates the capabilities the client is using from the command's <b>arguments</b>. (A <code>0000</code> flush ends the whole request.)`,
+      d: `Separates the capabilities the client is using from the command's arguments. (A <code>0000</code> flush ends the whole request.)`,
     },
     {
       k: "peel",
@@ -540,23 +547,18 @@ Now we have a list of the objects we want and can ask for the packfile with the 
 ---
 
 In this simple example, in practice, there is actually a lot more going over the wire in v2 than in the first version of the protocol. There are 3 round trips consisting of 456 bytes, instead of 2 and 234 bytes.
+
 However, in practical terms, v2 normally saves a lot of traffic because it can filter the references it cares about. Some larger repositories have many megabytes of reference data, so that first refs advertisement is killer overhead.
 
-## What can a Git server do nowadays?
+## What all can a Git server do nowadays?
 
 So this is really mostly what I didn't know. What can a git server _do_ these days outside of listing references and negotiating packfiles? What all commands can you tell it to advertise and allow clients to invoke?
 
-The reality is that out of the box, it's pretty much nothing. Outside of `ls-refs` and `fetch` the vanilla server only advertises `server-option` and `object-format`, which aren't actually _commands_, they're just simple ways to pass other data (arbitrary values to custom servers like Gerrit and the hash-format if it's not sha1).
+The reality is that out of the box, it's pretty much nothing. Outside of `ls-refs` and `fetch` the vanilla server only advertises `server-option` and `object-format`, which aren't actually _commands_, they're just simple ways to pass other data (to send arbitrary values to custom servers like Gerrit, and tell the client the hash-format).
 
-There _are_ other commands, but they're all gated behind server (and sometimes also client-side) config options.
+There _are_ other commands (like the `bundle-uri` and `packfile-uri` I mentioned at the start of the article), but they're all gated behind server (and sometimes also client-side) config options.
 
-Here's a nice little list that I had Claude whip up.
-
-<p className="sub">
-  Green rows are advertised by default; grey rows have to be switched on with
-  server (and sometimes client) config. The <b>Purpose</b> tag is roughly <em>why</em>{" "}
-  it exists — click any row for the story and the exact config to enable it.
-</p>
+Here is a full list of the current potential capabilities of a v2 Git server _(green rows are enabled by default, gray must be configured on)_ and when they were introduced.
 
 <CapabilityTable
   rows={[
@@ -573,7 +575,8 @@ Here's a nice little list that I had Claude whip up.
       subject: "ls-refs: introduce ls-refs server command",
       date: "Mar 15, 2018",
       doc: "https://git-scm.com/docs/gitprotocol-v2#_ls_refs",
-      thread: "https://lore.kernel.org/git/20180314183213.223440-14-bmwill@google.com/",
+      thread:
+        "https://lore.kernel.org/git/20180314183213.223440-14-bmwill@google.com/",
       email: "bmwill@google.com",
       desc: "Turns ref listing into an explicit command that takes ref-prefix arguments, so a client can ask for just the refs it wants instead of the full advertisement v1 dumped up front. Every v2 clone and fetch starts here.",
     },
@@ -590,7 +593,8 @@ Here's a nice little list that I had Claude whip up.
       subject: "upload-pack: introduce fetch server command",
       date: "Mar 15, 2018",
       doc: "https://git-scm.com/docs/gitprotocol-v2#_fetch",
-      thread: "https://lore.kernel.org/git/20180314183213.223440-21-bmwill@google.com/",
+      thread:
+        "https://lore.kernel.org/git/20180314183213.223440-21-bmwill@google.com/",
       email: "bmwill@google.com",
       desc: "The v2 object-negotiation command — v1's fetch with the ref advertisement stripped out (ls-refs handles that now) and the message format cleaned up so it can be extended. Runs on every clone and fetch.",
     },
@@ -607,12 +611,31 @@ Here's a nice little list that I had Claude whip up.
       subject: "serve: introduce the server-option capability",
       date: "Apr 23, 2018",
       doc: "https://git-scm.com/docs/gitprotocol-v2#_server_option",
-      thread: "https://lore.kernel.org/git/20180423224624.213341-1-bmwill@google.com/",
+      thread:
+        "https://lore.kernel.org/git/20180423224624.213341-1-bmwill@google.com/",
       email: "bmwill@google.com",
       desc: "A generic channel for passing server-specific options (<code>-o</code> / <code>--server-option</code>) inside a request, so custom deployments can act on hints without a protocol change. Advertised out of the box, but only useful when both the client passes options and the server understands them.",
     },
     {
-      cap: "filter",
+      cap: "fetch.shallow",
+      ver: "2.18",
+      yr: "'18",
+      does: "Shallow / --depth clones & deepening",
+      enabled: true,
+      purpose: "Shallow clone",
+      tone: "on",
+      author: "Brandon Williams",
+      sha: "f7e205010542dc9b712473d260058e43ca2b26f7",
+      subject: "fetch-pack: support shallow requests",
+      date: "Mar 15, 2018",
+      doc: "https://git-scm.com/docs/gitprotocol-v2#_fetch",
+      thread:
+        "https://lore.kernel.org/git/20180314183213.223440-23-bmwill@google.com/",
+      email: "bmwill@google.com",
+      desc: "Brings shallow clones and history deepening to v2's fetch — <code>--depth</code>, <code>--shallow-since</code>, <code>--deepen</code> — negotiated through the request's shallow arguments and the <code>shallow-info</code> response section. A base fetch feature, advertised by default and exercised by every shallow clone.",
+    },
+    {
+      cap: "fetch.filter",
       ver: "2.18",
       yr: "'18",
       does: "Partial clone (blobless/treeless)",
@@ -624,13 +647,16 @@ Here's a nice little list that I had Claude whip up.
       subject: "{fetch,upload}-pack: support filter in protocol v2",
       date: "May 3, 2018",
       doc: "https://git-scm.com/docs/gitprotocol-v2#_fetch",
-      thread: "https://lore.kernel.org/git/cover.1525220786.git.jonathantanmy@google.com/",
+      thread:
+        "https://lore.kernel.org/git/cover.1525220786.git.jonathantanmy@google.com/",
       email: "jonathantanmy@google.com",
       desc: "Adds partial-clone filter specs to v2's fetch, which was first designed without them — <code>--filter=blob:none</code> and friends. Widely used: blobless and treeless clones, and the engine behind Scalar/VFS-style workflows.",
-      config: [{ key: "uploadpack.allowFilter", value: "true", side: "server" }],
+      config: [
+        { key: "uploadpack.allowFilter", value: "true", side: "server" },
+      ],
     },
     {
-      cap: "ref-in-want",
+      cap: "fetch.ref-in-want",
       ver: "2.19",
       yr: "'18",
       does: "Request refs by name",
@@ -642,13 +668,16 @@ Here's a nice little list that I had Claude whip up.
       subject: "upload-pack: implement ref-in-want",
       date: "Jun 27, 2018",
       doc: "https://git-scm.com/docs/gitprotocol-v2#_fetch",
-      thread: "https://lore.kernel.org/git/20180605175144.4225-1-bmwill@google.com/",
+      thread:
+        "https://lore.kernel.org/git/20180605175144.4225-1-bmwill@google.com/",
       email: "bmwill@google.com",
       desc: "Lets a client name wanted refs instead of object ids, closing the race where a ref changes between the advertisement and the fetch — the kind of thing that happens on busy, load-balanced server farms. Specialized; mostly relevant to large hosts.",
-      config: [{ key: "uploadpack.allowRefInWant", value: "true", side: "server" }],
+      config: [
+        { key: "uploadpack.allowRefInWant", value: "true", side: "server" },
+      ],
     },
     {
-      cap: "sideband-all",
+      cap: "fetch.sideband-all",
       ver: "2.21",
       yr: "'19",
       does: "Multiplex the whole response",
@@ -660,10 +689,13 @@ Here's a nice little list that I had Claude whip up.
       subject: "{fetch,upload}-pack: sideband v2 fetch response",
       date: "Jan 16, 2019",
       doc: "https://git-scm.com/docs/gitprotocol-v2#_fetch",
-      thread: "https://lore.kernel.org/git/cover.1547244620.git.jonathantanmy@google.com/",
+      thread:
+        "https://lore.kernel.org/git/cover.1547244620.git.jonathantanmy@google.com/",
       email: "jonathantanmy@google.com",
       desc: "Extends the multiplexed side-band over the <em>entire</em> fetch response, not just the packfile, so the server can send progress and keepalives before the pack begins — a gap the CDN-offload work exposed. Opt-in and niche.",
-      config: [{ key: "uploadpack.allowSidebandAll", value: "true", side: "server" }],
+      config: [
+        { key: "uploadpack.allowSidebandAll", value: "true", side: "server" },
+      ],
     },
     {
       cap: "object-format",
@@ -678,12 +710,13 @@ Here's a nice little list that I had Claude whip up.
       subject: "serve: advertise object-format capability for protocol v2",
       date: "May 25, 2020",
       doc: "https://git-scm.com/docs/gitprotocol-v2#_object_format",
-      thread: "https://lore.kernel.org/git/20200619175601.569856-1-sandals@crustytoothpaste.net/",
+      thread:
+        "https://lore.kernel.org/git/20200619175601.569856-1-sandals@crustytoothpaste.net/",
       handle: "bk2204",
       desc: "Negotiates the repository's hash algorithm during the handshake — the wire-level enabler for the SHA-256 transition. Always exchanged in v2, though SHA-256 repos themselves are still rare.",
     },
     {
-      cap: "packfile-uris",
+      cap: "fetch.packfile-uris",
       ver: "2.28",
       yr: "'20",
       does: "CDN offload of pack data",
@@ -695,11 +728,16 @@ Here's a nice little list that I had Claude whip up.
       subject: "upload-pack: send part of packfile response as uri",
       date: "Jun 10, 2020",
       doc: "https://git-scm.com/docs/gitprotocol-v2#_fetch",
-      thread: "https://lore.kernel.org/git/cover.1543879256.git.jonathantanmy@google.com/",
+      thread:
+        "https://lore.kernel.org/git/cover.1543879256.git.jonathantanmy@google.com/",
       email: "jonathantanmy@google.com",
       desc: "Lets the server hand back <code>http(s)</code> URIs for part of the pack so a CDN serves the bulk data, cutting Git-server load. Powerful but rare in the wild, and the in-tree implementation only covers blobs.",
       config: [
-        { key: "uploadpack.blobPackfileUri", value: "<oid> <size> <uri>", side: "server" },
+        {
+          key: "uploadpack.blobPackfileUri",
+          value: "<oid> <size> <uri>",
+          side: "server",
+        },
         { key: "fetch.uriProtocols", value: "https", side: "client" },
       ],
     },
@@ -716,7 +754,8 @@ Here's a nice little list that I had Claude whip up.
       subject: "serve: advertise session ID in v2 capabilities",
       date: "Nov 11, 2020",
       doc: "https://git-scm.com/docs/gitprotocol-v2#_session_idsession_id",
-      thread: "https://lore.kernel.org/git/cover.1605136908.git.steadmon@google.com/",
+      thread:
+        "https://lore.kernel.org/git/cover.1605136908.git.steadmon@google.com/",
       email: "steadmon@google.com",
       desc: "Both sides advertise a unique session id so client and server trace logs can be correlated when debugging a remote operation. Purely diagnostic — valuable to operators, invisible to users.",
       config: [{ key: "transfer.advertiseSID", value: "true", side: "both" }],
@@ -734,13 +773,16 @@ Here's a nice little list that I had Claude whip up.
       subject: "object-info: support for retrieving object info",
       date: "Apr 20, 2021",
       doc: "https://git-scm.com/docs/gitprotocol-v2#_object_info",
-      thread: "https://lore.kernel.org/git/20210420233830.2181153-1-bga@google.com/",
+      thread:
+        "https://lore.kernel.org/git/20210420233830.2181153-1-bga@google.com/",
       email: "bga@google.com",
       desc: "Lets a client ask for object metadata (currently just <em>size</em>) by oid without downloading the objects. Very rare: server-side only, no in-tree client ever shipped, and it's been disabled by default since 2024 to shrink attack surface.",
-      config: [{ key: "transfer.advertiseObjectInfo", value: "true", side: "server" }],
+      config: [
+        { key: "transfer.advertiseObjectInfo", value: "true", side: "server" },
+      ],
     },
     {
-      cap: "wait-for-done",
+      cap: "fetch.wait-for-done",
       ver: "2.32",
       yr: "'21",
       does: "Negotiate without a packfile",
@@ -752,7 +794,8 @@ Here's a nice little list that I had Claude whip up.
       subject: "fetch: teach independent negotiation (no packfile)",
       date: "May 4, 2021",
       doc: "https://git-scm.com/docs/gitprotocol-v2#_fetch",
-      thread: "https://lore.kernel.org/git/cover.1617929278.git.jonathantanmy@google.com/",
+      thread:
+        "https://lore.kernel.org/git/cover.1617929278.git.jonathantanmy@google.com/",
       email: "jonathantanmy@google.com",
       desc: "Makes the server wait for the client instead of unilaterally sending a pack, so negotiation can run on its own — the building block for push negotiation and <code>git fetch --negotiate-only</code>. Advertised as a fetch feature; niche.",
     },
@@ -769,11 +812,16 @@ Here's a nice little list that I had Claude whip up.
       subject: 'protocol v2: add server-side "bundle-uri" skeleton',
       date: "Dec 22, 2022",
       doc: "https://git-scm.com/docs/gitprotocol-v2#_bundle_uri",
-      thread: "https://lore.kernel.org/git/pull.1234.git.1653072042.gitgitgadget@gmail.com/",
+      thread:
+        "https://lore.kernel.org/git/pull.1234.git.1653072042.gitgitgadget@gmail.com/",
       handle: "avar",
       desc: "Points the client at <code>*.bundle</code> files (often on a CDN) to seed a clone or fetch, so most objects arrive from bundles instead of the Git server — faster clones, less load. Still emerging; used by some large hosts.",
       config: [
-        { key: "uploadpack.advertiseBundleURIs", value: "true", side: "server" },
+        {
+          key: "uploadpack.advertiseBundleURIs",
+          value: "true",
+          side: "server",
+        },
         { key: "transfer.bundleURI", value: "true", side: "client" },
       ],
     },
@@ -790,7 +838,8 @@ Here's a nice little list that I had Claude whip up.
       subject: "Add 'promisor-remote' capability to protocol v2",
       date: "Feb 18, 2025",
       doc: "https://git-scm.com/docs/gitprotocol-v2#_promisor_remotepr_info",
-      thread: "https://lore.kernel.org/git/20240731134014.2299361-1-christian.couder@gmail.com/",
+      thread:
+        "https://lore.kernel.org/git/20240731134014.2299361-1-christian.couder@gmail.com/",
       handle: "chriscool",
       desc: "Lets the server tell the client which promisor remote it uses, so the client can lazily fetch missing (often large) objects straight from that better-connected source instead of passing <code>-c remote.X…</code> by hand. The newest and least-settled capability.",
       config: [
@@ -803,28 +852,62 @@ Here's a nice little list that I had Claude whip up.
 
 Now, there is a lot to potentially dig into here, but what's really interesting is how _old_ some of these capabilities are and how very, very rarely used they are.
 
-Because most of them require
+Nearly all of them landed over 5 years ago and nearly none of them are available on any major code host. GitHub and GitLab, for example, only enable `fetch.filter` so you can do blobless clones. None of the rest of these capabilities are enabled _(well, GitLab can do bundle-uris on self-hosted instances, I think, but not by default)_.
+
+Honestly, _most_ of this is by and for Google. 11 of the 14 capabilities were contributed by Google and nearly all of the configurable options were also contributed by them. So, most of v2 seems to be so Google can scale Git weirdly internally.
+
+But it's cool.
 
 ## See it for yourself
 
-You don't need a special setup to watch v2 work. Point <code>GIT_TRACE_PACKET</code> at any modern host and read the conversation:
+If you want to check any of this out yourself, it's actually pretty easy to see what is going over the wire.
+If you set the <code>GIT_TRACE_PACKET</code> environment variable and run Git networking stuff, it will show you what it's doing.
 
-<Wire
-  label="Commands to observe protocol v2 yourself"
-  lines={[
-    [["cmt", "# Watch the capability advertisement and ls-refs exchange"]],
-    ["GIT_TRACE_PACKET=1 git ls-remote https://github.com/git/git"],
-    [],
-    [["cmt", "# Force a version and compare v0 vs v2 for yourself"]],
-    ["git -c protocol.version=2 ls-remote https://github.com/git/git"],
-    ["git -c protocol.version=0 ls-remote https://github.com/git/git"],
-    [],
-    [["cmt", "# Check what your client defaults to"]],
-    [
-      "git config --get protocol.version   ",
-      ["cmt", "# empty ⇒ built-in default of 2"],
-    ],
-  ]}
-/>
+```small
+$ GIT_TRACE_PACKET=1 git ls-remote https://github.com/schacon/soe
+12:37:45.271670 pkt-line.c:85           packet:          git< # service=git-upload-pack
+12:37:45.272656 pkt-line.c:85           packet:          git< 0000
+12:37:45.272691 pkt-line.c:85           packet:          git< version 2
+12:37:45.272716 pkt-line.c:85           packet:          git< agent=git/github-cda1d7094a30-Linux
+12:37:45.272732 pkt-line.c:85           packet:          git< ls-refs=unborn
+12:37:45.272747 pkt-line.c:85           packet:          git< fetch=shallow wait-for-done filter
+12:37:45.272760 pkt-line.c:85           packet:          git< server-option
+12:37:45.272773 pkt-line.c:85           packet:          git< object-format=sha1
+12:37:45.272785 pkt-line.c:85           packet:          git< 0000
+12:37:45.272956 pkt-line.c:85           packet:    ls-remote< version 2
+12:37:45.274390 pkt-line.c:85           packet:    ls-remote< agent=git/github-cda1d7094a30-Linux
+12:37:45.274425 pkt-line.c:85           packet:    ls-remote< ls-refs=unborn
+12:37:45.274446 pkt-line.c:85           packet:    ls-remote< fetch=shallow wait-for-done filter
+12:37:45.274463 pkt-line.c:85           packet:    ls-remote< server-option
+12:37:45.274477 pkt-line.c:85           packet:    ls-remote< object-format=sha1
+12:37:45.274491 pkt-line.c:85           packet:    ls-remote< 0000
+12:37:45.274508 pkt-line.c:85           packet:    ls-remote> command=ls-refs
+12:37:45.274552 pkt-line.c:85           packet:    ls-remote> agent=git/2.52.0-Darwin
+12:37:45.274576 pkt-line.c:85           packet:    ls-remote> object-format=sha1
+12:37:45.274594 pkt-line.c:85           packet:    ls-remote> 0001
+12:37:45.274561 pkt-line.c:85           packet:          git< command=ls-refs
+12:37:45.274612 pkt-line.c:85           packet:    ls-remote> peel
+12:37:45.274656 pkt-line.c:85           packet:          git< agent=git/2.52.0-Darwin
+12:37:45.274714 pkt-line.c:85           packet:    ls-remote> symrefs
+12:37:45.274744 pkt-line.c:85           packet:          git< object-format=sha1
+12:37:45.274779 pkt-line.c:85           packet:    ls-remote> unborn
+12:37:45.274819 pkt-line.c:85           packet:          git< 0001
+12:37:45.274893 pkt-line.c:85           packet:          git< peel
+12:37:45.274919 pkt-line.c:85           packet:          git< symrefs
+12:37:45.274860 pkt-line.c:85           packet:    ls-remote> 0000
+12:37:45.274968 pkt-line.c:85           packet:          git< unborn
+12:37:45.275097 pkt-line.c:85           packet:          git< 0000
+12:37:45.490316 pkt-line.c:85           packet:          git> 0002
+12:37:45.490332 pkt-line.c:85           packet:    ls-remote< ee93348afd51e0d634d9e84a702af190d45cf9e3 HEAD symref-target:refs/heads/main
+12:37:45.490569 pkt-line.c:85           packet:    ls-remote< ee93348afd51e0d634d9e84a702af190d45cf9e3 refs/heads/main
+12:37:45.490611 pkt-line.c:85           packet:    ls-remote< 9cb163aaa43273f49de0182416d3a621b3ae8292 refs/heads/sc-branch-1
+12:37:45.490646 pkt-line.c:85           packet:    ls-remote< 9cb163aaa43273f49de0182416d3a621b3ae8292 refs/pull/1/head
+12:37:45.490671 pkt-line.c:85           packet:    ls-remote< 0000
+12:37:45.490874 pkt-line.c:85           packet:    ls-remote< 0002
+ee93348afd51e0d634d9e84a702af190d45cf9e3	HEAD
+ee93348afd51e0d634d9e84a702af190d45cf9e3	refs/heads/main
+9cb163aaa43273f49de0182416d3a621b3ae8292	refs/heads/sc-branch-1
+9cb163aaa43273f49de0182416d3a621b3ae8292	refs/pull/1/head
+```
 
-Look for the <code>version 2</code> line, the capability list that follows it, and then your client sending <code>command=ls-refs</code>. That's the whole protocol, right there on the wire — the quiet rewrite you've been using all along.
+Well, that's it. Hope you learned something, because I certainly did.
