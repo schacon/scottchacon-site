@@ -1,6 +1,5 @@
 ---
 import './wire.css';
-import crypto from 'node:crypto';
 interface Config {
   key: string;
   value: string;
@@ -23,8 +22,8 @@ interface Row {
   config?: Config[]; // config values to enable it (right column)
   doc?: string; // link to the git-scm.com documentation section
   thread?: string; // lore.kernel.org URL of the introducing email thread
-  handle?: string; // GitHub username → author avatar for the thread link
-  email?: string; // author email → Gravatar fallback when no handle
+  handle?: string; // GitHub username of the commit author (not currently rendered)
+  email?: string; // commit author email (not currently rendered)
 }
 interface Props {
   rows: Row[];
@@ -44,16 +43,6 @@ function groupConfig(cfg: Config[]): [string, Config[]][] {
   }
   return order.map((k) => [k, map.get(k)!]);
 }
-function avatarFor(handle?: string, email?: string): string | null {
-  if (handle) return `https://github.com/${handle}.png?size=48`;
-  if (email) {
-    const hash = crypto.createHash('md5').update(email.trim().toLowerCase()).digest('hex');
-    return `https://www.gravatar.com/avatar/${hash}?s=48&d=identicon`;
-  }
-  return null;
-}
-const initialsFor = (name?: string) =>
-  (name ?? '').split(/\s+/).filter(Boolean).map((w) => w[0]).join('').slice(0, 2).toUpperCase();
 ---
 <div class="tablewrap captable">
   <table>
@@ -74,8 +63,6 @@ const initialsFor = (name?: string) =>
         const url = r.sha ? `https://github.com/${repoName}/commit/${r.sha}` : '';
         const hasConfig = Boolean(r.config?.length);
         const cfgGroups = hasConfig ? groupConfig(r.config!) : [];
-        const avatar = avatarFor(r.handle, r.email);
-        const initials = initialsFor(r.author);
         const hasDetail = Boolean(r.author || r.sha || r.subject || r.date || r.desc || hasConfig || r.doc || r.thread);
         const rowCls = [
           'cap-row',
@@ -147,11 +134,6 @@ const initialsFor = (name?: string) =>
                         )}
                         {r.thread && (
                           <a class="cap-detail__thread" href={r.thread} target="_blank" rel="noopener noreferrer">
-                            {avatar ? (
-                              <img class="cap-detail__avatar" src={avatar} alt={r.author} width="20" height="20" loading="lazy" decoding="async" />
-                            ) : (
-                              <span class="cap-detail__avatar cap-detail__avatar--mono" aria-hidden="true">{initials}</span>
-                            )}
                             <span class="cap-detail__linktag">Thread</span>
                             <span class="cap-detail__threadsubj">{r.subject}</span>
                           </a>

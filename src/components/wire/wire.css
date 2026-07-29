@@ -261,8 +261,6 @@
 }
 .prose-body .cap-detail__linktext { font-family: var(--wire-mono); font-size: 12.5px; color: var(--accent-ink); }
 .prose-body .cap-detail__doc:hover .cap-detail__linktext { text-decoration: underline; }
-.prose-body .cap-detail__avatar { width: 20px; height: 20px; border-radius: 50%; flex: 0 0 auto; background: var(--hair); border: 1px solid var(--hair); object-fit: cover; }
-.prose-body .cap-detail__avatar--mono { display: inline-flex; align-items: center; justify-content: center; font-family: var(--wire-mono); font-size: 8px; font-weight: 700; color: var(--accent-ink); background: color-mix(in srgb, var(--accent) 12%, var(--paper)); }
 .prose-body .cap-detail__threadsubj { font-size: 13px; color: var(--ink); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .prose-body .cap-detail__thread:hover .cap-detail__threadsubj { text-decoration: underline; }
 
