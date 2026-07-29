@@ -848,7 +848,7 @@ def git_wire_v2():
         c.text(tx + 34, ty + 112 + i * 48, s, 25, col, family=mono,
                weight="400", anchor="start")
     c.rect_raw(tx + 34 + 74, ty + 112 + 4 * 48 - 21, 14, 27, "#57C6BD")  # cursor
-    c.text(600, 160, "the protocol you're speaking", 38, p["ink"],
+    c.text(600, 160, "you are a protocol droid, are you not?", 38, p["ink"],
            family="Georgia, serif", weight="700", style="italic")
     save("git-wire-v2",
          c.render("A terminal showing a Git protocol v2 capability advertisement"))
