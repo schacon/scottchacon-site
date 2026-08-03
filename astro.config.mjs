@@ -1,16 +1,16 @@
 // @ts-check
-import { copyFileSync } from 'node:fs';
+import { writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { defineConfig } from 'astro/config';
 
-/** The Jekyll-era site served posts at /YYYY/MM/DD/slug.html; emit a copy of
- *  each post at that path so old inbound links still work on GitHub Pages,
- *  which has no server-side redirects. The pages carry a canonical link to
- *  the trailing-slash URL. */
-function htmlAliases() {
+/** The Jekyll-era site served posts at /YYYY/MM/DD/slug.html; emit a redirect
+ *  stub at each of those paths so old inbound links still work. GitHub Pages
+ *  can't send a real 301, but an instant meta refresh plus a canonical link is
+ *  treated as a permanent redirect by search engines. */
+function htmlRedirects() {
   return {
-    name: 'html-aliases',
+    name: 'html-redirects',
     hooks: {
       /** @param {{ dir: URL, pages: { pathname: string }[] }} args */
       'astro:build:done': ({ dir, pages }) => {
@@ -18,9 +18,22 @@ function htmlAliases() {
         for (const { pathname } of pages) {
           const post = pathname.match(/^(\d{4}\/\d{2}\/\d{2}\/[^/]+)\/?$/);
           if (!post) continue;
-          copyFileSync(
-            path.join(out, post[1], 'index.html'),
+          const to = `/${post[1]}/`;
+          writeFileSync(
             path.join(out, `${post[1]}.html`),
+            `<!doctype html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8">
+<title>Redirecting…</title>
+<link rel="canonical" href="https://scottchacon.com${to}">
+<meta http-equiv="refresh" content="0; url=${to}">
+</head>
+<body>
+<p>This page has moved to <a href="${to}">https://scottchacon.com${to}</a>.</p>
+</body>
+</html>
+`,
           );
         }
       },
@@ -38,7 +51,7 @@ export default defineConfig({
   site: 'https://scottchacon.com',
   trailingSlash: 'always',
   build: { format: 'directory' }, // → /path/index.html pretty URLs
-  integrations: [mdx(), react(), sitemap(), htmlAliases()],
+  integrations: [mdx(), react(), sitemap(), htmlRedirects()],
   vite: {
     plugins: [tailwindcss()],
   },
