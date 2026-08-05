@@ -1,0 +1,28 @@
+---
+title: "Slidetty"
+description: "Markdown slide decks that run in your terminal, with syntax highlighting and keyboard navigation."
+image: /assets/images/projects/slidetty.svg
+year: "2025"
+lang: Go
+status: active
+repo: https://github.com/schacon/slidetty
+sort: 15
+---
+
+Slidetty is a TUI slideshow app. You write the deck in Markdown and present it
+straight from the terminal — which, if you're giving a talk about command line
+tools, is where you already are.
+
+It's built with [Bubble Tea](https://github.com/charmbracelet/bubbletea) and
+[Glamour](https://github.com/charmbracelet/glamour), so the Markdown rendering
+and syntax highlighting are genuinely nice, and the layout reflows when you
+resize the window.
+
+This is a distant descendant of [Showoff](/projects/showoff/), which did the
+same job in a browser fifteen years earlier.
+
+## Install
+
+```sh
+go build -o slidetty main.go
+```

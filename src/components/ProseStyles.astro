@@ -1,0 +1,110 @@
+<style is:global>
+  /* Article prose. Scoped to .prose-body (a class, matching the specificity of
+     an HTML post's own component styles) so it never leaks into the site chrome
+     and so raw-HTML posts (e.g. the wire post's `.wire pre`) still win by source
+     order. Class-scoping matters under Tailwind v4's cascade layers.
+     Shared by PostLayout and ProjectLayout. */
+  .prose-body a { color: #5555ff; }
+  .prose-body blockquote {
+    background: #eee;
+    color: #666;
+    border-left: 2px solid #888;
+    padding: 12px;
+    line-height: 1.8em;
+    font-style: italic;
+  }
+  .prose-body h2 { font-size: 2em; margin-top: 30px !important; font-weight: bold; }
+  .prose-body h3 { font-size: 1.8em; margin-top: 30px !important; font-weight: bold; }
+  .prose-body h4 { font-size: 1.4em; margin-top: 30px !important; font-weight: bold; }
+  /* Inline code reads as code at a glance: mono face, tinted chip, accent ink. */
+  .prose-body code {
+    font-family: var(--font-mono);
+    font-size: 0.85em;
+    color: #be123c;
+    background-color: #f4f4f5;
+    border: 1px solid #e4e4e7;
+    border-radius: 4px;
+    padding: 0.1em 0.35em;
+    line-height: inherit;
+  }
+  .prose-body pre {
+    line-height: 1.4em;
+    width: 100%;
+    background-color: #f4f4f5;
+    border: 1px solid #e4e4e7;
+    border-radius: 6px;
+    padding: 12px;
+    overflow-x: auto;
+  }
+  /* ```small — plain-text blocks set a size down, so wide terminal traces
+     fit the column without wrapping or horizontal scrolling. */
+  .prose-body pre[data-language="small"] { font-size: 0.7em; line-height: 1.5; }
+  .prose-body pre[data-language="small"] code { font-size: 1em; }
+  /* Inside a block, the <pre> already carries the chip treatment. */
+  .prose-body pre code {
+    color: inherit;
+    background: none;
+    border: 0;
+    border-radius: 0;
+    padding: 0;
+    font-size: 0.9em;
+  }
+  .prose-body ul {
+    list-style: circle;
+    margin-left: 30px;
+  }
+  .prose-body ul li {
+    margin-bottom: 10px;
+  }
+  .prose-body p {
+    font-size: 1.1em;
+    letter-spacing: -0.003em;
+    line-height: 32px;
+    font-weight: 400;
+  }
+  .prose-body img { max-width: 100%; height: auto; }
+  .prose-body figure { margin: 32px 0; }
+  .prose-body figure img { width: 100%; border-radius: 12px; display: block; }
+  .prose-body figcaption {
+    text-align: center;
+    font-size: 0.9em;
+    color: #888;
+    margin-top: 10px;
+    font-style: italic;
+  }
+  .toc { border-left: 1px solid #e4e4e7; }
+  .toc a {
+    display: block;
+    padding: 5px 0 5px 16px;
+    margin-left: -1px;
+    border-left: 2px solid transparent;
+    color: #71717a;
+    font-size: 0.9em;
+    line-height: 1.4;
+    text-decoration: none;
+    transition: color .15s, border-color .15s;
+  }
+  .toc a.lvl-3 { padding-left: 32px; font-size: 0.85em; }
+  .toc a:hover { color: #3f3f46; }
+  .toc a.active {
+    color: #5555ff;
+    border-left-color: #5555ff;
+    font-weight: 500;
+  }
+  @media (prefers-color-scheme: dark) {
+    .prose-body code {
+      color: #fda4af;
+      background-color: #27272a;
+      border-color: #3f3f46;
+    }
+    .prose-body pre {
+      background-color: #18181b;
+      border-color: #27272a;
+    }
+    .prose-body pre code { color: inherit; background: none; }
+    .toc { border-left-color: #27272a; }
+    .toc a { color: #a1a1aa; }
+    .toc a:hover { color: #e4e4e7; }
+    .toc a.active { color: #a5b4fc; border-left-color: #a5b4fc; }
+  }
+</style>

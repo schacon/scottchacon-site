@@ -1,0 +1,84 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import SiteHeader from '../../components/SiteHeader.astro';
+import ProjectCard from '../../components/ProjectCard.astro';
+import { getAllProjects } from '../../lib/projects';
+
+const projects = await getAllProjects();
+const active = projects.filter((p) => p.entry.data.status === 'active');
+const archived = projects.filter((p) => p.entry.data.status !== 'active');
+
+// Odds and ends that don't warrant a page of their own, but are fun to poke at.
+const more = [
+  { name: 'piper', url: 'https://github.com/schacon/piper', blurb: 'Local-only chat rooms in the terminal, stored as JSONL' },
+  { name: 'jimmy', url: 'https://github.com/schacon/jimmy', blurb: 'SwiftUI fasting, gym and habit tracker for iOS' },
+  { name: 'git-pulls', url: 'https://github.com/schacon/git-pulls', blurb: 'List and merge GitHub pull requests from the command line' },
+  { name: 'markdownDrop', url: 'https://github.com/schacon/markdownDrop', blurb: 'Drag an image into a Markdown file, get an S3 URL' },
+  { name: 'git-ruby', url: 'https://github.com/schacon/git-ruby', blurb: 'A pure Ruby implementation of Git, from 2008' },
+  { name: 'calcdown', url: 'https://github.com/schacon/calcdown', blurb: 'Turns a Markdown document into a Calca-style interpreted sheet' },
+  { name: 'situation-clock', url: 'https://github.com/schacon/situation-clock', blurb: 'Old iPads on a wall as the red clocks of a situation room' },
+  { name: 'cowsay', url: 'https://github.com/schacon/cowsay', blurb: 'The Git version of the awesome cowsay project' },
+  { name: 'git-branch-mcp', url: 'https://github.com/schacon/git-branch-mcp', blurb: 'An MCP server for Git branch operations' },
+  { name: '3D-Me', url: 'https://github.com/schacon/3D-Me', blurb: 'I got myself 3D scanned and could not model my way out of it' },
+];
+---
+<BaseLayout title="Projects" description="Fun side projects, tools and experiments from Scott Chacon.">
+  <div class="flex-auto pb-24">
+    <SiteHeader />
+    <div class="sm:px-8 mt-9">
+      <div class="mx-auto w-full max-w-7xl lg:px-8">
+        <div class="relative px-4 sm:px-8 lg:px-12">
+          <div class="mx-auto max-w-2xl lg:max-w-5xl">
+            <div class="max-w-2xl">
+              <h1 class="font-head text-5xl sm:text-6xl tracking-tight text-zinc-900 dark:text-zinc-100 pb-1">
+                Projects
+              </h1>
+              <div class="flex flex-col mt-6 text-lg text-zinc-600 dark:text-zinc-400 space-y-2">
+                <div>
+                  Things I've built for fun, or to scratch an itch, or because reimplementing
+                  something from scratch is the fastest way to understand it. Some are still
+                  alive, some have been handed off, and some are here mostly as evidence.
+                </div>
+              </div>
+            </div>
+
+            <div class="mt-16">
+              <h2 class="font-head text-2xl text-zinc-900 dark:text-zinc-100 pb-4 border-b border-zinc-200 dark:border-zinc-800">
+                Currently
+              </h2>
+              <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-12 mt-10 items-start">
+                {active.map((project) => <ProjectCard project={project} />)}
+              </div>
+            </div>
+
+            <div class="mt-20">
+              <h2 class="font-head text-2xl text-zinc-900 dark:text-zinc-100 pb-4 border-b border-zinc-200 dark:border-zinc-800">
+                The back catalog
+              </h2>
+              <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-12 mt-10 items-start">
+                {archived.map((project) => <ProjectCard project={project} />)}
+              </div>
+            </div>
+
+            <div class="mt-24 max-w-3xl">
+              <h2 class="font-head text-2xl text-zinc-900 dark:text-zinc-100 pb-4 mb-2 border-b border-zinc-200 dark:border-zinc-800">
+                Also lying around on GitHub
+              </h2>
+              <div class="flex flex-col divide-y divide-zinc-100 dark:divide-zinc-800">
+                {more.map((m) => (
+                  <a href={m.url} class="group flex flex-col gap-0.5 py-3 sm:flex-row sm:items-baseline sm:gap-4">
+                    <span class="w-40 flex-none font-mono text-sm text-zinc-500 dark:text-zinc-400 transition-colors group-hover:text-blue-600">{m.name}</span>
+                    <span class="text-zinc-700 dark:text-zinc-300">{m.blurb}</span>
+                  </a>
+                ))}
+              </div>
+              <p class="mt-6 text-sm text-zinc-400">
+                The rest is on <a class="text-blue-600" href="https://github.com/schacon">github.com/schacon</a>.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</BaseLayout>

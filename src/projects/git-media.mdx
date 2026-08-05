@@ -1,0 +1,23 @@
+---
+title: "git-media"
+description: "Large binary files in Git, kept outside the repository — an early stab at the problem Git LFS later solved."
+image: /assets/images/projects/git-media.svg
+year: "2009"
+lang: Ruby
+status: archived
+repo: https://github.com/schacon/git-media
+sort: 33
+---
+
+Git is wonderful right up until you commit a 400MB video into it, at which point
+every clone anyone ever does carries that 400MB forever. git-media was an early
+attempt to fix that.
+
+It used Git's smudge and clean filters: on commit, a large file was swapped out
+for a small placeholder and the real bytes were shipped to a backend — S3, a
+scp-reachable server, or a local path. On checkout, the filter pulled the bytes
+back. The repository stayed small, and the workflow stayed `git add`.
+
+This was several years before [Git LFS](https://git-lfs.com), which took the
+same basic approach and did it properly with server-side support. git-media
+moved on to [alebedev/git-media](https://github.com/alebedev/git-media).

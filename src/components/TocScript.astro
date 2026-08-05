@@ -1,0 +1,70 @@
+---
+/* Builds the sticky right-rail table of contents at runtime from the `h2`/`h3`
+   elements inside `#post-content`, and highlights the entry you're reading.
+   Expects `#post-content`, `#toc`, `#toc-nav` and `#toc-wrap` to exist.
+   With fewer than two headings the nav hides itself (and the whole rail hides
+   too, unless it holds a cover image). Shared by PostLayout and ProjectLayout. */
+---
+<script is:inline>
+(function () {
+  var content = document.getElementById('post-content');
+  var toc = document.getElementById('toc');
+  var wrap = document.getElementById('toc-wrap');
+  if (!content || !toc) { return; }
+  var hs = Array.prototype.slice.call(content.querySelectorAll('h2, h3'));
+  if (hs.length < 2) {
+    var nav = document.getElementById('toc-nav');
+    if (nav) { nav.style.display = 'none'; }
+    if (wrap && !wrap.querySelector('img')) { wrap.style.display = 'none'; }
+    return;
+  }
+
+  var links = {};
+  hs.forEach(function (h) {
+    if (!h.id) {
+      h.id = h.textContent.trim().toLowerCase()
+        .replace(/[^\w]+/g, '-').replace(/^-+|-+$/g, '');
+    }
+    var a = document.createElement('a');
+    a.href = '#' + h.id;
+    a.textContent = h.textContent;
+    a.className = h.tagName === 'H3' ? 'lvl-3' : 'lvl-2';
+    toc.appendChild(a);
+    links[h.id] = a;
+  });
+
+  var current = null;
+  function setActive(id) {
+    if (current === id || !links[id]) { return; }
+    if (current && links[current]) { links[current].classList.remove('active'); }
+    current = id;
+    links[id].classList.add('active');
+  }
+
+  var visible = {};
+  var obs = new IntersectionObserver(function (entries) {
+    entries.forEach(function (e) {
+      if (e.isIntersecting) { visible[e.target.id] = true; }
+      else { delete visible[e.target.id]; }
+    });
+    var best = null, bestTop = Infinity;
+    hs.forEach(function (h) {
+      if (visible[h.id]) {
+        var t = h.getBoundingClientRect().top;
+        if (t < bestTop) { bestTop = t; best = h.id; }
+      }
+    });
+    if (best) { setActive(best); }
+    else {
+      var above = null;
+      hs.forEach(function (h) {
+        if (h.getBoundingClientRect().top < 120) { above = h.id; }
+      });
+      if (above) { setActive(above); }
+    }
+  }, { rootMargin: '-80px 0px -65% 0px', threshold: 0 });
+
+  hs.forEach(function (h) { obs.observe(h); });
+  setActive(hs[0].id);
+})();
+</script>

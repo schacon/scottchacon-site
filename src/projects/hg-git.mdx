@@ -1,0 +1,26 @@
+---
+title: "Hg-Git"
+description: "A Mercurial plugin that pushes to and pulls from Git servers, converting changesets losslessly in both directions."
+image: /assets/images/projects/hg-git.svg
+year: "2009"
+lang: Python
+status: archived
+repo: https://github.com/schacon/hg-git
+site: http://hg-git.github.io/
+sort: 34
+---
+
+Hg-Git is a Mercurial plugin that adds the ability to push to and pull from a
+Git server repository. It means you can work on Git-based projects from Hg, or
+use a Git server as the collaboration point for a team where some people use Git
+and some use Mercurial.
+
+The important part is that it converts commits and changesets *losslessly* in
+both directions — you can round-trip through the other system without quietly
+mangling history, which is what made it usable for real teams rather than as a
+one-time import tool.
+
+I started it in 2009. It was picked up and carried much further by others, and
+my repo became a mirror — development lives on at
+[foss.heptapod.net/mercurial/hg-git](https://foss.heptapod.net/mercurial/hg-git),
+and it's still on [PyPI](https://pypi.org/project/hg-git/).

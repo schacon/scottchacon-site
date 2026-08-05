@@ -10,7 +10,9 @@ an <img>-referenced SVG.
 import math, os
 
 W, H = 1200, 800
-OUT = "/Users/schacon/projects/scottchacon-site/public/assets/images/covers"
+ROOT = "/Users/schacon/projects/scottchacon-site/public/assets/images"
+OUT = f"{ROOT}/covers"      # post covers
+PROJ_OUT = f"{ROOT}/projects"  # /projects/ cards + project page rails
 
 PAL = {
     "git": dict(bg=("#fff3ec", "#ffdcc7"), ink="#7c2d12",
@@ -151,11 +153,16 @@ class Cover:
                 f'<defs>{"".join(self.defs)}</defs>{"".join(self.body)}</svg>')
 
 
-def save(slug, svg):
-    os.makedirs(OUT, exist_ok=True)
-    with open(os.path.join(OUT, slug + ".svg"), "w") as fh:
+def save(slug, svg, outdir=None):
+    outdir = outdir or OUT
+    os.makedirs(outdir, exist_ok=True)
+    with open(os.path.join(outdir, slug + ".svg"), "w") as fh:
         fh.write(svg)
-    print(f"wrote {slug}.svg ({len(svg)} bytes)")
+    print(f"wrote {os.path.basename(outdir)}/{slug}.svg ({len(svg)} bytes)")
+
+
+def save_project(slug, svg):
+    save(slug, svg, PROJ_OUT)
 
 
 # =====================================================================
@@ -860,7 +867,259 @@ SCENES = [flags, github_flow, reset, notes, pro_git_zh, pro_git_kindle,
           do_what_you_want, mit_language, github_cs, hungarian_desks,
           cefr_levels, git_wire_v2]
 
+# =====================================================================
+# PROJECT POSTERS  (one per entry in src/projects/, written to PROJ_OUT)
+#
+# Deliberately NOT the post-cover look. Post covers are soft, illustrated and
+# carry a tagline; these are flat, saturated, text-free geometry — two or three
+# oversized shapes on one solid field. They have to read as a thumbnail in the
+# /projects/ grid and as a 240px rail image on the project page, so: no grid,
+# no blobs, no gradients, no type, and nothing thinner than about 14px.
+# =====================================================================
+
+PP = {
+    "ink":       "#141433",
+    "slate":     "#2E2E5C",   # dim key / recessed shape on an ink field
+    "cream":     "#F2ECE1",
+    "sand":      "#DCD3C2",   # recessed shape on a cream field
+    "vermilion": "#FF4A24",
+    "mustard":   "#FFC02E",
+    "teal":      "#00B39B",
+    "cobalt":    "#2743E8",
+    "magenta":   "#FF2D7E",
+    "violet":    "#7A35F0",
+    "sky":       "#3AC0F5",
+}
+
+
+def _polar(cx, cy, r, deg):
+    a = math.radians(deg)
+    return cx + r * math.cos(a), cy + r * math.sin(a)
+
+
+class Poster:
+    """Flat, text-free geometric cover for a project. One solid field, a handful
+    of big primitives, nothing else."""
+
+    def __init__(self, bg):
+        self.bg = PP[bg]
+        self.body = [f'<rect width="{W}" height="{H}" fill="{self.bg}"/>']
+
+    def add(self, s):
+        self.body.append(s)
+
+    def _kw(self, kw):
+        return "".join(f' {k.replace("_", "-")}="{v}"' for k, v in kw.items())
+
+    def disc(self, cx, cy, r, fill, **kw):
+        self.add(f'<circle cx="{cx:.1f}" cy="{cy:.1f}" r="{r:.1f}" '
+                 f'fill="{fill}"{self._kw(kw)}/>')
+
+    def ring(self, cx, cy, r, stroke, sw, **kw):
+        self.add(f'<circle cx="{cx:.1f}" cy="{cy:.1f}" r="{r:.1f}" fill="none" '
+                 f'stroke="{stroke}" stroke-width="{sw}"{self._kw(kw)}/>')
+
+    def bar(self, x, y, w, h, fill, r=0, **kw):
+        self.add(f'<rect x="{x:.1f}" y="{y:.1f}" width="{w:.1f}" '
+                 f'height="{h:.1f}" rx="{r:.1f}" fill="{fill}"{self._kw(kw)}/>')
+
+    def tri(self, pts, fill, **kw):
+        d = " ".join(f"{'M' if i == 0 else 'L'}{x:.1f} {y:.1f}"
+                     for i, (x, y) in enumerate(pts)) + " Z"
+        self.add(f'<path d="{d}" fill="{fill}"{self._kw(kw)}/>')
+
+    def wedge(self, cx, cy, r, a0, a1, fill, **kw):
+        """Pie slice from a0 to a1 degrees (clockwise, 0 = east)."""
+        x0, y0 = _polar(cx, cy, r, a0)
+        x1, y1 = _polar(cx, cy, r, a1)
+        large = 1 if (a1 - a0) % 360 > 180 else 0
+        self.add(f'<path d="M{cx:.1f} {cy:.1f} L{x0:.1f} {y0:.1f} '
+                 f'A{r:.1f} {r:.1f} 0 {large} 1 {x1:.1f} {y1:.1f} Z" '
+                 f'fill="{fill}"{self._kw(kw)}/>')
+
+    def band(self, cx, cy, r, a0, a1, stroke, sw, cap="butt", **kw):
+        """Thick arc — a slice of a ring."""
+        x0, y0 = _polar(cx, cy, r, a0)
+        x1, y1 = _polar(cx, cy, r, a1)
+        large = 1 if (a1 - a0) % 360 > 180 else 0
+        self.add(f'<path d="M{x0:.1f} {y0:.1f} A{r:.1f} {r:.1f} 0 {large} 1 '
+                 f'{x1:.1f} {y1:.1f}" fill="none" stroke="{stroke}" '
+                 f'stroke-width="{sw}" stroke-linecap="{cap}"{self._kw(kw)}/>')
+
+    def half(self, cx, cy, r, facing, fill):
+        """Half disc; `facing` is the direction the round side points."""
+        a0 = {"right": -90, "left": 90, "up": 180, "down": 0}[facing]
+        self.wedge(cx, cy, r, a0, a0 + 180, fill)
+
+    def render(self, label):
+        return (f'<svg xmlns="http://www.w3.org/2000/svg" width="{W}" '
+                f'height="{H}" viewBox="0 0 {W} {H}" role="img" '
+                f'aria-label="{label}">{"".join(self.body)}</svg>')
+
+
+
+
+def micro_manager():
+    """A keypad grid with four keys lit."""
+    p = Poster("ink")
+    lit = {0: PP["vermilion"], 2: PP["mustard"], 5: PP["teal"], 9: PP["sky"]}
+    cell, gap = 150, 30
+    x0 = (W - (4 * cell + 3 * gap)) / 2
+    y0 = (H - (3 * cell + 2 * gap)) / 2
+    for i in range(12):
+        r, c = divmod(i, 4)
+        p.bar(x0 + c * (cell + gap), y0 + r * (cell + gap), cell, cell,
+              lit.get(i, PP["slate"]), r=26)
+    return p.render("A grid of twelve chunky keys, four of them lit")
+
+
+def ticgit():
+    """Squares tethered to nodes on a line."""
+    p = Poster("vermilion")
+    p.bar(90, 552, 1020, 34, PP["ink"], r=17)
+    for x in [190, 420, 650, 880, 1080]:
+        p.disc(x, 569, 46, PP["ink"])
+    for x in [420, 650, 880]:
+        p.bar(x - 14, 380, 28, 180, PP["ink"])
+    for x, y in [(420, 200), (650, 156), (880, 224)]:
+        p.bar(x - 105, y, 210, 210, PP["cream"], r=24)
+    return p.render("Three squares tethered to nodes on a horizontal line")
+
+
+def unfurler_project():
+    """Three fetches, two different answers."""
+    p = Poster("teal")
+    for x in [330, 600, 870]:
+        p.disc(x, 172, 46, PP["ink"])
+        p.bar(x - 13, 200, 26, 90, PP["ink"])
+    p.bar(150, 290, 430, 380, PP["cream"], r=26)
+    p.bar(150, 290, 430, 200, PP["ink"], r=26)
+    p.bar(190, 536, 240, 34, PP["ink"], r=17)
+    p.bar(190, 594, 150, 34, PP["ink"], r=17)
+    p.bar(620, 290, 430, 380, PP["cream"], r=26)
+    for angle in (45, -45):
+        p.bar(819, 292, 32, 200, PP["ink"], r=16,
+              transform=f"rotate({angle} 835 392)")
+    p.bar(660, 536, 240, 34, PP["ink"], r=17)
+    p.bar(660, 594, 150, 34, PP["ink"], r=17)
+    return p.render("Three probes feeding two cards: one with an image block, "
+                    "one with a cross where the image should be")
+
+
+def soe():
+    """Lines of text and one enormous caret."""
+    p = Poster("mustard")
+    p.bar(150, 268, 400, 64, PP["ink"], r=32)
+    p.bar(150, 412, 280, 64, PP["ink"], r=32)
+    p.bar(590, 180, 140, 440, PP["cream"], r=16)
+    return p.render("Three bars of text beside one oversized block caret")
+
+
+def slidetty():
+    """A slide and its progress dots."""
+    p = Poster("magenta")
+    p.bar(300, 150, 600, 400, PP["cream"], r=30)
+    p.bar(360, 226, 460, 58, PP["ink"], r=29)
+    p.bar(360, 330, 480, 32, PP["ink"], r=16)
+    p.bar(360, 400, 380, 32, PP["ink"], r=16)
+    for i in range(6):
+        cx = 375 + i * 90
+        p.disc(cx, 660, 40 if i == 2 else 24, PP["cream"])
+    return p.render("A single slide above a row of progress dots")
+
+
+
+
+
+
+def showoff():
+    """A small source throwing a big picture."""
+    p = Poster("cobalt")
+    p.tri([(272, 336), (704, 186), (704, 614), (272, 474)], PP["mustard"])
+    p.bar(140, 330, 140, 140, PP["cream"], r=16)
+    p.bar(700, 190, 400, 420, PP["cream"], r=26)
+    p.disc(900, 400, 96, PP["ink"])
+    return p.render("A small square projecting a widening beam onto a large panel")
+
+
+def git_scribe():
+    """One source, four editions."""
+    p = Poster("ink")
+    cols = [PP["cream"], PP["vermilion"], PP["mustard"], PP["teal"]]
+    for i, col in enumerate(cols):
+        a0 = -90 + i * 90
+        mx, my = _polar(0, 0, 46, a0 + 45)
+        p.wedge(600 + mx, 400 + my, 250, a0, a0 + 90, col)
+    return p.render("A disc split into four quadrants, fanned apart, each a "
+                    "different colour")
+
+
+def grack():
+    """A request driven straight down through a stack."""
+    p = Poster("sky")
+    for i in range(3):
+        p.bar(240, 176 + i * 150, 720, 108, PP["ink"], r=16)
+    p.bar(545, 130, 110, 500, PP["cream"], r=12)
+    p.disc(600, 672, 62, PP["vermilion"])
+    return p.render("Three stacked slabs pierced by a vertical bar ending in a disc")
+
+
+def git_media():
+    """Enormous becomes tiny."""
+    p = Poster("magenta")
+    p.disc(430, 400, 268, PP["cream"])
+    p.bar(700, 380, 200, 40, PP["ink"], r=20)
+    p.disc(960, 400, 46, PP["ink"])
+    return p.render("A very large disc joined by a bar to a very small one")
+
+
+def hg_git():
+    """Two halves, traffic both ways."""
+    p = Poster("vermilion")
+    p.half(430, 400, 232, "left", PP["cream"])
+    p.half(770, 400, 232, "right", PP["ink"])
+    p.bar(400, 336, 400, 44, PP["cream"], r=22)
+    p.bar(400, 420, 400, 44, PP["ink"], r=22)
+    return p.render("Two facing half discs bridged by two bars, one in each "
+                    "direction")
+
+
+
+
+def desks_project():
+    """A permutation matrix — one pick per row and column."""
+    p = Poster("cream")
+    picks = {0: 2, 1: 0, 2: 4, 3: 1, 4: 3}
+    cell, gap = 108, 18
+    x0 = (W - (5 * cell + 4 * gap)) / 2
+    y0 = (H - (5 * cell + 4 * gap)) / 2
+    for r in range(5):
+        for c in range(5):
+            hit = picks[r] == c
+            p.bar(x0 + c * (cell + gap), y0 + r * (cell + gap), cell, cell,
+                  PP["vermilion"] if hit else PP["sand"], r=14)
+    return p.render("A five by five grid with exactly one highlighted cell per "
+                    "row and column")
+
+
+PROJECT_POSTERS = {
+    "micro-manager": micro_manager,
+    "ticgit": ticgit,
+    "unfurler": unfurler_project,
+    "soe": soe,
+    "slidetty": slidetty,
+    "showoff": showoff,
+    "git-scribe": git_scribe,
+    "grack": grack,
+    "git-media": git_media,
+    "hg-git": hg_git,
+    "hungarian-desks": desks_project,
+}
+
+
 if __name__ == "__main__":
-    for s in SCENES:
-        s()
-    print("done:", len(SCENES), "covers")
+    for scene in SCENES:
+        scene()
+    for slug, poster in PROJECT_POSTERS.items():
+        save_project(slug, poster())
+    print("done:", len(SCENES), "covers,", len(PROJECT_POSTERS), "project posters")

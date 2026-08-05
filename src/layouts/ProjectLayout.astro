@@ -2,32 +2,24 @@
 import { render } from 'astro:content';
 import '../styles/global.css';
 import SiteHeader from '../components/SiteHeader.astro';
-import PromoBanner from '../components/PromoBanner.astro';
 import ProseStyles from '../components/ProseStyles.astro';
 import TocScript from '../components/TocScript.astro';
-import { formatDate, relativeTime, readingMinutes, shareImage, type Post } from '../lib/posts';
+import { statusMeta, type Project } from '../lib/projects';
+import { shareImage } from '../lib/posts';
 
 interface Props {
-  post: Post;
+  project: Project;
 }
-const { post } = Astro.props;
-const { entry, category, date, url, isHtml } = post;
-const { title, image, excerpt } = entry.data;
+const { project } = Astro.props;
+const { entry, url } = project;
+const { title, description, image, year, lang, status, repo, site, post } = entry.data;
 
 const siteTitle = 'Scott Chacon';
 const shareImg = shareImage(image);
-const shareDesc = (excerpt ?? '').replace(/\s+/g, ' ').trim().slice(0, 200);
-const showBanner = category === 'git' || category === 'tech';
-const isoDate = date.toISOString();
-const prettyDate = formatDate(date);
-const rel = relativeTime(date);
-const readMins = readingMinutes(entry.body ?? '');
+const shareDesc = description.replace(/\s+/g, ' ').trim().slice(0, 200);
+const { label, cls } = statusMeta(status);
 
-// Markdown/MDX render through Astro's pipeline; raw-HTML posts inject verbatim.
-let Content: Awaited<ReturnType<typeof render>>['Content'] | undefined;
-if (!isHtml) {
-  ({ Content } = await render(entry));
-}
+const { Content } = await render(entry);
 ---
 <!DOCTYPE html>
 <html lang="en-US">
@@ -38,13 +30,12 @@ if (!isHtml) {
   <meta name="description" content={shareDesc} />
   <link rel="canonical" href={`https://scottchacon.com${url}`} />
 
-  <meta property="og:type" content="article" />
+  <meta property="og:type" content="website" />
   <meta property="og:site_name" content={siteTitle} />
   <meta property="og:title" content={title} />
   <meta property="og:description" content={shareDesc} />
   <meta property="og:image" content={`https://scottchacon.com${shareImg}`} />
   <meta property="og:url" content={`https://scottchacon.com${url}`} />
-  <meta property="article:published_time" content={isoDate} />
 
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:site" content="@chacon" />
@@ -72,8 +63,7 @@ if (!isHtml) {
 
 <body>
 <div class="flex-auto pb-20">
-  <SiteHeader backUrl="/posts" backText="all posts" />
-  {showBanner && <PromoBanner />}
+  <SiteHeader backUrl="/projects/" backText="all projects" />
   <div class="sm:px-8 mt-9">
     <div class="mx-auto w-full max-w-7xl lg:px-8">
       <div class="relative px-4 sm:px-8 lg:px-12">
@@ -82,21 +72,25 @@ if (!isHtml) {
             <h1 class="font-head text-4xl sm:text-5xl tracking-tight text-zinc-900 dark:text-zinc-100">
               {title}
             </h1>
-            <div class="mt-4 flex items-center gap-2 text-sm tracking-tight text-zinc-400">
-              <time datetime={isoDate}>{prettyDate}</time>
-              <span aria-hidden="true">·</span>
-              <span>{rel}</span>
-              <span aria-hidden="true">·</span>
-              <span>{readMins} min read</span>
+            <div class="mt-4 flex flex-wrap items-center gap-2 text-sm tracking-tight text-zinc-400">
+              <span class={`inline-flex rounded-full px-2 py-0.5 text-[0.65rem] font-semibold uppercase tracking-widest ${cls}`}>{label}</span>
+              {lang && <><span class="font-mono text-zinc-500 dark:text-zinc-400">{lang}</span><span aria-hidden="true">·</span></>}
+              <span>{year}</span>
             </div>
-            <div id="post-content" class="prose-body font-blog font-lg leading-7 flex flex-col mt-6 space-y-4">
-              {isHtml ? <Fragment set:html={entry.body} /> : Content && <Content />}
+            <p class="mt-5 text-lg leading-8 text-zinc-600 dark:text-zinc-400">{description}</p>
+            <div id="post-content" class="prose-body font-blog font-lg leading-7 flex flex-col mt-8 space-y-4">
+              <Content />
             </div>
           </article>
           <aside id="toc-wrap" class="hidden lg:block flex-none w-60">
             <div class="sticky top-12">
-              {image && (
-                <img src={image} alt="" class="w-full rounded-xl mb-6 ring-1 ring-zinc-900/5 dark:ring-white/10" />
+              <img src={image} alt="" class="w-full rounded-xl mb-6 ring-1 ring-zinc-900/5 dark:ring-white/10" />
+              {(repo || site || post) && (
+                <div class="mb-6 flex flex-col gap-2 text-sm">
+                  {site && <a href={site} class="text-blue-600 hover:underline">Website <span aria-hidden="true">↗</span></a>}
+                  {repo && <a href={repo} class="text-blue-600 hover:underline">Source on GitHub <span aria-hidden="true">↗</span></a>}
+                  {post && <a href={post} class="text-blue-600 hover:underline">Related post <span aria-hidden="true">→</span></a>}
+                </div>
               )}
               <nav id="toc-nav">
                 <div class="text-xs font-semibold uppercase tracking-widest text-zinc-400 mb-3">On this page</div>
@@ -104,6 +98,16 @@ if (!isHtml) {
               </nav>
             </div>
           </aside>
+        </div>
+
+        <!-- Links again at the end of the article, for the narrow layout where
+             the right rail is hidden entirely. -->
+        <div class="mx-auto max-w-5xl lg:hidden mt-10">
+          <div class="flex flex-wrap gap-4 text-sm border-t border-zinc-200 dark:border-zinc-800 pt-6">
+            {site && <a href={site} class="text-blue-600 hover:underline">Website <span aria-hidden="true">↗</span></a>}
+            {repo && <a href={repo} class="text-blue-600 hover:underline">Source on GitHub <span aria-hidden="true">↗</span></a>}
+            {post && <a href={post} class="text-blue-600 hover:underline">Related post <span aria-hidden="true">→</span></a>}
+          </div>
         </div>
       </div>
     </div>

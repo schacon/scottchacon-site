@@ -1,0 +1,26 @@
+---
+title: "Showoff"
+description: "Presentation software for developers — slides in Markdown, served from a local web server, presenter notes included."
+image: /assets/images/projects/showoff.svg
+year: "2010"
+lang: Ruby
+status: archived
+repo: https://github.com/schacon/showoff
+sort: 30
+---
+
+Showoff was a presentation tool for people who would rather write Markdown than
+fight Keynote. A deck was a directory of Markdown files and a JSON manifest;
+`showoff serve` started a little web server and your slides were a URL.
+
+Because the deck was a web app rather than a document, it could do things a
+slide deck normally can't: a presenter view with notes and a timer on your
+laptop while the audience saw the slides, live-executed code samples, and
+audience members following along in their own browsers.
+
+It grew well past what I had time to maintain. [Puppet Labs](https://github.com/puppetlabs/showoff)
+took it over and maintains the gem now — my repo is kept around only to preserve
+the issue history.
+
+[Slidetty](/projects/slidetty/) is the same idea, fifteen years later, back in
+the terminal.

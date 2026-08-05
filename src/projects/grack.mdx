@@ -1,0 +1,25 @@
+---
+title: "Grack"
+description: "Git's Smart HTTP server protocol as a Rack app, so any Ruby web server could host Git repositories."
+image: /assets/images/projects/grack.svg
+year: "2009"
+lang: Ruby
+status: archived
+repo: https://github.com/schacon/grack
+post: /2010/03/04/smart-http/
+sort: 32
+---
+
+Git ships a Smart HTTP backend called `git-http-backend`, but it only runs as a
+CGI script and is really only targeted at Apache 2.x — it expects `PATH_INFO` to
+be set and formatted a particular way.
+
+Grack reimplements that handler as a Rack application. Once the protocol lives
+in Rack, any Ruby web server can serve Git over HTTP: Unicorn, Thin, Passenger,
+WEBrick, whatever you already run.
+
+I wrote about how the Smart HTTP protocol actually works in
+[Smart HTTP Transport](/2010/03/04/smart-http/).
+
+The gem is now developed at [grackorg/grack](https://github.com/grackorg/grack);
+my repository isn't updated any more.

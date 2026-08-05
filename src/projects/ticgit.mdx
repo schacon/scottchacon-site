@@ -1,0 +1,34 @@
+---
+title: "TicGit"
+description: "A Git-native issue tracker. Tickets live in the repository itself, with a CLI and a TUI."
+image: /assets/images/projects/ticgit.svg
+year: "2008 → today"
+lang: Rust
+status: active
+repo: https://github.com/schacon/ticgit
+site: https://ticgit.dev
+sort: 12
+---
+
+TicGit is an issue tracker with no server. Tickets are stored in the repository
+as structured [git-meta](https://crates.io/crates/git-meta-lib) metadata, so
+they clone, branch and sync exactly the way your code does.
+
+The `ti` CLI creates, reads, updates and syncs ticket data, and `ti tui` gives
+you a full terminal UI over the same store. Every command has `--json` output
+for scripting and `--markdown` output for agents — `ti agent` will even teach a
+coding agent how to drive it.
+
+I first wrote this in Ruby in 2008 as an experiment in what you could store in
+Git besides source. The current version is a ground-up Rust rewrite on top of
+git-meta.
+
+## Install
+
+```sh
+curl -fsSL https://ticgit.dev/install | sh
+```
+
+Or from source via Cargo (`cargo install ticgit`). The binary is named `ti`.
+
+More at [ticgit.dev](https://ticgit.dev).

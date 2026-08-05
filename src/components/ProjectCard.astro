@@ -1,0 +1,24 @@
+---
+import { statusMeta, type Project } from '../lib/projects';
+
+interface Props {
+  project: Project;
+}
+const { project } = Astro.props;
+const { entry, url } = project;
+const { title, description, image, year, lang, status } = entry.data;
+const { label, cls } = statusMeta(status);
+---
+<a href={url} class="group flex flex-col">
+  <div class="overflow-hidden rounded-2xl aspect-[3/2] bg-zinc-100 dark:bg-zinc-800 ring-1 ring-zinc-900/5 dark:ring-white/10">
+    <img src={image} alt="" loading="lazy" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+  </div>
+  <div class="mt-4 flex items-center gap-2">
+    <span class={`inline-flex rounded-full px-2 py-0.5 text-[0.65rem] font-semibold uppercase tracking-widest ${cls}`}>{label}</span>
+    {lang && <span class="text-xs font-mono text-zinc-500 dark:text-zinc-400">{lang}</span>}
+    <span aria-hidden="true" class="text-zinc-300 dark:text-zinc-600">·</span>
+    <span class="text-xs tracking-tight text-zinc-400">{year}</span>
+  </div>
+  <h2 class="font-head mt-1.5 text-2xl leading-tight tracking-tight text-zinc-900 dark:text-zinc-100 transition-colors group-hover:text-blue-600">{title}</h2>
+  <p class="mt-1.5 text-base leading-7 text-zinc-600 dark:text-zinc-400">{description}</p>
+</a>

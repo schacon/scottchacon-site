@@ -1,0 +1,30 @@
+---
+title: "git-scribe"
+description: "A toolchain for writing ebooks with Git, GitHub and AsciiDoc — the tooling behind Pro Git."
+image: /assets/images/projects/git-scribe.svg
+year: "2011"
+lang: Ruby
+status: archived
+repo: https://github.com/schacon/git-scribe
+sort: 31
+---
+
+git-scribe was a command line toolset for writing e-books the way you write
+software: AsciiDoc source in a Git repository, co-authors sending pull requests,
+and the tool handling everything that isn't writing.
+
+From one source tree it generated the online version, PDF, mobi for Kindle and
+epub for iBooks and Nook. Around that it had the workflow pieces a real book
+needs — technical and copy editing passes, translation handling, errata,
+syntax-highlighted code, and pegging a version of the book to a version of the
+software it documents.
+
+The premise was that authors should focus on writing and not on website
+generation and six output formats. It came directly out of writing
+[Pro Git](https://git-scm.com/book), which had exactly these problems.
+
+## Install
+
+```sh
+gem install git-scribe
+```

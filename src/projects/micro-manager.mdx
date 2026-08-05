@@ -1,0 +1,28 @@
+---
+title: "Micro Manager"
+description: "Puts each running coding agent on its own lit key of a macropad, so you can jump between them with your thumb."
+image: /assets/images/projects/micro-manager.svg
+year: "2026"
+lang: Swift
+status: active
+repo: https://github.com/schacon/micro-manager
+site: https://schacon.github.io/micro-manager/
+sort: 11
+---
+
+Micro Manager is a macOS menu-bar app that lights each running
+[herdr](https://herdr.dev) agent on its own key of a Work Louder
+[Creator Micro 2](https://worklouder.cc/creator-micro-2), and jumps to that
+agent when you press the key.
+
+It is the bridge itself — no Node, no daemon, nothing to install on the herdr
+side. It reads herdr's socket directly and drives the pad over raw HID.
+
+## Install
+
+Download the [latest release](https://github.com/schacon/micro-manager/releases/latest/download/MicroManager.zip),
+unzip, drag `MicroManager.app` to Applications and launch it. macOS will ask for
+**Input Monitoring** — grant it, then toggle the manager off and on.
+
+There's also a [hacking guide](https://github.com/schacon/micro-manager/blob/main/docs/hacking.md)
+if you want to point it at something other than herdr.

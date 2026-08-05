@@ -52,4 +52,24 @@ function htmlLoader(): Loader {
 
 const htmlPosts = defineCollection({ loader: htmlLoader(), schema });
 
-export const collections = { posts, htmlPosts };
+// Projects: one md/mdx file per project. Unlike posts these aren't dated, so the
+// file name is the whole slug and `year` is just display copy ("2009", "2008 →
+// today"). `sort` drives the order on /projects/ (lower first) — hand-ordered
+// rather than chronological so the current stuff leads.
+const projects = defineCollection({
+  loader: glob({ pattern: '**/*.{md,mdx}', base: './src/projects' }),
+  schema: z.object({
+    title: z.string(),
+    description: z.string(),
+    image: z.string(),
+    year: z.string(),
+    lang: z.string().optional(),
+    status: z.enum(['active', 'archived']).default('archived'),
+    repo: z.string().optional(),
+    site: z.string().optional(),
+    post: z.string().optional(), // a related post on this site
+    sort: z.number().default(100),
+  }),
+});
+
+export const collections = { posts, htmlPosts, projects };

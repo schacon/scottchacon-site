@@ -1,0 +1,28 @@
+---
+title: "unfurler.dev"
+description: "Fetches your page as Twitterbot, as Slackbot, and as a browser, then shows you the preview card each one would actually build."
+image: /assets/images/projects/unfurler.svg
+year: "2026"
+status: active
+site: https://unfurler.dev
+post: /2026/08/05/unfurler/
+sort: 13
+---
+
+You write a post, you share the link, and the preview card comes up blank. You
+open a preview debugger, it tells you everything is fine — because it fetched
+your page as a browser, and a browser is not what X or Slack sends.
+
+[unfurler.dev](https://unfurler.dev) fetches your page **three times in
+parallel**: once as `Twitterbot/1.0`, once as `Slackbot-LinkExpanding`, and once
+as a browser. Each card is built from the HTML that platform's own crawler
+actually received. When the three responses disagree — a CDN rule, a WAF, a bot
+filter — you get told, and you can flip between them and read the difference.
+
+It also shows the whole fallback chain for every field, not just which tag won,
+which matters because X and Slack disagree about the order. And it does a ranged
+fetch of your image to measure its real pixel dimensions rather than trusting
+`og:image:width`.
+
+I wrote up how it works in
+[See Your Link Before You Post It](/2026/08/05/unfurler/).

@@ -1,0 +1,30 @@
+---
+title: "soe"
+description: "Scott's Own Editor — a built-in TUI text editor for CLI tools, so nobody gets dropped into vim unwillingly."
+image: /assets/images/projects/soe.svg
+year: "2026"
+lang: Rust
+status: active
+repo: https://github.com/schacon/soe
+sort: 14
+---
+
+When a command line tool needs a message from you — a commit message, a ticket
+body — it shells out to whatever `$EDITOR` says. If that's unset, or set to
+something the user doesn't actually know how to exit, you've just ruined their
+afternoon.
+
+`soe` is a Rust crate that resolves the best available editor using Git's own
+precedence order and falls back to a built-in TUI editor when none is
+configured. One call, and your tool always has a working editor.
+
+## What it does
+
+- Editor resolution: `$GIT_EDITOR` → `core.editor` → `$VISUAL` → `$EDITOR` → built-in TUI
+- Menu bar (File / Help), line numbers, word navigation
+- Mouse support — click to position the cursor, scroll to move
+- Two modes: `PlainText` and `CommitMessage` (72-char guide line, soft wrap)
+- Save with `Ctrl+S` to return the content, `Esc` to cancel and return nothing
+
+Built on [ratatui](https://ratatui.rs) and
+[crossterm](https://github.com/crossterm-rs/crossterm).

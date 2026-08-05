@@ -1,0 +1,25 @@
+---
+title: "Hungarian Desks"
+description: "Assigning office desks optimally with the Hungarian algorithm and an Airtable form full of everyone's preferences."
+image: /assets/images/projects/hungarian-desks.svg
+year: "2020"
+lang: Ruby
+status: archived
+repo: https://github.com/schacon/hungarian-desks
+post: /2020/08/07/hungarian-desks/
+sort: 36
+---
+
+How do you hand out desks in an office? Usually by department, but at Chatterbug
+— and at GitHub before it — people sat wherever they wanted, and with partial
+remote schedules the desks were shared anyway. Mixed seating is arguably better
+for a company. It's just annoying to arrange.
+
+So this turns it into an assignment problem. Everyone fills in an Airtable form
+ranking the desks they'd like. The tool feeds those rankings into the
+[Hungarian algorithm](https://en.wikipedia.org/wiki/Hungarian_algorithm), which
+finds the assignment that maximizes total happiness across the whole office
+rather than just giving the first responders what they asked for.
+
+I wrote up the whole thing, including why the obvious approaches don't work, in
+[Hungarian Desks](/2020/08/07/hungarian-desks/).
