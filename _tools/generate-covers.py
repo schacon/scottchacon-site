@@ -861,11 +861,43 @@ def git_wire_v2():
          c.render("A terminal showing a Git protocol v2 capability advertisement"))
 
 
+def unfurler():
+    """unfurler.dev — one link preview card, with the image still a question."""
+    c = Cover("tech"); p = c.p
+
+    cw, ch = 560, 500
+    cx, cy = (W - cw) / 2, (H - ch) / 2
+    c.shadow(cx + cw / 2, cy + ch + 18, 240, 24, 0.12)
+    c.rrect(cx, cy, cw, ch, 26, "#ffffff")
+
+    # The image slot, with its contents still unknown.
+    slot_h = 320
+    cid = c.clip(cx, cy, cw, slot_h, 26)
+    c.add(f'<g clip-path="url(#{cid})">')
+    c.rect_raw(cx, cy, cw, slot_h, c.grad(p["a"], p["d"], 45))
+    c.add("</g>")
+
+    # A question mark drawn as geometry — no web fonts survive inside an <img>.
+    qx, qy = 600, cy + 106
+    c.path(f"M{qx-46} {qy} A46 46 0 1 1 {qx} {qy+46} L{qx} {qy+82}",
+           stroke="#ffffff", sw=24)
+    c.circle(qx, qy + 128, 14, "#ffffff")
+
+    # Title, description, domain — bars, not words.
+    c.pill(cx + 44, cy + slot_h + 44, 380, 26, p["ink"], opacity="0.80")
+    c.pill(cx + 44, cy + slot_h + 92, 264, 22, p["ink"], opacity="0.26")
+    c.pill(cx + 44, cy + slot_h + 132, 140, 16, p["ink"], opacity="0.14")
+
+    save("unfurler",
+         c.render("A link preview card whose image area holds a large question "
+                  "mark, above blank title, description and domain bars"))
+
+
 SCENES = [flags, github_flow, reset, notes, pro_git_zh, pro_git_kindle,
           blog_over, environment, replace, bundles, rerere, smart_http,
           undoing_merges, this_year, translate_this, gory_details,
           do_what_you_want, mit_language, github_cs, hungarian_desks,
-          cefr_levels, git_wire_v2]
+          cefr_levels, git_wire_v2, unfurler]
 
 # =====================================================================
 # PROJECT POSTERS  (one per entry in src/projects/, written to PROJ_OUT)
