@@ -861,6 +861,46 @@ def git_wire_v2():
          c.render("A terminal showing a Git protocol v2 capability advertisement"))
 
 
+def local_models_build_an_app():
+    """Three build bars of twenty cards; two finished apps still serve a 500."""
+    c = Cover("tech"); p = c.p
+    green, amber, grey = "#16a34a", "#f59e0b", "#c7cfe3"
+    red = "#dc2626"
+    rows = [
+        # label, per-card status, verdict
+        ("GPT-5.6 Sol",  ["g"] * 20,                       True),
+        ("Muse Glimmer", ["g"] * 20,                       False),
+        ("Qwen3.8",      ["g"] * 6 + ["a"] * 4 + ["n"] * 10, True),
+    ]
+    x0, w, gap = 306, 29, 6
+    y = 300
+    for label, cards, works in rows:
+        c.text(x0 - 26, y + 10, label, 26, p["ink"], anchor="end",
+               family="Georgia, serif", weight="700")
+        for i, st in enumerate(cards):
+            fill = {"g": green, "a": amber, "n": grey}[st]
+            op = ' opacity="0.45"' if st == "n" else ""
+            c.add(f'<rect x="{x0 + i * (w + gap)}" y="{y - 14}" width="{w}" '
+                  f'height="28" rx="6" fill="{fill}"{op}/>')
+        bx = x0 + 20 * (w + gap) + 26
+        if works:
+            c.circle(bx + 22, y, 21, green)
+            c.path(f"M{bx + 12} {y} l7 8 l14 -16", stroke="#ffffff", sw=6)
+        else:
+            c.rrect(bx, y - 26, 116, 52, 10, "#ffffff")
+            c.rect_raw(bx, y - 26, 116, 15, "#f1f5f9")
+            for k in range(3):
+                c.circle(bx + 14 + k * 13, y - 18, 3.5, "#cbd5e1")
+            c.text(bx + 58, y + 15, "500", 28, red,
+                   family="'IBM Plex Mono', monospace", weight="700")
+        y += 108
+    c.text(600, 150, "twenty cards, three models", 40, p["ink"],
+           family="Georgia, serif", weight="700", style="italic")
+    c.text(600, 700, "every suite green &#183; every build clean",
+           27, p["ink"], family="Georgia, serif", weight="400", style="italic")
+    save("local-models-build-an-app",
+         c.render("Three rows of twenty build cards; two completed rows still "
+                  "end in a browser window showing a 500 error"))
 def unfurler():
     """unfurler.dev — one link preview card, with the image still a question."""
     c = Cover("tech"); p = c.p
@@ -897,7 +937,8 @@ SCENES = [flags, github_flow, reset, notes, pro_git_zh, pro_git_kindle,
           blog_over, environment, replace, bundles, rerere, smart_http,
           undoing_merges, this_year, translate_this, gory_details,
           do_what_you_want, mit_language, github_cs, hungarian_desks,
-          cefr_levels, git_wire_v2, unfurler]
+          cefr_levels, git_wire_v2, unfurler,
+          local_models_build_an_app]
 
 # =====================================================================
 # PROJECT POSTERS  (one per entry in src/projects/, written to PROJ_OUT)

@@ -1,0 +1,71 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 250" width="760" height="250" role="img" aria-label="Every card, in order">
+<rect width="760" height="250" fill="#ffffff"/>
+<text x="24" y="34" font-family="'IBM Plex Sans', -apple-system, Helvetica, Arial, sans-serif" font-size="17" font-weight="600" fill="#12161c">Every card, in order</text>
+<text x="24" y="55" font-family="'IBM Plex Sans', -apple-system, Helvetica, Arial, sans-serif" font-size="12.5" fill="#6b7480">green passed first try · amber needed retries · grey never reached</text>
+<text x="136" y="101" font-family="'IBM Plex Sans', -apple-system, Helvetica, Arial, sans-serif" font-size="13" fill="#12161c" text-anchor="end">GPT-5.6 Sol</text>
+<rect x="150.0" y="86" width="23.8" height="21" rx="4" fill="#2f9e63" opacity="1"/>
+<rect x="178.8" y="86" width="23.8" height="21" rx="4" fill="#2f9e63" opacity="1"/>
+<rect x="207.5" y="86" width="23.8" height="21" rx="4" fill="#2f9e63" opacity="1"/>
+<rect x="236.2" y="86" width="23.8" height="21" rx="4" fill="#2f9e63" opacity="1"/>
+<rect x="265.0" y="86" width="23.8" height="21" rx="4" fill="#2f9e63" opacity="1"/>
+<rect x="293.8" y="86" width="23.8" height="21" rx="4" fill="#2f9e63" opacity="1"/>
+<rect x="322.5" y="86" width="23.8" height="21" rx="4" fill="#2f9e63" opacity="1"/>
+<rect x="351.2" y="86" width="23.8" height="21" rx="4" fill="#2f9e63" opacity="1"/>
+<rect x="380.0" y="86" width="23.8" height="21" rx="4" fill="#2f9e63" opacity="1"/>
+<rect x="408.8" y="86" width="23.8" height="21" rx="4" fill="#2f9e63" opacity="1"/>
+<rect x="437.5" y="86" width="23.8" height="21" rx="4" fill="#2f9e63" opacity="1"/>
+<rect x="466.2" y="86" width="23.8" height="21" rx="4" fill="#2f9e63" opacity="1"/>
+<rect x="495.0" y="86" width="23.8" height="21" rx="4" fill="#2f9e63" opacity="1"/>
+<rect x="523.8" y="86" width="23.8" height="21" rx="4" fill="#2f9e63" opacity="1"/>
+<rect x="552.5" y="86" width="23.8" height="21" rx="4" fill="#2f9e63" opacity="1"/>
+<rect x="581.2" y="86" width="23.8" height="21" rx="4" fill="#2f9e63" opacity="1"/>
+<rect x="610.0" y="86" width="23.8" height="21" rx="4" fill="#2f9e63" opacity="1"/>
+<rect x="638.8" y="86" width="23.8" height="21" rx="4" fill="#2f9e63" opacity="1"/>
+<rect x="667.5" y="86" width="23.8" height="21" rx="4" fill="#2f9e63" opacity="1"/>
+<rect x="696.2" y="86" width="23.8" height="21" rx="4" fill="#2f9e63" opacity="1"/>
+<text x="150" y="123" font-family="ui-monospace, 'SF Mono', Menlo, monospace" font-size="10.5" fill="#6b7480">20/20 cards · 0 retried · <tspan fill="#1f6f5c" font-weight="600">runs</tspan></text>
+<text x="136" y="147" font-family="'IBM Plex Sans', -apple-system, Helvetica, Arial, sans-serif" font-size="13" fill="#12161c" text-anchor="end">Muse Glimmer</text>
+<rect x="150.0" y="132" width="23.8" height="21" rx="4" fill="#2f9e63" opacity="1"/>
+<rect x="178.8" y="132" width="23.8" height="21" rx="4" fill="#2f9e63" opacity="1"/>
+<rect x="207.5" y="132" width="23.8" height="21" rx="4" fill="#2f9e63" opacity="1"/>
+<rect x="236.2" y="132" width="23.8" height="21" rx="4" fill="#2f9e63" opacity="1"/>
+<rect x="265.0" y="132" width="23.8" height="21" rx="4" fill="#2f9e63" opacity="1"/>
+<rect x="293.8" y="132" width="23.8" height="21" rx="4" fill="#2f9e63" opacity="1"/>
+<rect x="322.5" y="132" width="23.8" height="21" rx="4" fill="#2f9e63" opacity="1"/>
+<rect x="351.2" y="132" width="23.8" height="21" rx="4" fill="#2f9e63" opacity="1"/>
+<rect x="380.0" y="132" width="23.8" height="21" rx="4" fill="#2f9e63" opacity="1"/>
+<rect x="408.8" y="132" width="23.8" height="21" rx="4" fill="#2f9e63" opacity="1"/>
+<rect x="437.5" y="132" width="23.8" height="21" rx="4" fill="#2f9e63" opacity="1"/>
+<rect x="466.2" y="132" width="23.8" height="21" rx="4" fill="#2f9e63" opacity="1"/>
+<rect x="495.0" y="132" width="23.8" height="21" rx="4" fill="#2f9e63" opacity="1"/>
+<rect x="523.8" y="132" width="23.8" height="21" rx="4" fill="#2f9e63" opacity="1"/>
+<rect x="552.5" y="132" width="23.8" height="21" rx="4" fill="#2f9e63" opacity="1"/>
+<rect x="581.2" y="132" width="23.8" height="21" rx="4" fill="#2f9e63" opacity="1"/>
+<rect x="610.0" y="132" width="23.8" height="21" rx="4" fill="#2f9e63" opacity="1"/>
+<rect x="638.8" y="132" width="23.8" height="21" rx="4" fill="#2f9e63" opacity="1"/>
+<rect x="667.5" y="132" width="23.8" height="21" rx="4" fill="#2f9e63" opacity="1"/>
+<rect x="696.2" y="132" width="23.8" height="21" rx="4" fill="#2f9e63" opacity="1"/>
+<text x="150" y="169" font-family="ui-monospace, 'SF Mono', Menlo, monospace" font-size="10.5" fill="#6b7480">20/20 cards · 0 retried · <tspan fill="#b23b2e" font-weight="600">500s</tspan></text>
+<text x="136" y="193" font-family="'IBM Plex Sans', -apple-system, Helvetica, Arial, sans-serif" font-size="13" fill="#12161c" text-anchor="end">Qwen3.8</text>
+<rect x="150.0" y="178" width="23.8" height="21" rx="4" fill="#f0a52a" opacity="1"/>
+<rect x="178.8" y="178" width="23.8" height="21" rx="4" fill="#2f9e63" opacity="1"/>
+<rect x="207.5" y="178" width="23.8" height="21" rx="4" fill="#f0a52a" opacity="1"/>
+<rect x="236.2" y="178" width="23.8" height="21" rx="4" fill="#2f9e63" opacity="1"/>
+<rect x="265.0" y="178" width="23.8" height="21" rx="4" fill="#2f9e63" opacity="1"/>
+<rect x="293.8" y="178" width="23.8" height="21" rx="4" fill="#f0a52a" opacity="1"/>
+<rect x="322.5" y="178" width="23.8" height="21" rx="4" fill="#2f9e63" opacity="1"/>
+<rect x="351.2" y="178" width="23.8" height="21" rx="4" fill="#2f9e63" opacity="1"/>
+<rect x="380.0" y="178" width="23.8" height="21" rx="4" fill="#f0a52a" opacity="1"/>
+<rect x="408.8" y="178" width="23.8" height="21" rx="4" fill="#2f9e63" opacity="1"/>
+<rect x="437.5" y="178" width="23.8" height="21" rx="4" fill="#c9d0d8" opacity="0.5"/>
+<rect x="466.2" y="178" width="23.8" height="21" rx="4" fill="#c9d0d8" opacity="0.5"/>
+<rect x="495.0" y="178" width="23.8" height="21" rx="4" fill="#c9d0d8" opacity="0.5"/>
+<rect x="523.8" y="178" width="23.8" height="21" rx="4" fill="#c9d0d8" opacity="0.5"/>
+<rect x="552.5" y="178" width="23.8" height="21" rx="4" fill="#c9d0d8" opacity="0.5"/>
+<rect x="581.2" y="178" width="23.8" height="21" rx="4" fill="#c9d0d8" opacity="0.5"/>
+<rect x="610.0" y="178" width="23.8" height="21" rx="4" fill="#c9d0d8" opacity="0.5"/>
+<rect x="638.8" y="178" width="23.8" height="21" rx="4" fill="#c9d0d8" opacity="0.5"/>
+<rect x="667.5" y="178" width="23.8" height="21" rx="4" fill="#c9d0d8" opacity="0.5"/>
+<rect x="696.2" y="178" width="23.8" height="21" rx="4" fill="#c9d0d8" opacity="0.5"/>
+<text x="150" y="215" font-family="ui-monospace, 'SF Mono', Menlo, monospace" font-size="10.5" fill="#6b7480">10/20 cards · 4 retried · <tspan fill="#1f6f5c" font-weight="600">runs</tspan></text>
+</svg>
